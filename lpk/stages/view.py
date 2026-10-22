@@ -21,6 +21,20 @@ ORTHO = {'front', 'back', 'side', 'top'}
 LOOKDEV_INTENSITY = 1.0
 
 
+def window_context():
+    """The temp_override keywords {'window', 'screen'} of the context's window, else of the first window of
+    the window manager: the context has no window in a bridge call that has just loaded a file. Operators
+    that parent, set a mode or read the selection need a window but no area. Raises RuntimeError when
+    Blender has no window."""
+    ctx = bpy.context
+    manager = getattr(ctx, 'window_manager', None)
+    window = getattr(ctx, 'window', None) or next(iter(manager.windows if manager else ()), None)
+    if window is None:
+        raise RuntimeError('Blender has no window: rig building and heat weights need a window of its '
+                           'window manager')
+    return {'window': window, 'screen': window.screen}
+
+
 def view3d_context():
     """The temp_override keywords {'window', 'screen', 'area', 'region'} of a 3D Viewport and its main
     region: the context's screen first, then every window of the window manager, because the context has

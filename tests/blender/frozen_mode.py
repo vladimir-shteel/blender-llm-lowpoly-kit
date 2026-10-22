@@ -1,4 +1,4 @@
-"""The frozen mesh mode end to end in Blender (bpy as a Python module, background mode): the worked example
+"""The frozen mesh mode end to end in Blender (background mode): the worked example
 built, frozen, edited for real with Blender's mesh operators (the head's faces subdivided, a trunk face
 extruded, an edge ring of an arm dissolved), refused by the build stamp, frozen again with its zones
 transferred, built in the frozen mode and taken through unwrap, packs, bake, rig and export; the parametric
@@ -6,9 +6,9 @@ mode's guard against moves not captured; the zone tools; and adopt of the exampl
 re-imported as a foreign mesh. Captures need Blender's user interface and are not run; the part capture's
 clean-up is checked.
 
-Not a host test (the host loop runs tests/test_*.py): run it where bpy imports,
+Not a host test (the host loop runs tests/test_*.py): run it in Blender,
 
-    python3 tests/blender/frozen_mode.py
+    blender -b --python-exit-code 1 --python tests/blender/frozen_mode.py
 
 It works on a copy of examples/mannequin in a temporary folder and prints a short summary; any failed
 check raises."""
@@ -20,12 +20,8 @@ import tempfile
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, ROOT)
 
-try:
-    import bpy
-    import bmesh
-except ImportError:
-    print('skipped: bpy does not import here (pip install bpy, or run inside Blender)')
-    sys.exit(0)
+import bpy
+import bmesh
 
 import numpy as np
 
