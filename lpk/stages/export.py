@@ -1,8 +1,8 @@
 """Export of a built model (the mesh, with its armature when it has a rig) and its baked textures: export_fbx
-(the FBX for Unity), export() by an export profile (lpk/profiles: FBX or binary glTF, bones renamed by role),
-compare_import(), which re-imports an exported file and lists where it differs from the model, and
-export_output(), an export in the rest pose with the final material followed by that comparison. A model
-without a rig (rig_name None) goes out as its mesh alone: the profile's skeleton keys act on no bone. The FBX
+(the FBX by a profile's exporter arguments), export() by an export profile (lpk/profiles: FBX or binary glTF,
+bones renamed by role), compare_import(), which re-imports an exported file and lists where it differs from the
+model, and export_output(), an export in the rest pose with the final material followed by that comparison. A
+model without a rig (rig_name None) goes out as its mesh alone: the profile's skeleton keys act on no bone. The FBX
 bytes are made deterministic after writing (fbx_fixed_time, fbx_fixed_ids)."""
 import os
 import re
@@ -133,22 +133,18 @@ def fbx_fixed_ids(data):
     return bytes(out)
 
 
-def export_fbx(obj_name, rig_name, out_dir, file_name, deform_only=True, bake_space_transform=True,
-               primary_bone_axis='Y', secondary_bone_axis='X', restore_paths=False, settings=None):
+def export_fbx(obj_name, rig_name, out_dir, file_name, exporter, restore_paths=False):
     """Writes <out_dir>/<file_name>.fbx and every image used by the mesh's materials as PNG
     beside it. rig_name: the armature object, or None to write the mesh alone. The armature is exported
-    in its rest pose, and stays in it afterwards: the pose is not put back. Only deform bones go out and no
-    leaf bones are added, so Unity's Humanoid mapping sees exactly the authored skeleton.
+    in its rest pose, and stays in it afterwards: the pose is not put back.
     The images are re-pointed to their PNG copies before the export, because the FBX references
     each image by its file path (relative to the FBX). restore_paths=False leaves them pointing at
     the copies; True puts each image's previous file path and format back after the export, except
     images that had no file path (generated ones), whose only file is now the copy.
-    settings: export_scene.fbx keyword arguments that override the ones this function passes (an
-    export profile's 'exporter'); the file path and the selection stay this function's.
+    exporter: the export_scene.fbx keyword arguments of an export profile (lpk.profiles); the export
+    adds the file path, the selection and the object types (mesh and armature) itself.
     Returns {'fbx': path, 'images': [png paths], 'bytes': file size}, plus 'paths_restored': count
     with restore_paths."""
-    if settings and {'filepath', 'use_selection'} & set(settings):
-        raise ValueError('export_fbx settings cannot set filepath or use_selection')
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     ob = bpy.data.objects[obj_name]
@@ -169,16 +165,7 @@ def export_fbx(obj_name, rig_name, out_dir, file_name, deform_only=True, bake_sp
             pb.matrix_basis.identity()
     shown = _show_only(ob, rig)
     path = out / (file_name + '.fbx')
-    args = dict(
-        filepath=str(path), use_selection=True, object_types={'ARMATURE', 'MESH'},
-        apply_unit_scale=True, apply_scale_options='FBX_SCALE_ALL',
-        axis_forward='-Z', axis_up='Y', bake_space_transform=bake_space_transform,
-        mesh_smooth_type='FACE', use_mesh_modifiers=False,
-        add_leaf_bones=False, primary_bone_axis=primary_bone_axis, secondary_bone_axis=secondary_bone_axis,
-        use_armature_deform_only=deform_only, bake_anim=False,
-        path_mode='RELATIVE', embed_textures=False)
-    if settings:
-        args.update(settings)
+    args = dict(exporter, filepath=str(path), use_selection=True, object_types={'ARMATURE', 'MESH'})
     try:
         with _window():
             bpy.ops.export_scene.fbx(**args)
@@ -345,7 +332,7 @@ def export(obj_name, rig_name, out_dir, file_name, profile='unity_humanoid', res
     beside it), or <out_dir>/<file_name>.glb through the glTF exporter (images embedded, rest pose, no
     modifiers applied). Bones the profile renames by role are renamed on a temporary copy of the mesh and the
     armature only (see _export_copy); the model keeps its names. The selection and the active object are put
-    back afterwards. With unity_humanoid this is exactly export_fbx's export.
+    back afterwards.
     profile: a shipped name, a JSON path or a profile dict. restore_paths: export_fbx's (FBX only).
     Returns {'profile', 'format', 'path', 'bytes', 'images', 'renamed': {old: new}}: 'images' are the
     PNG paths beside an FBX, or the names of the images a .glb embeds, which also gets 'ignored':
@@ -365,7 +352,7 @@ def export(obj_name, rig_name, out_dir, file_name, profile='unity_humanoid', res
         with _export_copy(ob, rig, renames) as (eob, erig):
             if p['format'] == 'fbx':
                 r = export_fbx(eob.name, erig.name if erig else None, out_dir, file_name,
-                               restore_paths=restore_paths, settings=p['exporter'])
+                               exporter=p['exporter'], restore_paths=restore_paths)
                 rep = {'path': r['fbx'], 'bytes': r['bytes'], 'images': r['images']}
                 if 'paths_restored' in r:
                     rep['paths_restored'] = r['paths_restored']

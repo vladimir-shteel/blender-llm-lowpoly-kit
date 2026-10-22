@@ -1,6 +1,6 @@
 """Host tests (no Blender) of the export profiles, the skeleton templates and the pure parts of rig.py.
 
-rig.py and export.py import bpy, so the functions under test are read from their source with ast and,
+rig.py imports bpy, so the functions under test are read from their source with ast and,
 where they are pure, executed with a stand-in for mathutils.Vector. Run with pytest, or directly:
 python tests/test_profiles.py"""
 import ast
@@ -15,7 +15,6 @@ if str(ROOT) not in sys.path:
 from lpk import profiles, skeletons  # noqa: E402
 
 RIG = ROOT / 'lpk' / 'stages' / 'rig.py'
-EXPORT = ROOT / 'lpk' / 'stages' / 'export.py'
 
 
 class _Raises:
@@ -50,25 +49,6 @@ def test_every_profile_loads_and_validates():
             assert isinstance(p[key], kind), (name, key)
         assert profiles.validate(p) == [], name
         assert p['skeleton'] in skeletons.names()
-
-
-def test_unity_humanoid_reproduces_export_fbx_arguments():
-    tree = ast.parse(EXPORT.read_text(encoding='utf-8'))
-    fn = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'export_fbx')
-    a = fn.args
-    defaults = {arg.arg: ast.literal_eval(d) for arg, d in zip(a.args[len(a.args) - len(a.defaults):], a.defaults)}
-    call = next(c for c in ast.walk(fn) if isinstance(c, ast.Call)
-                and any(k.arg == 'axis_forward' for k in c.keywords))
-    args = {}
-    for k in call.keywords:
-        if k.arg in ('filepath', 'use_selection', 'object_types'):
-            continue
-        args[k.arg] = defaults[k.value.id] if isinstance(k.value, ast.Name) else ast.literal_eval(k.value)
-    p = profiles.load('unity_humanoid')
-    assert p['exporter'] == args
-    assert p['bone_map'] == {}
-    assert (p['format'], p['deform_only'], p['leaf_bones'], p['textures']) == ('fbx', True, False, 'files')
-    assert p['axes'] == {'forward': '-Z', 'up': 'Y'}
 
 
 def test_fbx_generic_names_bones_by_role():
