@@ -13,13 +13,7 @@ def tuft(b, part, base, tip, width, col, tip_col=None, thick=None, front=None, n
     it across `front`; tip_col colours the cone,
     which starts at `neck` (fraction of the length), so a later neck keeps the tint to the tip.
     Four round sides read as a spike; three flattened ones (a small thick, front set) as a shard or a
-    blade. It runs straight from base to tip: tufts all round a crown read as a hedgehog's spikes where
-    the drawing sweeps a forelock forward and a ruff back. A lock that sweeps or hooks is hands.talon,
-    bending toward a curl direction through `bend` on a circular arc with its base buried (a wide
-    section in the curl plane and a thin one across it gives a curved blade), or fur.flame_locks for a
-    fan of them from one root. Tufts rooted on a surface go through the forms that find their roots:
-    hair.hair_locks casts each straight down onto a head, fur.fur_fringe roots them round a loft's
-    ring.
+    blade. It runs straight from base to tip.
     Returns rings (lists of BMVerts). Units: base m, tip m, width m (half size), thick m (half size)."""
     base = Vector(base); tip = Vector(tip); axis = (tip - base).normalized()
     front = Vector(front) if front is not None else (Z if abs(axis.dot(Z)) < 0.9 else Y)
