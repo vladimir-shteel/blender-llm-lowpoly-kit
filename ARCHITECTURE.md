@@ -119,7 +119,7 @@ a frozen texture needs the frozen mesh; each is switched only on the human's req
 | | Procedural texture (`TEXTURE_FROZEN` absent or False) | Frozen texture (`TEXTURE_FROZEN = True`) |
 |---|---|---|
 | **Parametric mesh** (`FROZEN` absent or False) | `build` from `build_mesh(P)`; `unwrap`, `pack` and `bake` make the UVs and the atlas on every run | not allowed: `TEXTURE_FROZEN` raises unless `FROZEN = True` |
-| **Frozen mesh** (`FROZEN = True`) | `build` copies `<NAME>_Frozen`; `unwrap`, `pack` and `bake` as in the parametric mesh | `build` copies `<NAME>_Frozen` with its stored UVs; `unwrap` and `pack` refuse; `bake` composites only `over` sources onto `<NAME>_AtlasFrozen` |
+| **Frozen mesh** (`FROZEN = True`) | `build` copies `<NAME>_Frozen`; `unwrap`, `pack` and `bake` as in the parametric mesh | `build` copies `<NAME>_Frozen` with its stored UVs; `unwrap` and `pack` refuse; `bake` starts from `<NAME>_AtlasFrozen` and writes `<NAME>_Atlas` with only the `over` sources composited on it, the frozen image unchanged |
 
 - **Parametric** (`FROZEN` absent or False): `build` makes the body from `build_mesh(P)`. The human may
   move vertices (stored by `capture_edits` and replayed by every build) and never changes the topology.
@@ -149,7 +149,7 @@ a frozen texture needs the frozen mesh; each is switched only on the human's req
   |---|---|---|
   | `build` | the body's topology changed since the stamp | parametric: `freeze` keeps the edit; frozen: `freeze` stores it |
   | `build` | vertices moved since the stamp | parametric: `capture_edits` stores them; frozen: `freeze` stores them; either updates the stamp |
-  | `build` | a body without a stamp (the kit did not write it) | the body is rebuilt over it |
+  | `build` | a body without a stamp (the kit did not write it) | the body is renamed or removed |
   | `build`, under a frozen texture | UVs edited since the stamp | `freeze_texture` stores the edit |
   | `bake`, under a frozen texture | an atlas painted since the stamp | `freeze_texture` stores the edit |
 - **Zone tools** (`stages.zones`) read and change the body by part: a summary per part (counts, bounds,
@@ -197,9 +197,10 @@ a frozen texture needs the frozen mesh; each is switched only on the human's req
 ## Model module contract
 
 A model module is one Python file; its paths are relative to its folder, and its outputs go to `out/`
-beside it. It defines the attributes below; each row names the stages and review calls that read it. A
-missing attribute raises when a stage that reads it runs, naming the attribute. "Optional" rows have a default
-when absent; every other row is required by the stages it names.
+beside it. It defines the attributes below. **Read by** names the stages and review calls that read an
+attribute, in groups split by semicolons: a group ending in "(optional)" reads the attribute when the module
+defines it and uses a default otherwise; every other group requires it, and a missing attribute raises when
+such a stage or review call runs, naming the attribute.
 
 **Identity and inputs**
 
@@ -215,43 +216,46 @@ when absent; every other row is required by the stages it names.
 
 | Attribute | Read by | Meaning |
 |---|---|---|
-| `blocks(P)` | `blocks`; `adopt` for the parts its vertex groups and materials do not give | a list of `(kind, part, colour, args)`; kinds `box`, `wedge`, `ellipsoid`, `tube`, `loft`, `profile` (`stages.blocks`) |
+| `blocks(P)` | `blocks`; `adopt` for the part names and for the parts the adopted mesh's vertex groups and materials do not give (optional) | a list of `(kind, part, colour, args)`; kinds `box`, `wedge`, `ellipsoid`, `tube`, `loft`, `profile` (`stages.blocks`) |
 | `build_mesh(P)` | `capture_edits`, `build`; `freeze` of a topology edited since the stamp while no frozen mesh exists; `zones` with a parametric reference, `replace` | `(body builder, {source: builder})` with a builder for every `SOURCES` key, each part passed to `core.edits.apply` with `P['edits']` right after it is made. Frozen: only the sources are used, and a model without sources needs no `build_mesh` |
-| `EDITS` | `capture_edits` (parametric mode only) | the hand-edit file |
-| `FROZEN` | `adopt`, `freeze`, `build`, `capture_edits`, `freeze_texture`; the zone operations (optional) | True: the frozen mode; `capture_edits` refuses it, `freeze_texture` and the zone operations need it |
+| `EDITS` | `capture_edits` (parametric mode only); every stage and review call that evaluates `props()`, for `P['edits']` (optional) | the hand-edit file, which `capture_edits` adds to |
+| `FROZEN` | `adopt`, `freeze`, `build`, `capture_edits`, `freeze_texture`, the zone operations (optional) | True: the frozen mode; `capture_edits` refuses it, `freeze_texture` and the zone operations need it |
 | `ADOPT` | `adopt` | the name of the mesh object to adopt |
 
 **Texture**
 
 | Attribute | Read by | Meaning |
 |---|---|---|
-| `TEXTURE_FROZEN` | `build`, `unwrap`, `pack`, `bake`, `adopt`, `freeze`, `freeze_texture`, `unfreeze_texture`; the zone operations, `repair_uvs` (optional) | True: the frozen texture; raises unless `FROZEN = True`; `repair_uvs` needs it |
-| `sheet_of(colour, part)` | `unwrap`, `pack`, `bake` | the atlas group of a face |
-| `ATLAS` | `unwrap`, `pack`, `bake`; `check_uvs` and the `'uv_check'` of other stages for its size while the scene holds no atlas image | `(size, {group: density})` |
-| `FACE_PART`, `face_pred(P)` | `unwrap`, `pack`, `bake` (optional) | the face island: its part, and the test of its faces by centre and normal |
-| `STRIPS` | `unwrap`, `pack`, `bake` (optional) | `{part: loft sides}`, each unrolled into one strip |
-| `OWN` | `unwrap`, `pack`, `bake`, the frozen-texture bake, `repair_uvs`, `check_uvs` and the `'uv_check'` of other stages (optional) | the parts that carry their own texture; the UV check leaves them out |
+| `TEXTURE_FROZEN` | `build`, `unwrap`, `pack`, `bake`, `adopt`, `freeze`, `freeze_texture`, `unfreeze_texture`, the zone operations, `repair_uvs` (optional) | True: the frozen texture; raises unless `FROZEN = True`; `repair_uvs` needs it |
+| `sheet_of(colour, part)` | `unwrap`, `pack`, the procedural-texture `bake` | the atlas group of a face |
+| `ATLAS` | `unwrap`, `pack`, the procedural-texture `bake`; `check_uvs` and the `'uv_check'` of other stages for its size while the scene holds no atlas image | `(size, {group: density})` |
+| `FACE_PART`, `face_pred(P)` | `unwrap`, `pack`, the procedural-texture `bake` (optional) | the face island: its part, and the test of its faces by centre and normal |
+| `STRIPS` | `unwrap`, `pack`, the procedural-texture `bake` (optional) | `{part: loft sides}`, each unrolled into one strip |
+| `OWN` | `unwrap`, `pack`, `bake` under either texture mode, `repair_uvs`, `check_uvs` and the `'uv_check'` of other stages (optional) | the parts that carry their own texture; the UV check leaves them out |
 | `seams(P)` | `unwrap` (optional) | `{'cuts', 'panels', 'hard'}` |
 | `BOOST` | `unwrap` (optional) | `{part: linear UV scale}` |
 | `FACE_AREA`, `FACE_TEXELS` | `pack` (optional) | the face island's atlas area, or its texels per metre |
-| `SOURCES` | `build`, `bake`, `repair_uvs` (optional) | the colour sources, below; the frozen-texture bake reads only `SOURCES`, `OWN`, `MATERIAL` and `GRIT` |
-| `MATERIAL`, `GRIT` | `bake` (optional); `repair_uvs` reads `GRIT` | `GRIT` is the print grit colour, None for flat colours |
+| `SOURCES` | `build`, `bake`, `repair_uvs` (optional) | the colour sources, below |
+| `MATERIAL`, `GRIT` | `bake`, `repair_uvs` for `GRIT` (optional) | `GRIT` is the print grit colour, None for flat colours |
 
 **Rig, pose and export**
 
 | Attribute | Read by | Meaning |
 |---|---|---|
-| `SKELETON` | `rig`; `adopt` for the template's binding (optional); `joins`; `export` (optional) | the skeleton template name. With it `export` writes the body with the rig `<NAME>_Rig`, whose influence limit is the smallest of the profiles'; without it the body alone, the profiles' skeleton keys acting on no bone |
-| `bones(P)` | `rig` | `{bone: (head, tail)}` in metres; `'{s}'` expands per side |
+| `SKELETON` | `rig`, `joins`; `adopt` for the part names of the template's binding, `export` (optional) | the skeleton template name. With it `export` writes the body with the rig `<NAME>_Rig`, whose influence limit is the smallest of the profiles'; without it the body alone, the profiles' skeleton keys acting on no bone |
+| `bones(P)` | `rig` | `{bone: (head, tail)}` in metres, keyed by the template's bone names with each side's bones written out |
 | `EXTRA_BONES` | `rig` (optional) | bones beyond the template's |
-| `ALLOWED` | `rig`, `adopt` (optional) | bones per part over the template's binding |
-| `FIXED` | `rig`, `adopt` (optional) | the parts bound at fixed weights |
-| `JOINS` | `joins`; `rig`, `adopt` (optional) | `[(parent, child, caps)]` |
+| `ALLOWED` | `rig`, `adopt` with `SKELETON` for the part names (optional) | bones per part over the template's binding |
+| `FIXED` | `rig`, `adopt` with `SKELETON` for the part names (optional) | the parts bound at fixed weights |
+| `JOINS` | `joins`; `rig`, `adopt` with `SKELETON` for the part names (optional) | `[(parent, child, caps)]` |
 | `WEIGHTS` | `rig` (optional) | the weights backend |
 | `PREVIEW` | `preview` (optional) | the look |
-| `TEST_POSE` | `pose_test`; `poses`, `joins` for the pose `'test'`, its default (optional) | the test pose |
+| `TEST_POSE` | `pose_test`; `joins` for the pose `'test'`, its default; `poses` for the pose `'test'` (optional) | the test pose |
 | `EXPORTS` | `export`; `rig` for the influence limit (optional) | profile names or JSON paths |
 | `EXPORT_DIR` | `export` (optional) | default `out/` |
+
+In `ALLOWED`, `FIXED` and `JOINS` an entry whose names hold `'{s}'` stands for one entry per side of the
+`SKELETON` template, the side filled in (`lpk.skeletons.sided`).
 
 `SOURCES` is `{source: entry}` in bake order, a later source covering an earlier one. An entry's keys:
 
