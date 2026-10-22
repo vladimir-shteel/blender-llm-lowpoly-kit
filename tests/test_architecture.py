@@ -1,7 +1,7 @@
 """The architecture conformance test (ARCHITECTURE.md, "Conformance checks"), on the host Python: lpk is
 parsed with ast, and only the host-importability check imports modules, each in a subprocess of its own
-that refuses the Blender modules. The scan covers lpk/; tests/ and dev/ are not scanned, so a test may
-reach the private names of the module it tests.
+that refuses the Blender modules. The scan covers lpk/; tests/, dev/ and lpk_dev/ are not scanned, so a
+test may reach the private names of the module it tests.
 
 Every finding is an exception keyed by (rule, module, name), never by line number, with its count of
 sites. The rules:

@@ -1,5 +1,6 @@
-"""Development-only tools of the kit, never shipped: a release builds the production kit
-without lpk_dev, tests/ and dev/, and nothing in lpk imports lpk_dev.
+"""Development-only tools of the kit. Nothing in lpk imports lpk_dev, so the kit runs without it, and
+.gitattributes marks lpk_dev, dev/ and tests/ export-ignore: git archive and the release archives leave
+them out.
 
 fingerprint snapshots every array a stage leaves on a built model and compares two snapshots, for the
 same-version determinism check (CONTRIBUTING.md, 'Verifying a change').

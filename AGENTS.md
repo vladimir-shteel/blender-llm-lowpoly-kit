@@ -16,7 +16,7 @@ not pass/fail.
 
 ## Rules
 
-- Read [ARCHITECTURE.md](ARCHITECTURE.md) before changing `lpk/`, `dev/` or `tests/`. A change fits it
+- Read [ARCHITECTURE.md](ARCHITECTURE.md) before changing `lpk/`, `lpk_dev/`, `dev/` or `tests/`. A change fits it
   or amends it first through its procedure. Never add a local workaround, a parallel route, or a
   parameter or branch that only keeps earlier output unchanged.
 - Production delivery defaults to requested model files and a short message with paths/blockers.

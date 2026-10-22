@@ -2,7 +2,7 @@
 
 This document fixes the structure of `lpk`: its layers, the model module contract, the runner, what the
 kit keeps between calls, the one place for each kind of extension, the invariants, and the procedure by
-which the structure itself may change. Every change to `lpk/`, `dev/` or `tests/` either fits this
+which the structure itself may change. Every change to `lpk/`, `lpk_dev/`, `dev/` or `tests/` either fits this
 document or amends it first ([Changing the architecture](#changing-the-architecture)).
 
 Precedence: [AGENTS.md](AGENTS.md) rules come first, this document second,
@@ -28,6 +28,10 @@ does not follow the rules yet, or has not run where it must; do not copy its pat
 - **Skills** carry the workflow in prose: what to run, in what order, and what the human looks at.
   Review is conversational: the human looks and answers in the conversation; nothing in code holds a
   stage for an answer or records an approval.
+- **Development tools** stay outside the kit a user runs: `lpk_dev` (the fingerprints, imported inside
+  Blender), `dev/` (host scripts such as the scrub) and `tests/` (the host tests). Nothing in `lpk` imports
+  them, and `.gitattributes` marks them `export-ignore`, so `git archive` and release archives leave them
+  out.
 
 ## Runtime
 

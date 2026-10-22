@@ -3,3 +3,7 @@
 *.npz binary
 *.blend binary
 *.fbx binary
+# Development-only folders stay out of git archive and release archives
+/dev export-ignore
+/lpk_dev export-ignore
+/tests export-ignore
