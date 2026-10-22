@@ -5,65 +5,20 @@ bpy, bmesh and mathutils are replaced by stand-ins while the code runs; no pictu
 built.
 
 python tests/test_snout_keys.py"""
-import contextlib
 import importlib
 import json
 import math
 import os
 import re
 import sys
-import types
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FORMS = os.path.join(ROOT, 'skills', 'lowpoly', 'references', 'forms')
 DOC = os.path.join(FORMS, 'snout-keys.md')
 VIEWS = os.path.join(FORMS, 'snout-keys', 'views.json')
 FENCE = re.compile(r'^```(\w*)\n(.*?)^```', re.M | re.S)
-
-
-class _Vector:
-    """The part of mathutils.Vector the calibrations and the head readers touch."""
-
-    def __init__(self, seq=(0.0, 0.0, 0.0)):
-        self.v = [float(c) for c in seq]
-
-    x = property(lambda s: s.v[0])
-    y = property(lambda s: s.v[1])
-    z = property(lambda s: s.v[2])
-
-    def __iter__(self):
-        return iter(self.v)
-
-    def __len__(self):
-        return len(self.v)
-
-    def __getitem__(self, i):
-        return self.v[i]
-
-
-@contextlib.contextmanager
-def _blender_stand_ins():
-    """bpy, bmesh and mathutils stand-ins for the module-level imports, and lpk as a bare package over its
-    folder; sys.modules is restored afterwards."""
-    stand_ins = ('bpy', 'bmesh', 'mathutils', 'mathutils.bvhtree')
-    ours = lambda name: name in stand_ins or name == 'lpk' or name.startswith('lpk.')
-    saved = {k: v for k, v in sys.modules.items() if ours(k)}
-    for k in saved:
-        del sys.modules[k]
-    mathutils = types.ModuleType('mathutils')
-    mathutils.Vector, mathutils.Matrix = _Vector, type('Matrix', (), {})
-    bvhtree = types.ModuleType('mathutils.bvhtree')
-    bvhtree.BVHTree = type('BVHTree', (), {})
-    lpk = types.ModuleType('lpk')
-    lpk.__path__ = [os.path.join(ROOT, 'lpk')]
-    sys.modules.update({'bpy': types.ModuleType('bpy'), 'bmesh': types.ModuleType('bmesh'), 'mathutils': mathutils,
-                        'mathutils.bvhtree': bvhtree, 'lpk': lpk})
-    try:
-        yield
-    finally:
-        for k in [k for k in sys.modules if ours(k)]:
-            del sys.modules[k]
-        sys.modules.update(saved)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from blender_stand_ins import stand_ins as _blender_stand_ins  # noqa: E402
 
 
 def _fences():

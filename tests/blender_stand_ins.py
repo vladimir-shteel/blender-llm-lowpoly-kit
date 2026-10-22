@@ -1,19 +1,22 @@
 """Stand-ins for bpy, bmesh and mathutils that let host tests import and run the Blender-side kernels.
 
-Vector is the part of mathutils.Vector the kernels touch; BMesh is bmesh.new(): vertex and face sequences in
-creation order with int layers keyed by their names, faces that compute their normal, centre and area, edges
-derived from the faces (one object per vertex pair, valid while a face uses it), and the bmesh.ops the
+Vector is the part of mathutils.Vector the kernels touch, Euler and Matrix the part the view fits turn it with
+(numpy); BMesh is bmesh.new(): vertex and face sequences in creation order with int layers keyed by their
+names, faces that compute their normal, centre and area, edges derived from the faces (one object per vertex pair, valid while a face uses it), and the bmesh.ops the
 kernels call (triangulate fans a polygon from its first corner; weld_verts merges the mapped vertices into
 their targets; delete removes faces, and with them the vertices they leave loose; rotate_edges turns the
 edge between two triangles to their other diagonal). BVHTree.FromPolygons keeps its polygons and answers
 ray_cast and find_nearest over their fan triangles by brute force; mathutils.geometry holds
-intersect_point_tri. stand_ins() installs the modules, and lpk as a bare package over its folder, while a
-block runs and puts sys.modules back afterwards. Not a test file: the test files import it."""
+intersect_point_tri. stand_ins() installs the modules (and any empty ones its `extra` names), and lpk as a
+bare package over its folder, while a block runs and puts sys.modules back afterwards. Not a test file: the
+test files import it."""
 import contextlib
 import math
 import os
 import sys
 import types
+
+import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -88,6 +91,9 @@ class Vector:
     def copy(self):
         return Vector(self)
 
+    def lerp(self, o, t):
+        return self + (Vector(o) - self) * t
+
     def angle(self, o, fallback=None):
         n = self.length * Vector(o).length
         if not n:
@@ -113,6 +119,41 @@ class Rotation:
         v = Vector(v)
         k, c, s = self.axis, math.cos(self.angle), math.sin(self.angle)
         return v * c + k.cross(v) * s + k * (k.dot(v) * (1 - c))
+
+
+class Matrix:
+    """A 3x3 matrix over numpy as far as the view fits use it: .a, and @ a vector."""
+
+    def __init__(self, a):
+        self.a = np.asarray(a, dtype=np.float64)
+
+    def __matmul__(self, v):
+        return Vector(self.a @ np.asarray(v, dtype=np.float64))
+
+
+def _axis_turn(axis, angle):
+    c, s = math.cos(angle), math.sin(angle)
+    return {'X': [[1, 0, 0], [0, c, -s], [0, s, c]],
+            'Y': [[c, 0, s], [0, 1, 0], [-s, 0, c]],
+            'Z': [[c, -s, 0], [s, c, 0], [0, 0, 1]]}[axis]
+
+
+class Euler:
+    """mathutils.Euler: angles (x, y, z) in radians; the order names the axes in the order their turns
+    apply, so 'XYZ' is Rz @ Ry @ Rx and 'ZXY' is Ry @ Rx @ Rz. to_quaternion returns the angles as a
+    Vector: the tests that read a rotation a kernel set compare angles."""
+
+    def __init__(self, angles, order='XYZ'):
+        self.angles, self.order = tuple(angles), order
+
+    def to_matrix(self):
+        m = np.eye(3)
+        for axis in self.order:
+            m = np.asarray(_axis_turn(axis, self.angles['XYZ'.index(axis)])) @ m
+        return Matrix(m)
+
+    def to_quaternion(self):
+        return Vector(self.angles)
 
 
 class Element:
@@ -490,16 +531,17 @@ class BVHTree:
 
 
 @contextlib.contextmanager
-def stand_ins():
-    """bpy, bmesh and mathutils stand-ins for the module-level imports of lpk.core, lpk.forms and lpk.build, and
-    lpk as a bare package over its folder; sys.modules is restored afterwards."""
-    names = ('bpy', 'bmesh', 'bmesh.ops', 'mathutils', 'mathutils.bvhtree', 'mathutils.geometry')
+def stand_ins(extra=()):
+    """bpy, bmesh and mathutils stand-ins for the module-level imports of lpk.core, lpk.forms, lpk.stages and
+    lpk.build, and lpk as a bare package over its folder; sys.modules is restored afterwards. extra: names of
+    further empty modules to install (addon_utils)."""
+    names = ('bpy', 'bmesh', 'bmesh.ops', 'mathutils', 'mathutils.bvhtree', 'mathutils.geometry') + tuple(extra)
     ours = lambda name: name in names or name == 'lpk' or name.startswith('lpk.')
     saved = {k: v for k, v in sys.modules.items() if ours(k)}
     for k in saved:
         del sys.modules[k]
     mathutils = types.ModuleType('mathutils')
-    mathutils.Vector, mathutils.Matrix = Vector, type('Matrix', (), {})
+    mathutils.Vector, mathutils.Euler, mathutils.Matrix = Vector, Euler, Matrix
     bvhtree = types.ModuleType('mathutils.bvhtree')
     bvhtree.BVHTree = BVHTree
     mathutils.bvhtree = bvhtree
@@ -515,6 +557,7 @@ def stand_ins():
     lpk.__path__ = [os.path.join(ROOT, 'lpk')]
     sys.modules.update({'bpy': types.ModuleType('bpy'), 'bmesh': bmesh, 'bmesh.ops': ops, 'mathutils': mathutils,
                         'mathutils.bvhtree': bvhtree, 'mathutils.geometry': geometry, 'lpk': lpk})
+    sys.modules.update({name: types.ModuleType(name) for name in extra})
     try:
         yield
     finally:

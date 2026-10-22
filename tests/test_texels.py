@@ -6,7 +6,6 @@ stand-ins while the modules are imported; nothing here bakes.
 
 python tests/test_texels.py"""
 import ast
-import contextlib
 import importlib
 import math
 import os
@@ -16,74 +15,8 @@ import types
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
-
-
-class _Vector(tuple):
-    """mathutils.Vector as far as the modules' import-time code and fan_decal use it."""
-
-    def __new__(cls, seq=(0.0, 0.0, 0.0)):
-        return tuple.__new__(cls, (float(c) for c in seq))
-
-    x = property(lambda s: s[0])
-    y = property(lambda s: s[1])
-    z = property(lambda s: s[2])
-
-    def __add__(self, o):
-        return _Vector(a + b for a, b in zip(self, o))
-
-    def __sub__(self, o):
-        return _Vector(a - b for a, b in zip(self, o))
-
-    def __mul__(self, k):
-        return _Vector(a * k for a in self)
-
-    __rmul__ = __mul__
-
-    def __truediv__(self, k):
-        return _Vector(a / k for a in self)
-
-    def dot(self, o):
-        return sum(a * b for a, b in zip(self, o))
-
-    def cross(self, o):
-        a, b = self, o
-        return _Vector((a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]))
-
-    @property
-    def length(self):
-        return math.sqrt(self.dot(self))
-
-    def copy(self):
-        return _Vector(self)
-
-    def normalized(self):
-        n = math.sqrt(sum(c * c for c in self)) or 1.0
-        return _Vector(c / n for c in self)
-
-
-@contextlib.contextmanager
-def _blender_stand_ins():
-    """bpy, bmesh and mathutils stand-ins for the module-level imports of the stage and shape modules,
-    and lpk as a bare package over its folder; sys.modules is restored afterwards."""
-    stand_ins = ('bpy', 'bmesh', 'mathutils', 'mathutils.bvhtree')
-    ours = lambda name: name in stand_ins or name == 'lpk' or name.startswith('lpk.')
-    saved = {k: v for k, v in sys.modules.items() if ours(k)}
-    for k in saved:
-        del sys.modules[k]
-    mathutils = types.ModuleType('mathutils')
-    mathutils.Vector = _Vector
-    bvhtree = types.ModuleType('mathutils.bvhtree')
-    bvhtree.BVHTree = type('BVHTree', (), {})
-    lpk = types.ModuleType('lpk')
-    lpk.__path__ = [os.path.join(ROOT, 'lpk')]
-    sys.modules.update({'bpy': types.ModuleType('bpy'), 'bmesh': types.ModuleType('bmesh'), 'mathutils': mathutils,
-                        'mathutils.bvhtree': bvhtree, 'lpk': lpk})
-    try:
-        yield
-    finally:
-        for k in [k for k in sys.modules if ours(k)]:
-            del sys.modules[k]
-        sys.modules.update(saved)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from blender_stand_ins import Vector as _Vector, stand_ins as _blender_stand_ins  # noqa: E402
 
 
 with _blender_stand_ins():

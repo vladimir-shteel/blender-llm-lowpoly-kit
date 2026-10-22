@@ -18,60 +18,22 @@ from unittest import mock
 import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-class _Vector(tuple):
-    def __new__(cls, seq=(0.0, 0.0, 0.0)):
-        return super().__new__(cls, (float(v) for v in seq))
-
-    def __add__(self, o):
-        return _Vector(np.add(self, o))
-
-    def normalized(self):
-        return _Vector(np.asarray(self) / np.linalg.norm(self))
-
-    def copy(self):
-        return _Vector(self)
-
-
-class _Euler:
-    def __init__(self, angles, order='XYZ'):
-        self.angles = tuple(angles)
-
-    def to_quaternion(self):
-        return _Vector(self.angles)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from blender_stand_ins import Vector as _Vector, stand_ins  # noqa: E402
 
 
 @contextlib.contextmanager
 def _blender_stand_ins():
-    """bpy, addon_utils and mathutils stand-ins for the module-level imports, and lpk as a bare package
-    over its folder; sys.modules is restored afterwards."""
-    stand_ins = ('bpy', 'mathutils', 'mathutils.bvhtree', 'addon_utils', 'lpk.core.builder')
-    ours = lambda name: name in stand_ins or name == 'lpk' or name.startswith('lpk.')
-    saved = {k: v for k, v in sys.modules.items() if ours(k)}
-    for k in saved:
-        del sys.modules[k]
-    mathutils = types.ModuleType('mathutils')
-    mathutils.Vector, mathutils.Euler, mathutils.Matrix = _Vector, _Euler, object
-    bvhtree = types.ModuleType('mathutils.bvhtree')
-    bvhtree.BVHTree = type('BVHTree', (), {})
-    lpk = types.ModuleType('lpk')
-    lpk.__path__ = [os.path.join(ROOT, 'lpk')]
-    # Load the production colour conversion alone; Builder's geometry dependencies need Blender.
-    with open(os.path.join(ROOT, 'lpk', 'core', 'builder.py'), encoding='utf-8') as source:
-        conversion = next(n for n in ast.parse(source.read()).body
-                          if isinstance(n, ast.FunctionDef) and n.name == 'srgb_to_linear')
-    builder = types.ModuleType('lpk.core.builder')
-    exec(compile(ast.Module(body=[conversion], type_ignores=[]), '<colour conversion>', 'exec'), builder.__dict__)
-    sys.modules['lpk.core.builder'] = builder
-    sys.modules.update({'bpy': types.ModuleType('bpy'), 'mathutils': mathutils, 'mathutils.bvhtree': bvhtree,
-                        'addon_utils': types.ModuleType('addon_utils'), 'lpk': lpk})
-    try:
+    """The stand-ins of blender_stand_ins plus addon_utils, with lpk.core.builder replaced by the production
+    colour conversion alone (Builder's geometry dependencies need Blender)."""
+    with stand_ins(extra=('addon_utils',)):
+        with open(os.path.join(ROOT, 'lpk', 'core', 'builder.py'), encoding='utf-8') as source:
+            conversion = next(n for n in ast.parse(source.read()).body
+                              if isinstance(n, ast.FunctionDef) and n.name == 'srgb_to_linear')
+        builder = types.ModuleType('lpk.core.builder')
+        exec(compile(ast.Module(body=[conversion], type_ignores=[]), '<colour conversion>', 'exec'), builder.__dict__)
+        sys.modules['lpk.core.builder'] = builder
         yield
-    finally:
-        for k in [k for k in sys.modules if ours(k)]:
-            del sys.modules[k]
-        sys.modules.update(saved)
 
 
 with _blender_stand_ins():

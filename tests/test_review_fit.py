@@ -5,80 +5,18 @@ and pitch (no Blender needed: bpy and mathutils are replaced by stand-ins while 
 and the mathutils stand-in turns vectors with numpy).
 
 python tests/test_review_fit.py"""
-import contextlib
 import importlib
 import json
 import math
 import os
 import sys
 import tempfile
-import types
 
 import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-class _Vector(tuple):
-    """The part of mathutils.Vector the fits and the calibrations use: a sequence with x, y, z."""
-
-    def __new__(cls, seq):
-        return super().__new__(cls, (float(v) for v in seq))
-
-    x = property(lambda s: s[0])
-    y = property(lambda s: s[1])
-    z = property(lambda s: s[2])
-
-
-class _Matrix:
-    def __init__(self, a):
-        self.a = np.asarray(a, dtype=np.float64)
-
-    def __matmul__(self, v):
-        return _Vector(self.a @ np.asarray(v, dtype=np.float64))
-
-
-def _axis_turn(axis, angle):
-    c, s = math.cos(angle), math.sin(angle)
-    return {'X': [[1, 0, 0], [0, c, -s], [0, s, c]],
-            'Y': [[c, 0, s], [0, 1, 0], [-s, 0, c]],
-            'Z': [[c, -s, 0], [s, c, 0], [0, 0, 1]]}[axis]
-
-
-class _Euler:
-    """mathutils.Euler: angles (x, y, z) in radians; the order names the axes in the order their turns
-    apply, so 'XYZ' is Rz @ Ry @ Rx and 'ZXY' is Ry @ Rx @ Rz."""
-
-    def __init__(self, angles, order='XYZ'):
-        self.angles, self.order = tuple(angles), order
-
-    def to_matrix(self):
-        m = np.eye(3)
-        for axis in self.order:
-            m = np.asarray(_axis_turn(axis, self.angles['XYZ'.index(axis)])) @ m
-        return _Matrix(m)
-
-
-@contextlib.contextmanager
-def _blender_stand_ins():
-    """bpy and mathutils stand-ins for the module-level imports of lpk.stages.review, lpk.stages.view and
-    lpk.core.views, and lpk as a bare package over its folder; sys.modules is restored afterwards."""
-    stand_ins = ('bpy', 'mathutils')
-    ours = lambda name: name in stand_ins or name == 'lpk' or name.startswith('lpk.')
-    saved = {k: v for k, v in sys.modules.items() if ours(k)}
-    for k in saved:
-        del sys.modules[k]
-    mathutils = types.ModuleType('mathutils')
-    mathutils.Vector, mathutils.Euler, mathutils.Matrix = _Vector, _Euler, _Matrix
-    lpk = types.ModuleType('lpk')
-    lpk.__path__ = [os.path.join(ROOT, 'lpk')]
-    sys.modules.update({'bpy': types.ModuleType('bpy'), 'mathutils': mathutils, 'lpk': lpk})
-    try:
-        yield
-    finally:
-        for k in [k for k in sys.modules if ours(k)]:
-            del sys.modules[k]
-        sys.modules.update(saved)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from blender_stand_ins import Euler as _Euler, Vector as _Vector, stand_ins as _blender_stand_ins  # noqa: E402
 
 
 with _blender_stand_ins():
