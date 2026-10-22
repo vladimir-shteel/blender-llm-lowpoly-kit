@@ -100,7 +100,8 @@ budget and the whole atlas packed normally, again, until the island's size stops
   final). The runner stops the listed packs at the first settled one and marks it `settled`.
 - The first pack after an unwrap in the same call reads the island as the unwrap left it and does not
   rescale; after a call that only unwraps, pass `rescale=False` to the first pack call
-  ([running](running.md#splitting-calls)). A pack that does not rescale never settles.
+  ([running](running.md#splitting-calls)). A pack that does not rescale never settles, unless the model
+  has no face island: then the first pack is final and settled.
 - A face budget that does not fit beside the other islands keeps moving: lower `FACE_TEXELS`, raise the
   atlas size, or move texels from another group.
 - `out/<NAME>.pack.json` caches packs keyed on the starting UVs and the settings; on a hit the pack

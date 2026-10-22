@@ -62,9 +62,9 @@ a parallel route. A refusal of bad input fails fast with a message that names th
   identical vertex order, UVs, weights, images and export bytes on a clean rebuild.
   `lpk_dev/fingerprint.py` snapshots every array a stage leaves on the objects and images and compares two
   snapshots. Compare runs without the pack cache (`out/<NAME>.pack.json`), which restores packs.
-- **The worked example** (`examples/mannequin`) is the acceptance model: a change that can touch geometry,
-  UVs, weights or exports runs its stages in Blender before integration, and every `reimport` of its
-  export has empty `diffs`. `bpy` from pip runs every stage but the captures, which need Blender's user
+- **The worked examples** (`examples/mannequin`, a character, and `examples/barrel`, a prop) are the
+  acceptance models: a change that can touch geometry, UVs, weights or exports runs their stages in
+  Blender before integration, and every `reimport` of their exports has empty `diffs`. `bpy` from pip runs every stage but the captures, which need Blender's user
   interface.
 - **An intentional output change** says so in its commit message with a before/after summary and the
   reason. Earlier outputs are diagnostics, not pass/fail.

@@ -1,9 +1,11 @@
 # The model file
 
-One Python file per character, next to its `views.json`, `refs/` and an `out/` folder the kit writes (a
-character without references has neither: [without references](intake.md#without-references)).
+One Python file per model, next to its `views.json`, `refs/` and an `out/` folder the kit writes (a
+model without references has neither: [without references](intake.md#without-references)).
 It holds data and composition only: every number is a measurement, a style choice with its reason, or a
-form's parameter. `examples/mannequin/mannequin.py` is the pattern; copy its layout.
+form's parameter. The worked example of the model's kind is the pattern (`examples/mannequin/mannequin.py`
+for a character, `examples/barrel/barrel.py` for a prop); copy its layout. The listing below is a
+character's; [a prop](#a-prop) leaves out the rig's attributes.
 
 ## What each stage reads
 
@@ -41,6 +43,35 @@ EXPORTS = ('glb_generic', 'fbx_generic')        # lpk.profiles names or JSON pat
 ```
 
 `'{s}'` in `ALLOWED`, `FIXED` and `JOINS` expands per side (`lpk.skeletons.sided`).
+
+## A prop
+
+A model without a rig defines the attributes up to the atlas and the export, and none of the rig's:
+
+```python
+NAME = 'Barrel'
+VIEWS = 'views.json'
+EDITS = 'edits.json'
+PALETTE = {'wood': (0.55, 0.36, 0.20), 'iron': (0.25, 0.25, 0.27)}
+
+def props(): ...                 # measurements in metres off views.json
+def blocks(P): ...               # [(kind, part, colour, args)]
+def build_mesh(P): ...           # (body Builder, {}): no colour source unless the prop paints one
+
+ATLAS = (256, {'Prop': 1.0})
+def sheet_of(colour, part): ...
+def seams(P): ...                # optional: the seamed unwrap
+EXPORTS = ('glb_generic', 'fbx_generic')
+```
+
+- **No `SKELETON`.** `rig`, `pose_test`, `pose_rest`, `run.poses` and `run.joins` need a rig and raise;
+  `export` writes the body alone, and the profile's skeleton keys (`bone_map`, `deform_only`,
+  `leaf_bones`, `influence_limit`) act on no bone.
+- **No face island** (`FACE_PART`, `face_pred`, `FACE_TEXELS`) unless painted detail needs one.
+- **The pivot is the origin.** Build the prop round the pivot the brief names: a standing prop's base
+  centre on z = 0, a held prop's grip, a hung prop's hook; its front faces -Y.
+- **Shared functions.** As a character's sections are, a prop's profile is one function of P that
+  `blocks(P)`, `build_mesh(P)` and `seams(P)` read (`stave_radius` and `stave_rings` in the example).
 
 ## Measurements: props()
 

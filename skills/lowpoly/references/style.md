@@ -65,6 +65,22 @@ How many facets the silhouette shows, and where.
   cannot carry, or whose paired limbs differ, takes shells.
 - **Default:** welded.
 
+## Hard surface
+
+A prop, and gear on a character, is made, not grown: its faces read as cut and its edges as edges.
+
+- **Ends:** flat caps (`cap0='flat'`, `cap1='flat'` of `Builder.loft`), coloured for what they show (end
+  grain, a lid) by `col0` and `col1`.
+- **Steps:** a band that stands off the surface (a hoop, a rim, a trim) is a step in one loft: two rings
+  at one height, the radius changing between them, with the loft's `axis` fixed so the rings stay
+  parallel: without it each ring turns to the path through its neighbours' centres, which two rings at
+  one centre leave without a direction.
+- **Colour borders** run along ring and column edges: each colour is a face colour, and its border an
+  island border of the seamed unwrap, crisp at any atlas density ([atlas](atlas.md#smart-or-seamed-unwrap)).
+- **Sides:** the fewest that keep the outline round at the read size; a turned prop shows its sides on its
+  silhouette.
+- **Default:** flat ends and colour borders in the mesh for a prop.
+
 ## Symmetry
 
 Whether the model is mirror-symmetric, and which parts pair. Choose it from the concept: asymmetric hair,

@@ -13,6 +13,13 @@ EXPORTS = ('glb_generic', 'fbx_generic')      # shipped profile names, or JSON p
 It reads the body, the rig and the atlas from the scene: after a `build` (which removes the rig), run
 `unwrap`, the packs, `bake` and `rig` again before exporting ([running](running.md)).
 
+## A model without a rig
+
+A module without `SKELETON` (a prop) exports its body alone: no rig is needed or written, the profile's
+skeleton keys (`bone_map`, `deform_only`, `leaf_bones`, `influence_limit`) act on no bone, and the shipped
+profiles serve it as they are. After a `build`, run `unwrap`, the packs and `bake` again before exporting.
+The re-import comparison then expects no armature and no bone, and does not look for a skin.
+
 ## Profiles
 
 A profile is the target's contract: the file format, the axes, the bone names by role, deform-only and
@@ -47,12 +54,12 @@ into a scratch collection, compared with the model, and deleted.
 |---|---|---|
 | `influences` | the model's bones per vertex exceed the profile's limit | `rig` was run before a lower-limit profile was added: run it again |
 | `import` | the importer failed | the text holds the importer's error |
-| `armatures`, `meshes` | not exactly one armature and one mesh came back | stray objects in the export, a split mesh |
+| `armatures`, `meshes` | not exactly one armature (none for a model without a rig) and one mesh came back | stray objects in the export, a split mesh |
 | `bones`, `parents` | bone names (after renames), count or hierarchy | the profile's `bone_map`, `deform_only`, `leaf_bones` |
 | `triangles` | the triangle count | modifiers applied on export, faces lost |
 | `uv layers` | the UV layer count | an extra or missing UV map |
 | `images` | image names (without extension and `.001` suffixes) | the material's connected Image Texture nodes; the FBX exporter carries a diffuse map only from a Principled Base Color link |
-| `skin` | the mesh came back without weights or not deformed by the armature | the Armature modifier, the exporter's skin settings |
+| `skin` | the mesh came back without weights or not deformed by the armature (a rigged model only) | the Armature modifier, the exporter's skin settings |
 | `size` | the world-space size along an axis beyond `lpk.stages.export.SIZE_METRES` plus `SIZE_SHARE` of it | a unit or scale error: a centimetre or inch unit, a scale left unapplied |
 
 A difference means the file is not the model: fix the cause, never the profile to quiet it. `bones` and
