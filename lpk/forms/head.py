@@ -15,7 +15,7 @@ X = Vector((1, 0, 0)); Y = Vector((0, 1, 0)); Z = Vector((0, 0, 1))
 # the skull), top/bottom in half heights, width in half widths, then superellipse exponent.
 # The top line falls steeply over the forehead, eases at the stop and runs flatter along the
 # bridge to the nose. The snout keeps most of its section to a blunt nose and the jaw line
-# stays low and nearly straight (a cylinder, as on a shepherd dog), not a cone to a point.
+# stays low and nearly straight: a cylinder, not a cone to a point.
 MUZZLE_KEYS = (
     (0.55, 0.55, -0.55, 0.45, 2.2),     # back of skull
     (0.30, 0.93, -0.85, 0.82, 2.8),
@@ -195,41 +195,25 @@ def snout_head(b, part, center, length, width, height, color, n=10, keys=MUZZLE_
     half (below its mid-height), 'ra_neg' the half width on the -X side, both in half widths like the
     key's own, and 'mult' the per-vertex radius factors (they scale the top and bottom vertices too), 'rb_neg'
     the lower half height in half heights, and 'off' the centre offset (across in half widths, up in
-    half heights). rb_neg and off move the section off the key's top and bottom; check that shifted
-    outline against the drawing. MUZZLE_KEYS[0], (0.55, 0.55, -0.55, 0.45, 2.2), is the back of the skull: 0.55 head
-    lengths behind the centre, 0.55 half heights above and below it, 0.45 half widths to each side, a
-    rounded section. With length, width and height at 1 the keys are in metres, as for a profile traced
-    off a calibrated side view (side_key, traced_keys); muzzle_keys builds head-unit keys from a few
-    proportions when no view draws the head's profile. nose, skull: the apexes closing the front and
-    the back, (s, height) in the keys' units. stop: index of the key the eyes sit on.
+    half heights); rb_neg and off move the section off the key's top and bottom. With length, width and
+    height at 1 the keys are in metres (side_key, traced_keys), and so is every deformer's length, h and
+    start; muzzle_keys builds head-unit keys from proportions. nose, skull: the apexes closing the front
+    and the back, (s, height) in the keys' units. stop: index of the key the eyes sit on.
     snout scales the length in front of the stop (1.0 = default proportion). eye_height: eye
     level above the cranium centre in half heights; keep it below the stop's top line or the
     eyes climb onto the forehead and into the hair.
 
-    How the keys make the front and three-quarter form. Each key is one section, a superellipse
-    centred at its mid-height, (top + bottom) / 2, with a half height of (top - bottom) / 2 and its half
-    width at that mid-height, where the section is widest; the exponent sets round (2) against box
-    (higher). The loft runs straight from section to section, so the front outline is the envelope of
-    all the sections: the front gives a width per row, not per key. Read each key's half width at its
-    own mid-height row, on the head alone (no ears, hair or ruff), then check the envelope against the
-    front (front_envelope); a section the envelope hides (a muzzle in front of the cheeks) shows its
-    width only on its own drawn outline. A section is as wide below its mid-height as above it unless
-    its options give the lower half a half width of its own ('ra_bneg'); taper_below narrows a jaw over
-    the built head instead and scales every vertex below its start, the muzzle included. A mass
-    standing out of another (a muzzle from a face plane, a brow over the eyes) is a width or height
-    step from one key to a close neighbour. The nose apex turns the last band into a cone: how far it
-    sits past the last key sets how pointed the nose reads, a pointed nose with its apex well ahead of a
-    small last key, a blunt one with a nearly full last key just behind the apex. With unit scales
-    every deformer's length, h and start is in metres too.
+    Each key is a superellipse section centred at its mid-height, (top + bottom) / 2, with half height
+    (top - bottom) / 2 and its half width at that mid-height, where it is widest; the loft runs straight
+    between sections, so the front outline is their envelope (front_envelope).
 
     color(i, j, d), Builder.loft's: i the band from key i to key i + 1, counted from the back key,
     for any number of keys; j the column, from the left side (+X) up over the top, down the right side
     and back under the jaw; d the column's outward direction in world space, x across and z up, with
     no y: it never points back or forward, so a rule on d alone reaches every band. The skull's apex
     cap takes one colour, color(0, 0, d), and the nose's apex cone one, color(len(keys) - 2, 0, d):
-    whatever band 0 and the last band give their column 0, never a colour of their own. So a mark
-    whose edge does not follow the bands (a nose pad on top of the tip, a stripe over the back of the
-    skull) goes into a colour source (the model's SOURCES). With MUZZLE_KEYS the bands are 0-1 the
+    whatever band 0 and the last band give their column 0, never a colour of their own. With
+    MUZZLE_KEYS the bands are 0-1 the
     back of the skull, 2 the crown, 3 the forehead, 4 the stop to the snout root, 5 the snout root,
     6 the snout's middle, 7 the nose base and 8 the nose pad; traced keys have bands of their own.
     Returns {'rings', 'eye': (y, z) of the eye line at the stop, 'eye_x': half width there, 'pt': fn(s,
@@ -344,17 +328,14 @@ def profile_head(b, part, origin, keys, n, color, nose, skull, stop=None, eye_he
 def profile_key_deviation(keys, height=None, width=None, read_mpp=None):
     """Per inner key of a profile (MUZZLE_KEYS and the like): how far its top, bottom and half
     width sit off the straight line between its neighbours, in the keys' units. A key at zero on all
-    three lies on its neighbours' line and carries no shape; one near zero carries little. Either can
-    go from the mesh (its colour moves to a source) once the outline built without it shows no loss
-    at the declared read size; no deviation in metres decides that for every head, and read_mpp gives
-    the deviation in screen pixels at that size.
+    three lies on its neighbours' line and carries no shape; one near zero carries little.
 
     height, width: the head's half height and half width in metres, as snout_head takes them: with
     both, each entry also holds the largest deviation in metres, the top and bottom scaled by height and
     the half width by width (the keys' own spacing along the head, as at snout 1). read_mpp: metres per
     screen pixel at the declared read size, the body's height over the on-screen height in pixels the brief
     declares (lpk.stages.review.play_size's 'mpp'): each entry then also holds that deviation in screen
-    pixels, how far the key stands off the line where the character must still read. Raises ValueError for
+    pixels. Raises ValueError for
     only one of height and width, read_mpp without them, or a value that is not a positive number.
     Returns [(key index, largest deviation in key units)] for the inner keys; with height and width (key
     index, deviation in key units, metres), and with read_mpp too, the screen pixels after them."""
@@ -393,9 +374,8 @@ def muzzle_keys(eye, nose, chin_z, mouth_z, cranium_w, muzzle_w, nose_w, back_s=
     runs it straight between those heights after a stop step under the eyes (a straight profile, on
     which the eased line can read as a drooping muzzle).
     Returns (keys: ten snout_head keys, each (s, top, bottom, half width, exponent), back to front; nose:
-    (s, height); stop index: 4). Units: chin_z head units, mouth_z head units, muzzle_w head units, nose_w
-    head units, back_s head units, brow_top head units, p_cranium exponent, p_muzzle exponent, bridge head
-    units (root top, nose top)."""
+    (s, height); stop index: 4). Units: head units throughout, but p_cranium and p_muzzle, superellipse
+    exponents."""
     es, ez = eye; ns, nz = nose
     stop_top = ez + 0.32
     keys = [(back_s, 0.55, -0.45, 0.55, 2.2), (back_s * 0.55, 0.93, chin_z * 0.70, cranium_w * 0.86, 2.8),
@@ -462,8 +442,7 @@ def front_half_width(front, outline, z):
     """Half the width of a closed front-view outline at the model height z, in metres: its outermost
     crossings of the row at that height, through the view's calibration. outline: a views.json trace's
     'px' on the front view, of the part alone (a head without its ears, hair or ruff, whose width the
-    front would add to it). Read a key's half width at the height of its mid-height, where its section
-    is widest. Raises ValueError when that row misses the outline.
+    front would add to it). Raises ValueError when that row misses the outline.
     Returns half the outline's width at height z, in metres."""
     py = _row(front, z)
     xs = _crossings(outline, py, 1)
@@ -486,12 +465,9 @@ def traced_keys(side, center, outline, columns, opts=None, front=None, front_out
     view's calibration and the head's front outline alone (no ears, hair or ruff). half_widths: one per
     key, None to read the front outline, an outline of its own in front-view pixels (a muzzle drawn
     inside the face, which the head's outline hides), or a half width in metres; None for the front
-    outline everywhere. The front shows a section only where it is the widest at that height, so a key
-    the envelope hides takes its width from its own outline. With an exponent other than 2 a key's half
-    width is its superellipse's extent, which the section's polygon does not quite reach (Builder.loft),
-    so the built front runs a little inside a width read here. Check what the keys make with
-    front_envelope against the head's front outline; the skill's worked example
-    skills/lowpoly/references/forms/snout-keys.md works one drawn head through.
+    outline everywhere. With an exponent other than 2 a key's half width is its superellipse's extent,
+    which the section's polygon does not quite reach (Builder.loft), so the built front runs a little
+    inside a width read here.
 
     Returns {'keys': [(s, top, bottom, half width[, opts])], 'reads': one per key {'px': its column,
     'top_py', 'bottom_py': the side rows read there, 'mid_z': its mid-height in model metres,
@@ -595,12 +571,9 @@ def front_envelope(keys, center, n, front, outline, nose=None, skull=None):
 
 def taper_below(b, part, centre, h, k, depth=0.9, start=None):
     """Narrow a head's lower part toward the chin: below `start` (a height; the head centre by
-    default) x shrinks by up to k at `depth` half heights under the centre. snout_head's sections
-    are as wide at the jaw as at the brow; an inverted-triangle face needs the chin
-    narrower than the cheeks, and the face kept full width down to the cheek line: every vertex below
-    `start` narrows, so a start above the cheek line narrows the face at the eyes and can leave the
-    eyes' outer corners off it. Pass `start` at the cheek line, just under the eyes, and check the eye
-    outlines on the face in the front capture.
+    default) x shrinks by up to k at `depth` half heights under the centre. Every vertex of the part
+    below `start` narrows, the muzzle included: a start above the cheek line narrows the face at the
+    eyes and can leave the eyes' outer corners off it.
     Units: centre m, h m (half height), k ratio, depth head units (half heights), start m (height)."""
     pid = b.pid(part)
     c = Vector(centre)
@@ -616,13 +589,9 @@ def wedge_muzzle(b, part, centre, length, h, keys, stop, k=0.75):
     """Turn snout_head's round muzzle sections into wedges: in front of the stop key every vertex
     above its section's middle moves toward the midline by up to k at the section's top, so the
     bridge narrows to a ridge over a flat-bottomed jaw and the nose reads as a triangle from the
-    front (left round, the sections read as a tube from the side and a blob of a nose). The default k
-    is a starting value, not a fit for every muzzle: on a narrow muzzle it can narrow the root and the
-    middle past the drawing. Choose k from this head's front capture against the drawing: lower it
-    where the root or the middle comes out narrower than drawn, raise it only while the ridge still
-    reads round. On a head with stored hand edits a change of k moves the edited vertices too (the
-    edits are offsets and the topology stays, so no conflict stops the build): review the edited head
-    after it.
+    front. The default k is a starting value: on a narrow muzzle it can narrow the root and the middle
+    past the drawing. On a head with stored hand edits a change of k moves the edited vertices too: the
+    edits are offsets on unchanged topology, so no conflict stops the build.
     Units: centre m, length m (one head length), h m (half height), keys head units (snout_head's keys),
     stop index into keys, k ratio."""
     pid = b.pid(part)
@@ -646,8 +615,8 @@ def wedge_muzzle(b, part, centre, length, h, keys, stop, k=0.75):
 
 def lift_muzzle(b, part, y0, y1, dz):
     """Raise a muzzle's front by dz at y1 (the nose tip), fading to nothing at y0 (in front of the
-    eyes), linear in y: straightens a drooping profile without rebuilding the keys the human's hand
-    edits were made on, since it moves vertices and keeps the part's topology. Run it inside the head's
+    eyes), linear in y: straightens a drooping profile while keeping the keys and the part's topology,
+    so stored hand edits still apply. Run it inside the head's
     part scope, before the scope's exit replays the stored edits (lpk.core.edits.apply), which must see
     the final form.
     Units: y0 m, y1 m, dz m."""
