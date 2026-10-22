@@ -25,7 +25,9 @@ not pass/fail.
 - English everywhere: code, comments, docstrings, docs, commit messages.
 - No names from projects this toolkit came from: no game, character or repository names, no private
   paths. `python dev/scrub_check.py` with `LPK_SCRUB_WORDS` set to the maintainer's word list must report
-  0 hard hits over every tracked file (CONTRIBUTING.md); without the list it proves nothing.
+  0 hard hits over every tracked file (CONTRIBUTING.md); without the list it proves nothing. A change that
+  brings work from a contributor's own projects is also scrubbed with that contributor's own list
+  (CONTRIBUTING.md, "Your own word list").
 - Skills carry the workflow only; every number and name lives in `lpk` and its data.
   `python tests/test_skills.py` keeps the skills in step with the code.
 - Blender space: metres, Z up, models face -Y, `.L` is +X. Builders carry a face palette index (`pal`)
