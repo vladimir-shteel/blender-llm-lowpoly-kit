@@ -14,14 +14,15 @@ A character on two legs, rigged on the `biped` skeleton template (`SKELETON = 'b
    ([the model file](../model-file.md)).
 4. **Blockout.** `run.model(MODEL, stages=('reference', 'blocks'))`: every part as its primitive beside the
    references. **Review:** the human compares the blocks with the drawings in Blender (front, side,
-   three-quarter; `run.capture(MODEL, tag='blocks', objects=['<NAME>_Blocks'])` for pictures); fix
-   proportions in `props()` and the sections, not in the blocks. Without references, `stages=('blocks',)`
+   three-quarter); `outline_diff` on `['<NAME>_Blocks']` gives where they leave each calibrated view
+   ([checking a step](../running.md#checking-a-step)); fix proportions in `props()` and the sections, not in the blocks. Without references, `stages=('blocks',)`
    and the human judges the blocks by eye; so too every later review compares with the human's idea.
 5. **Build part by part:** head and face, hair, torso and clothing, legs and feet, arms and hands, tail,
    gear, each from its area's card ([forms](../forms/README.md)). After each part:
-   `run.model(MODEL, stages=('build',))` and `run.capture(MODEL, tag=<part>)`.
-   **Review:** the part against its blocks and the references. When a part's accuracy is in doubt, lay the
-   build over the reference view (the overlay, [running](../running.md#review-calls)). Measure a shape off the
+   `run.model(MODEL, stages=('build',))`, then the outline of the body against each calibrated view
+   (`outline_diff`, [checking a step](../running.md#checking-a-step)): the part's bands and width.
+   **Review:** the human sees the part in Blender against its blocks and the references; give them the
+   bands and widths off the drawing, and the overlay when they want the build over the drawing. Measure a shape off the
    reference; do not tune a preset made for another species or body. If the human corrects a part by hand,
    run `capture_edits` before the next build and read what they moved: vertex moves only, the topology
    stays (step 8 for more).
@@ -40,7 +41,7 @@ A character on two legs, rigged on the `biped` skeleton template (`SKELETON = 'b
    [operations on a part](../frozen.md#operations-on-a-part). Stay parametric otherwise.
 9. **Texture.** `unwrap`, the packs until settled, `bake`, `preview`, split over calls
    ([running](../running.md#splitting-calls); the settings in [atlas](../atlas.md)). **Review:** the atlas on the
-   model (`run.capture(MODEL, tag='tex', shade='tex')`): the painted face, the seams, the colour boundaries.
+   model in Blender's texture shading: the painted face, the seams, the colour boundaries.
    When the human wants to paint the atlas by hand, or the model came with its own texture, freeze the
    texture ([frozen texture](../frozen.md#frozen-texture)); from then on add painted layers only as `'over'`
    sources. After a mesh edit under the frozen texture, **review** the UV check's parts and repair on the

@@ -94,7 +94,7 @@ it is normalised, not distances. Every lock starts at the knot, so bury the knot
 
 A tail on the midline fills the gap between the legs in the front view: drift it to one side as drawn,
 behind one leg. `lpk.stages.checks.limb_separation(<body>, ['tail'], ['leg.L'])` measures the touching span
-between the tail and a leg; the front capture shows it.
+between the tail and a leg.
 
 ## Limits
 

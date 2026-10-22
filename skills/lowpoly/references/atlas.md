@@ -17,7 +17,7 @@ Everything below is the procedural texture. Under a frozen texture (`TEXTURE_FRO
 `pack` refuse and the bake adds only the `'over'` sources: [the frozen texture](frozen.md#frozen-texture).
 
 Colour sources overlap the body until the bake, so a painted layer (a mask, a belly patch, tail rings)
-looks ragged in a capture before it: judge painted layers on the baked atlas (`shade='tex'`).
+looks ragged in a capture before it: judge painted layers on the baked atlas, in Blender's texture shading.
 
 ## Groups and texel density
 
@@ -210,7 +210,7 @@ nearest-texel sampling). The atlas is saved as `out/<NAME>_Atlas.png`.
 - **Grit** (`GRIT`, an optional model attribute: None, the default, for flat colours, or an `(r, g, b[, a])`
   colour, `lpk.stages.texture.GRIT` being one) multiplies an object-space noise of that colour into the
   albedo, shared by a source and the body under it. Large areas of one colour under grit read blotchy:
-  show them to the human before keeping it.
+  have the human look at them on the preview in Blender before keeping it.
 
 ## The preview
 

@@ -18,8 +18,9 @@ read it before writing a model of this kind.
 3. **The model file.** Write `props()`, the shared profile or section functions and `blocks(P)` first
    ([the model file](../model-file.md#a-prop)).
 4. **Blockout.** `run.model(MODEL, stages=('reference', 'blocks'))`: every part as its primitive beside the
-   references. **Review:** the human compares the blocks with the drawings in Blender
-   (`run.capture(MODEL, tag='blocks', objects=['<NAME>_Blocks'])` for pictures); fix proportions in
+   references. **Review:** the human compares the blocks with the drawings in Blender; `outline_diff` on
+   `['<NAME>_Blocks']` gives where they leave each calibrated view
+   ([checking a step](../running.md#checking-a-step)); fix proportions in
    `props()` and the shared functions, not in the blocks. Without references, `stages=('blocks',)` and the
    human judges the blocks by eye.
 5. **Build part by part:** the prop's own parts, the main body first, then what sits on it (trims, bands,
@@ -28,8 +29,9 @@ read it before writing a model of this kind.
    (plates, boards, rivets, studs) is one local form called once per copy from a list in P, each copy in
    a part of its own (`plate.1`, `plate.2`) or all in one part; a mirrored pair is built once and copied
    with `Builder.mirror_part`. After each part:
-   `run.model(MODEL, stages=('build',))` and `run.capture(MODEL, tag=<part>)`. **Review:** the part
-   against its blocks and the references. If the human corrects a part by hand, run `capture_edits` before
+   `run.model(MODEL, stages=('build',))`, then the outline against each calibrated view (`outline_diff`,
+   [checking a step](../running.md#checking-a-step)). **Review:** the human sees the part in Blender
+   against its blocks and the references, with the bands and widths off the drawing. If the human corrects a part by hand, run `capture_edits` before
    the next build and read what they moved.
 6. **Budget.** Once every part is built, count the triangles (`report['build']['body']['tris']`) against
    the brief. An overrun goes to the optimisation pass ([style](../style.md)) now, before the texture.
@@ -41,7 +43,7 @@ read it before writing a model of this kind.
 9. **Texture.** `unwrap`, `pack`, `bake`, `preview` ([atlas](../atlas.md)). Without a face island the first
    pack after the unwrap is final and reports `settled`; a prop takes a face island only for painted
    detail that needs one (a label, a sign). **Review:** the atlas on the model
-   (`run.capture(MODEL, tag='tex', shade='tex')`): the seams and the colour borders.
+   in Blender's texture shading: the seams and the colour borders.
 10. **Export, only when the human asks.** The prop is finished with the texture's review; the export may
     come much later, for several models at once. When asked, settle the targets with the human, write
     `EXPORTS`, run `export` ([export](../export.md)); every `reimport` must have an empty `diffs`.

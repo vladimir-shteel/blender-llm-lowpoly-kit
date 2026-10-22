@@ -118,9 +118,9 @@ def build_garments(b, P, data):
 ```
 
 Weights: the skirt to the hips and the upper legs (`ALLOWED = {'skirt': ['Hips', 'UpperLeg.L', 'UpperLeg.R']}`),
-the belt and its buckle to the hips and the spine, or pinned to the hips in `FIXED`. Check the skirt in the
-front capture for the legs below the crotch (the trunk's sections end there, so `skirt` does not see the
-thighs) and in the test pose for the legs passing through it.
+the belt and its buckle to the hips and the spine, or pinned to the hips in `FIXED`. Check the skirt for the legs below the
+crotch with `lpk.stages.checks.shell_clearance` (`{'skirt': ['leg.L', 'leg.R']}`; the trunk's sections end
+there, so `skirt` does not see the thighs) and in the test pose for the legs passing through it.
 
 ## Loose garments
 
@@ -130,7 +130,7 @@ thighs) and in the test pose for the legs passing through it.
   socket), never by moving the seam down: a sleeve welded down the body's side reads as glued
   ([joins.md](joins.md#an-arm-welded-down-the-bodys-side)).
 - **A sleeve much wider than the arm:** lower its ring centres with `'off'` until its top runs along the
-  shoulder line in the front capture; centred on the arm path it rises beside the head.
+  shoulder line in the front view's `outline_diff`; centred on the arm path it rises beside the head.
 - **Baggy trousers:** alternate fuller and pinched rings (thigh, knee, hem bunching) and add radius noise with
   `shapes.jitter_rings` over `shapes.path_rings`, the first ring left clean; `amount` comes from the drawn
   outline. Even rings read as machined pipes. Trousers so wide they meet at the midline: narrow the inner

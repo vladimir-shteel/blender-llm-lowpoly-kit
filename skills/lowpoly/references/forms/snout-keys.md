@@ -120,8 +120,8 @@ stay the first pass's. The envelope:
 
 The jaw now follows the drawing within 7 pixels. The largest row has moved to the crown's top, rows 64
 to 72, where the crown's section, a polygon of ten sides, turns its top vertex against a crown the
-drawing draws flat: that is the section's own facet, which the front capture judges, not a reading to
-correct. At the cheeks the keys run a few pixels inside the outline: with an exponent other than 2 a
+drawing draws flat: that is the section's own facet, which the human judges from the front in Blender, not a
+reading to correct. At the cheeks the keys run a few pixels inside the outline: with an exponent other than 2 a
 section's half width is the superellipse's extent, which the polygon's vertices do not quite reach. The
 built `head.profile_head` lays each section at its exact extents, so it reaches those half widths.
 

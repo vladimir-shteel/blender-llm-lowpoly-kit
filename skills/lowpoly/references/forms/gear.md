@@ -100,7 +100,7 @@ cloth in a short stub under the housing. Check from below and behind for a showi
 
 Same-value pieces side by side (white links on a white shell) vanish into one shape: put a dark rail or core
 behind them. Near-black parts read as flat slabs: give them a mid-grey rim or sole so their sub-forms show.
-The grey is a palette value the human picks. Judge it in the colour capture.
+The grey is a palette value the human picks and judges in Blender.
 
 ## Mechanical bulk
 

@@ -111,9 +111,10 @@ Each head form's docstring lists what it returns and how its `color` names the b
 Deformers run before the part's `edits.apply`, which must see the final form:
 
 - **A triangular nose and a ridged bridge:** `head.wedge_muzzle`. Its default `k` is a start, not a fit:
-  lower it where the front capture shows the root or the middle narrower than drawn, raise it only while the
+  lower it where the front view's `outline_diff` bands show the root or the middle narrower than drawn, raise it only while the
   ridge still reads round. On a head with stored edits a change of `k` moves the edited vertices too (the
-  edits are offsets on unchanged topology): look at the edited head again.
+  edits are offsets on unchanged topology): run `outline_diff` on the edited head again and have the human
+  look at it.
 - **A chin narrower than the cheeks:** give the jaw's keys a lower half width, checked with
   `front_envelope`; or `head.taper_below` over the built head with `start` at the cheek line, under the eyes.
   It scales every vertex below `start`, the muzzle included: started higher, it narrows the face at the eyes
@@ -141,7 +142,7 @@ stay parts of their own.
   views show the opening. `width` runs across the cupped face, `thick` along `front`. A side ear whose
   `front` points along the side shows the front view its edge: a thin vertical spike.
 - `cup` sets the inner side's concavity; `inner_col` and `tip_col` colour it. Take the inner, tip and outer
-  colours from the drawing and judge the front capture: an ear the colour of the head behind it merges into
+  colours from the drawing; the human judges them from the front in Blender: an ear the colour of the head behind it merges into
   the forehead, and the inner colour changes which animal it suggests.
 - With a hair cap, decide which surface each ear grows from ([hair-fur.md](hair-fur.md#ears-and-the-tuck-ring)).
   Ears on a fur mass sit forward of where the mass starts, or it swallows them.
@@ -158,4 +159,4 @@ stay parts of their own.
 - `snout_head`'s apex caps take their end band's colour: a mark whose edge does not follow the bands (a nose
   pad, a stripe over the skull) goes into a colour source ([markings-decals.md](markings-decals.md)).
 - Chosen columns, straight lofting, finite sides and deformers leave small differences against the traced
-  outline: judge the side and front captures, not every pixel.
+  outline: read the side and front `outline_diff` bands past its `floor`, not every pixel.

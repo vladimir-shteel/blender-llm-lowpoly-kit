@@ -97,6 +97,39 @@ build is followed by `unwrap`, the packs, `bake` and, for a rigged model, `rig` 
   `lpk.stages.review.outline_diff` gives where the build's outline leaves the drawing's, in pixels.
 - Contact sheets of captures beside the references: `python -m lpk.host.sheets`.
 
+## Checking a step
+
+The human looks at the open `.blend`: the scene holds the body, the blocks and the reference planes, and
+the viewport orbits, isolates a part (`run.select`, then local view), shows texture or material shading,
+the Face Orientation overlay and the test pose (`pose_test`). A review shows the human the step there and
+says what to look at; it makes no capture for something the viewport shows.
+
+The agent checks the shape by the numbers: a capture tells it nothing the outline comparison does not
+give in pixels, and it reads the frozen body the same as a built one. Per calibrated view (a turned
+concept takes `concept_fit`'s fit instead):
+
+```python
+from lpk.core.views import Views
+from lpk.stages import review
+
+views = Views('models/hero/views.json')
+fit = review.calib_fit(views.calib('front'))
+r = review.outline_diff(views, 'front', fit, ['Hero'], picture='models/hero/out/outline_front.png')
+result = {k: r.get(k) for k in ('why', 'floor', 'top', 'bottom', 'bands', 'parts')}
+```
+
+`bands` are the stretches where the build's outline leaves the drawing's, each with its rows, its offset
+in pixels and its part; `parts` give each part's width against the drawn one (`scale`); offsets under
+`floor` are within the fit's and the drawing's own precision. Pass `exclude_parts` for a limb drawn in
+another pose. The comparison reads the rest mesh: run `pose_rest` after a `pose_test` first. `picture` is for the
+human (grey both, red the build only, blue the drawing only); the overlay is the same comparison drawn
+face by face.
+
+Captures are for what the viewport cannot show at once: the play size
+([style](style.md#density)), the pose sheet (`run.poses`), a part cut out beside its crop
+([hands](forms/hands.md#judge-hands-where-they-read)), two variants or a before and after side by side, the
+look in the Standard view transform ([atlas](atlas.md#the-preview)), and a human who is not at Blender.
+
 ## Host commands
 
 Intake and sheets run on plain Python with numpy and Pillow, outside Blender: `python -m lpk.host.intake`

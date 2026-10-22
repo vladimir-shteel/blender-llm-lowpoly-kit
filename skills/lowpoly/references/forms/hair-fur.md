@@ -103,7 +103,7 @@ Decide for each ear which surface it grows from; either way it stays a part of i
   misses is skipped and counted in the build report's `misses`.
 - `hair_bun` wisps pointing up read as cat ears.
 - `hair_mantle`: route it behind an A-pose arm, or the arm pierces the mass; outside a high collar or hood,
-  or leave it out where the collar hides the nape (the human's call on the back capture).
+  or leave it out where the collar hides the nape (the human's call from the back in Blender).
 
 ## Masses and fringes
 

@@ -2,8 +2,9 @@
 
 A symmetric pair is built on the left (`'foot.L'`, the side sign +1) and copied with
 `b.mirror_part('foot.L', 'foot.R')`; a foot that differs by design is built on its own side with that side's
-sign. Toes face -Y. The leg loft ends inside the foot. The foot is the silhouette's base: judge it in the
-side and three-quarter captures and against the floor.
+sign. Toes face -Y. The leg loft ends inside the foot. The foot is the silhouette's base: measure it with
+the side view's `outline_diff` and against the floor (the build report's `zmin`); the human judges it from
+the side and three-quarter in Blender.
 
 ## Choose the form
 
@@ -79,7 +80,7 @@ into a zigzag at every corner of the column. Under the geometry stance colour th
 
 ## Boots
 
-- Boots narrower than the trouser hems vanish under them: compare their widths in the front capture.
+- Boots narrower than the trouser hems vanish under them: compare their widths in the front view's `outline_diff` `parts`.
 - The upper meets the sole at full width (`work_boot` sinks it in); a narrower bottom leaves a shelf of sole.
 - The rig's foot and toe bones bind to the boot's points, which `feet.work_boot_points` gives without
   building, from the same arguments and on the floor as the built boot stands; `bones(P)` reads them there:
@@ -103,7 +104,7 @@ the silhouette and hide the leg's flat cap:
 - a mitt paw: end the leg at the hock and stand `mitt_paw` under it, heel to toe;
 - fur drawn at the shin's top: a fringe of a few upward tufts ([hair-fur.md](hair-fur.md#masses-and-fringes)).
 
-Bird's toes under a mammal read as talons, a flat hand form as claw spikes: the side capture shows which.
+Bird's toes under a mammal read as talons, a flat hand form as claw spikes: the human judges which from the side in Blender.
 
 ## Limits
 
