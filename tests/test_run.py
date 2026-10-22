@@ -69,7 +69,8 @@ def _recording(run, calls):
     runners = {k: stage(k) for k in run.RUNNERS}
     def pack(M, P, rescale=True):
         calls.append(('pack', P is not None, {'rescale': rescale}))
-        return {'face_side_change': changes.pop(0) if changes else 5.0}
+        face = changes.pop(0) if changes else 5.0
+        return {'face_side_change': face, 'face_area': None if face is None else 0.05}
     changes = []
     calls.changes = changes
     return runners, pack
@@ -100,6 +101,12 @@ def test_stages_run_in_table_order_with_pack_repeated_and_measured_only_when_nee
             report = run.model(MODEL, ('unwrap',) + ('pack',) * 5)
             assert [r['face_side_change'] for r in report['pack']] == [0.4, 3.0, 0.5], \
                 'the unscaled first pack never settles; the packs stop after the first that does'
+            calls.changes.clear()
+            calls.clear()
+            calls.changes.extend([None, None])
+            report = run.model(MODEL, ('unwrap', 'pack', 'pack'))
+            assert [r['settled'] for r in report['pack']] == [True], \
+                'without a face island the first pack after an unwrap is final'
             calls.changes.clear()
             calls.clear()
             run.model(MODEL, ('pose_test', 'export'))
@@ -224,9 +231,15 @@ def test_a_stage_without_what_an_earlier_stage_makes_names_the_stage_to_run_firs
         for stage in ('pack', 'bake'):
             msg = _raises(ValueError, run.pack if stage == 'pack' else run.bake, M, P)
             assert msg == '%s: the body Probe has no atlas UV layer %s: run unwrap first' % (stage, texture.UV_LAYER)
+        M.SKELETON = 'biped'
         for stage in ('pose_test', 'pose_rest', 'export'):
             assert _raises(ValueError, run.RUNNERS[stage], M, P) == \
                 '%s: no rig Probe_Rig in the scene: run rig first' % stage
+        del M.SKELETON
+        with tempfile.TemporaryDirectory() as folder:
+            rigless = types.SimpleNamespace(NAME='Probe', __name__='probe', __lpk_folder__=folder)
+            assert 'Probe defines no EXPORTS' in _raises(AttributeError, run.export, rigless, P), \
+                'a model without SKELETON exports its body alone: no rig is required'
         objects['Probe'].data.uv_layers[texture.UV_LAYER] = object()
         objects['Probe_Rig'] = object()
         found = run.require(M, 'export', 'uv', 'rig')

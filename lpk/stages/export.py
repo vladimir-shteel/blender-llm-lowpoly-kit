@@ -1,12 +1,13 @@
-"""Export of a built character (mesh + armature) and its baked textures: export_fbx (the FBX for Unity),
-export() by an export profile (lpk/profiles: FBX or binary glTF, bones renamed by role), compare_import(),
-which re-imports an exported file and lists where it differs from the model, and export_output(), an export
-in the rest pose with the final material followed by that comparison. The FBX bytes are made deterministic
-after writing (fbx_fixed_time, fbx_fixed_ids)."""
+"""Export of a built model (the mesh, with its armature when it has a rig) and its baked textures: export_fbx
+(the FBX for Unity), export() by an export profile (lpk/profiles: FBX or binary glTF, bones renamed by role),
+compare_import(), which re-imports an exported file and lists where it differs from the model, and
+export_output(), an export in the rest pose with the final material followed by that comparison. A model
+without a rig (rig_name None) goes out as its mesh alone: the profile's skeleton keys act on no bone. The FBX
+bytes are made deterministic after writing (fbx_fixed_time, fbx_fixed_ids)."""
 import os
 import re
 import struct
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
 
 import bpy
@@ -135,9 +136,9 @@ def fbx_fixed_ids(data):
 def export_fbx(obj_name, rig_name, out_dir, file_name, deform_only=True, bake_space_transform=True,
                primary_bone_axis='Y', secondary_bone_axis='X', restore_paths=False, settings=None):
     """Writes <out_dir>/<file_name>.fbx and every image used by the mesh's materials as PNG
-    beside it. The armature is exported in its rest pose, and stays in it afterwards: the pose is not
-    put back. Only deform bones go out and no leaf bones are added, so Unity's Humanoid mapping sees
-    exactly the authored skeleton.
+    beside it. rig_name: the armature object, or None to write the mesh alone. The armature is exported
+    in its rest pose, and stays in it afterwards: the pose is not put back. Only deform bones go out and no
+    leaf bones are added, so Unity's Humanoid mapping sees exactly the authored skeleton.
     The images are re-pointed to their PNG copies before the export, because the FBX references
     each image by its file path (relative to the FBX). restore_paths=False leaves them pointing at
     the copies; True puts each image's previous file path and format back after the export, except
@@ -151,7 +152,7 @@ def export_fbx(obj_name, rig_name, out_dir, file_name, deform_only=True, bake_sp
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     ob = bpy.data.objects[obj_name]
-    rig = bpy.data.objects[rig_name]
+    rig = bpy.data.objects[rig_name] if rig_name else None
     images = []
     for m in ob.data.materials:
         for n in m.node_tree.nodes:
@@ -163,16 +164,10 @@ def export_fbx(obj_name, rig_name, out_dir, file_name, deform_only=True, bake_sp
         img.file_format = 'PNG'
         img.save()
 
-    for pb in rig.pose.bones:
-        pb.matrix_basis.identity()
-    vl = bpy.context.view_layer
-    hidden = {o: o.hide_get() for o in (ob, rig)}
-    for o in vl.objects:
-        o.select_set(False)
-    for o in (ob, rig):
-        o.hide_set(False)
-        o.select_set(True)
-    vl.objects.active = rig
+    if rig is not None:
+        for pb in rig.pose.bones:
+            pb.matrix_basis.identity()
+    shown = _show_only(ob, rig)
     path = out / (file_name + '.fbx')
     args = dict(
         filepath=str(path), use_selection=True, object_types={'ARMATURE', 'MESH'},
@@ -184,10 +179,12 @@ def export_fbx(obj_name, rig_name, out_dir, file_name, deform_only=True, bake_sp
         path_mode='RELATIVE', embed_textures=False)
     if settings:
         args.update(settings)
-    with _window():
-        bpy.ops.export_scene.fbx(**args)
-    for o, h in hidden.items():
-        o.hide_set(h)
+    try:
+        with _window():
+            bpy.ops.export_scene.fbx(**args)
+    finally:
+        for o, h in shown.items():
+            o.hide_set(h)
     restored = 0
     for img, filepath, file_format in previous:
         if filepath:
@@ -259,6 +256,22 @@ def _window():
         yield
 
 
+def _show_only(ob, rig):
+    """Select and show ob and rig (None: no rig) alone, the rig active when there is one, else ob, for an
+    exporter that writes the selection. Returns {object: its hidden state before}, for the caller to put
+    back."""
+    objs = [o for o in (ob, rig) if o is not None]
+    hidden = {o: o.hide_get() for o in objs}
+    vl = bpy.context.view_layer
+    for o in vl.objects:
+        o.select_set(False)
+    for o in objs:
+        o.hide_set(False)
+        o.select_set(True)
+    vl.objects.active = objs[-1]
+    return hidden
+
+
 @contextmanager
 def _export_copy(ob, rig, renames):
     """Yields the objects to export: the model's own when nothing is renamed, else a temporary copy of
@@ -311,18 +324,11 @@ def _images(ob, linked=False):
 
 
 def _export_glb(ob, rig, path, exporter):
-    """ob and rig, selected and shown for the call, written to path by the glTF exporter with the
-    exporter arguments it has. Returns {'path', 'bytes': the file size, 'images': the names of the
+    """ob and rig (None: the mesh alone), selected and shown for the call, written to path by the glTF
+    exporter with the exporter arguments it has. Returns {'path', 'bytes': the file size, 'images': the names of the
     images the file embeds, 'ignored': the exporter arguments this Blender's exporter does not have}."""
     args, ignored = _op_args(bpy.ops.export_scene.gltf, exporter)
-    hidden = {o: o.hide_get() for o in (ob, rig)}
-    vl = bpy.context.view_layer
-    for o in vl.objects:
-        o.select_set(False)
-    for o in (ob, rig):
-        o.hide_set(False)
-        o.select_set(True)
-    vl.objects.active = rig
+    hidden = _show_only(ob, rig)
     try:
         with _window():
             bpy.ops.export_scene.gltf(filepath=str(path), export_format='GLB', use_selection=True, **args)
@@ -334,12 +340,12 @@ def _export_glb(ob, rig, path, exporter):
 
 
 def export(obj_name, rig_name, out_dir, file_name, profile='unity_humanoid', restore_paths=False):
-    """Export the mesh and its armature by an export profile: <out_dir>/<file_name>.fbx through
-    export_fbx with the profile's exporter arguments (images as PNG files beside it), or
-    <out_dir>/<file_name>.glb through the glTF exporter (images embedded, rest pose, no modifiers
-    applied). Bones the profile renames by role are renamed on a temporary copy of the mesh and the
-    armature only (see _export_copy); the model keeps its names. The selection and the active object
-    are put back afterwards. With unity_humanoid this is exactly export_fbx's export.
+    """Export the mesh and its armature (rig_name None: the mesh alone) by an export profile:
+    <out_dir>/<file_name>.fbx through export_fbx with the profile's exporter arguments (images as PNG files
+    beside it), or <out_dir>/<file_name>.glb through the glTF exporter (images embedded, rest pose, no
+    modifiers applied). Bones the profile renames by role are renamed on a temporary copy of the mesh and the
+    armature only (see _export_copy); the model keeps its names. The selection and the active object are put
+    back afterwards. With unity_humanoid this is exactly export_fbx's export.
     profile: a shipped name, a JSON path or a profile dict. restore_paths: export_fbx's (FBX only).
     Returns {'profile', 'format', 'path', 'bytes', 'images', 'renamed': {old: new}}: 'images' are the
     PNG paths beside an FBX, or the names of the images a .glb embeds, which also gets 'ignored':
@@ -349,16 +355,17 @@ def export(obj_name, rig_name, out_dir, file_name, profile='unity_humanoid', res
     p = _resolve(profile)
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    ob, rig = bpy.data.objects[obj_name], bpy.data.objects[rig_name]
-    renames = _profiles.bone_renames([b.name for b in rig.data.bones], p)
+    ob = bpy.data.objects[obj_name]
+    rig = bpy.data.objects[rig_name] if rig_name else None
+    renames = _profiles.bone_renames([b.name for b in rig.data.bones], p) if rig is not None else {}
     vl = bpy.context.view_layer
     selected = {o.name for o in vl.objects if o.select_get()}
     active = vl.objects.active
     try:
         with _export_copy(ob, rig, renames) as (eob, erig):
             if p['format'] == 'fbx':
-                r = export_fbx(eob.name, erig.name, out_dir, file_name, restore_paths=restore_paths,
-                               settings=p['exporter'])
+                r = export_fbx(eob.name, erig.name if erig else None, out_dir, file_name,
+                               restore_paths=restore_paths, settings=p['exporter'])
                 rep = {'path': r['fbx'], 'bytes': r['bytes'], 'images': r['images']}
                 if 'paths_restored' in r:
                     rep['paths_restored'] = r['paths_restored']
@@ -428,8 +435,9 @@ def compare_import(path, obj_name, rig_name, profile=None):
     bone names (after the profile's renames), parents and count, the mesh object count, triangle count,
     UV layer count, image names, the world-space size (both importers undo the export's axis
     conversion, so sizes compare directly), and that the mesh is still skinned; and the model's bone
-    influences per vertex against the profile's influence_limit. Everything the import made is deleted
-    afterwards; the selection, the active object and the active collection are put back.
+    influences per vertex against the profile's influence_limit. rig_name None: a model without a rig,
+    whose file holds no armature and no bone and whose mesh is not skinned. Everything the import made is
+    deleted afterwards; the selection, the active object and the active collection are put back.
     profile: the profile the file was written with (a dict, shipped name or JSON path); None takes
     unity_humanoid for .fbx and glb_generic for .glb and .gltf.
     The expected bones are the deform bones and their parents with deform_only, else all; source
@@ -441,16 +449,18 @@ def compare_import(path, obj_name, rig_name, profile=None):
     imported triangle count, 'influences': the most bones weighting one vertex of the model}. An import
     that fails gives one 'import' difference and counts of 0."""
     p = _profile_for(path, profile)
-    ob, rig = bpy.data.objects[obj_name], bpy.data.objects[rig_name]
-    renames = _profiles.bone_renames([b.name for b in rig.data.bones], p)
+    ob = bpy.data.objects[obj_name]
+    rig = bpy.data.objects[rig_name] if rig_name else None
+    bones = list(rig.data.bones) if rig is not None else []
+    renames = _profiles.bone_renames([b.name for b in bones], p)
     keep = set()
-    for b in rig.data.bones:
+    for b in bones:
         if b.use_deform or not p['deform_only']:
             while b is not None and b.name not in keep:
                 keep.add(b.name)
                 b = b.parent
     want = {renames.get(b.name, b.name): (renames.get(b.parent.name, b.parent.name) if b.parent else None)
-            for b in rig.data.bones if b.name in keep}
+            for b in bones if b.name in keep}
     src_tris, src_uv = _tris(ob.data), len(ob.data.uv_layers)
     src_images = {_norm_image(i.name) for i in _images(ob, linked=True)}
     src_size = _extent([ob])
@@ -486,8 +496,8 @@ def compare_import(path, obj_name, rig_name, profile=None):
         new = [o for o in bpy.data.objects if o.as_pointer() not in before['objects']]
         arms = [o for o in new if o.type == 'ARMATURE']
         meshes = [o for o in new if o.type == 'MESH']
-        if len(arms) != 1:
-            differ('armatures', ['armatures: 1 != %d' % len(arms)])
+        if len(arms) != (rig is not None):
+            differ('armatures', ['armatures: %d != %d' % (rig is not None, len(arms))])
         for a in arms:
             for b in a.data.bones:
                 got[b.name] = b.parent.name if b.parent else None
@@ -508,7 +518,7 @@ def compare_import(path, obj_name, rig_name, profile=None):
         images = {_norm_image(i.name) for o in meshes for i in _images(o)}
         differ('images', ['image missing: %s' % n for n in sorted(src_images - images)])
         differ('images', ['image extra: %s' % n for n in sorted(images - src_images)])
-        for o in meshes:
+        for o in meshes if rig is not None else ():
             deformed = (any(m.type == 'ARMATURE' and m.object in arms for m in o.modifiers)
                         or (o.parent in arms and o.parent_type == 'ARMATURE'))
             if not (len(o.vertex_groups) and deformed):
@@ -535,16 +545,16 @@ def compare_import(path, obj_name, rig_name, profile=None):
 
 
 def export_output(obj_name, rig_name, out_dir, file_name, profile):
-    """One export of the body `obj_name` and its rig `rig_name` by `profile` (a profile dict, shipped name or
-    JSON path) to <out_dir>/<file_name> plus the profile's extension (export), re-imported and compared with
-    the model (compare_import). For the call only, the rig stands in its rest pose
-    (lpk.stages.pose.held_pose) and the body's slots show its mesh materials, the bake's final material
+    """One export of the body `obj_name` and its rig `rig_name` (None: a model without a rig) by `profile` (a
+    profile dict, shipped name or JSON path) to <out_dir>/<file_name> plus the profile's extension (export),
+    re-imported and compared with the model (compare_import). For the call only, the rig stands in its rest
+    pose (lpk.stages.pose.held_pose) and the body's slots show its mesh materials, the bake's final material
     (lpk.stages.preview.mesh_materials); the pose and display link it found come back afterwards, also after
     an error. Images saved beside an FBX get their earlier file paths back (export's restore_paths), so the
     bake's atlas image keeps its own file. Returns export's report plus 'reimport': compare_import's."""
     p = _resolve(profile)
     ob = bpy.data.objects[obj_name]
-    with pose.held_pose(rig_name), preview.mesh_materials(ob):
+    with pose.held_pose(rig_name) if rig_name else nullcontext(), preview.mesh_materials(ob):
         rep = export(obj_name, rig_name, out_dir, file_name, profile=p, restore_paths=True)
         rep['reimport'] = compare_import(rep['path'], obj_name, rig_name, profile=p)
     return rep
