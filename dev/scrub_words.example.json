@@ -1,0 +1,12 @@
+{
+  "about": "A neutral illustration of the scrub word list. The real list is private: pass its path with --words or set LPK_SCRUB_WORDS. hard: never in a comment, a docstring or a text file; soft: allowed in context, every hit reviewed.",
+  "hard": [
+    "\\bExampleStudio\\b",
+    "\\bHeroCodename\\b",
+    "example-private-repo",
+    "PrivateNotes/"
+  ],
+  "soft": [
+    "\\bEngineName\\b"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "unity_humanoid",
+  "description": "FBX for Unity's Humanoid avatar: the template's bone names unchanged (Unity's auto-mapping recognises them), -Z forward and Y up with the space transform baked, unit scale applied, deform bones only, no leaf bones, no animation, textures as PNG files beside the FBX under relative paths. The exporter arguments are export_fbx's own.",
+  "format": "fbx",
+  "skeleton": "biped",
+  "bone_map": {},
+  "deform_only": true,
+  "leaf_bones": false,
+  "influence_limit": 4,
+  "axes": {"forward": "-Z", "up": "Y"},
+  "textures": "files",
+  "exporter": {
+    "apply_unit_scale": true,
+    "apply_scale_options": "FBX_SCALE_ALL",
+    "axis_forward": "-Z",
+    "axis_up": "Y",
+    "bake_space_transform": true,
+    "mesh_smooth_type": "FACE",
+    "use_mesh_modifiers": false,
+    "add_leaf_bones": false,
+    "primary_bone_axis": "Y",
+    "secondary_bone_axis": "X",
+    "use_armature_deform_only": true,
+    "bake_anim": false,
+    "path_mode": "RELATIVE",
+    "embed_textures": false
+  }
+}

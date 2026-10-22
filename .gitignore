@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.blend1
+# The local form library holds this user's forms; it never goes into git
+/lpk_local/
+# Example outputs and Blender files are rebuilt from the model folders
+examples/*/out/
+examples/*/*.blend
+# The sandbox files
+/sandbox/

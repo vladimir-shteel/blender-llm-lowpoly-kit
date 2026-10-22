@@ -1,0 +1,328 @@
+{
+ "views": {
+  "front": {
+   "image": "refs/front.png",
+   "facing": "front",
+   "depicted_pose": "a_pose",
+   "note": "drawn by the agent in Blender (draw_refs.py); arms in the same 38-degree A-pose as the build",
+   "size": [
+    700,
+    1000
+   ],
+   "calibration": {
+    "mode": "rows",
+    "height_m": 1.75,
+    "crown_px": 100,
+    "feet_px": 900
+   },
+   "mid_px": 350
+  },
+  "side": {
+   "image": "refs/side.png",
+   "facing": "left",
+   "depicted_pose": "a_pose",
+   "note": "drawn at the front view's scale on its ground row; the left arm (toward the viewer) is drawn over the torso",
+   "size": [
+    500,
+    1000
+   ],
+   "calibration": {
+    "mode": "rows_of",
+    "of": "front",
+    "row_offset_px": 0
+   },
+   "zero_px": 250
+  },
+  "back": {
+   "image": "refs/back.png",
+   "facing": "back",
+   "depicted_pose": "a_pose",
+   "note": "drawn at the front view's scale on its ground row, seen from behind; the measurements do not read it: it is there to compare the build with",
+   "size": [
+    700,
+    1000
+   ],
+   "calibration": {
+    "mode": "rows_of",
+    "of": "front",
+    "row_offset_px": 0
+   },
+   "mid_px": 350
+  }
+ },
+ "landmarks": {
+  "front": {
+   "crown": [
+    350,
+    100
+   ],
+   "hairline": [
+    350,
+    123
+   ],
+   "eye.L": [
+    364,
+    152
+   ],
+   "eye.R": [
+    336,
+    152
+   ],
+   "ear.L": [
+    390,
+    160
+   ],
+   "ear.R": [
+    310,
+    160
+   ],
+   "mouth": [
+    350,
+    183
+   ],
+   "chin": [
+    350,
+    204
+   ],
+   "collar_base": [
+    350,
+    226
+   ],
+   "shoulder.L": [
+    428,
+    247
+   ],
+   "shoulder.R": [
+    272,
+    247
+   ],
+   "armpit.L": [
+    429,
+    298
+   ],
+   "armpit.R": [
+    271,
+    298
+   ],
+   "sleeve.L": [
+    483,
+    318
+   ],
+   "sleeve.R": [
+    217,
+    318
+   ],
+   "elbow.L": [
+    514,
+    356
+   ],
+   "elbow.R": [
+    186,
+    356
+   ],
+   "wrist.L": [
+    587,
+    449
+   ],
+   "wrist.R": [
+    113,
+    449
+   ],
+   "fingers.L": [
+    643,
+    520
+   ],
+   "fingers.R": [
+    57,
+    520
+   ],
+   "chest.L": [
+    423,
+    330
+   ],
+   "chest.R": [
+    277,
+    330
+   ],
+   "waist.L": [
+    413,
+    415
+   ],
+   "waist.R": [
+    287,
+    415
+   ],
+   "shirt_hem": [
+    350,
+    485
+   ],
+   "hips.L": [
+    428,
+    530
+   ],
+   "hips.R": [
+    272,
+    530
+   ],
+   "hip.L": [
+    391,
+    489
+   ],
+   "hip.R": [
+    309,
+    489
+   ],
+   "crotch": [
+    350,
+    526
+   ],
+   "knee.L": [
+    393,
+    672
+   ],
+   "knee.R": [
+    307,
+    672
+   ],
+   "ankle.L": [
+    396,
+    862
+   ],
+   "ankle.R": [
+    304,
+    862
+   ],
+   "trouser_hem": [
+    350,
+    868
+   ],
+   "sole": [
+    350,
+    900
+   ]
+  },
+  "side": {
+   "crown": [
+    250,
+    99
+   ],
+   "hairline": [
+    210,
+    122
+   ],
+   "skull_back": [
+    304,
+    155
+   ],
+   "hair_nape": [
+    298,
+    172
+   ],
+   "brow": [
+    208,
+    138
+   ],
+   "eye": [
+    209,
+    152
+   ],
+   "nose": [
+    200,
+    169
+   ],
+   "lip": [
+    205,
+    183
+   ],
+   "chin": [
+    222,
+    204
+   ],
+   "jaw": [
+    280,
+    200
+   ],
+   "neck_front": [
+    232,
+    212
+   ],
+   "neck_back": [
+    278,
+    212
+   ],
+   "back": [
+    298,
+    300
+   ],
+   "chest_front": [
+    199,
+    315
+   ],
+   "waist_front": [
+    211,
+    420
+   ],
+   "waist_back": [
+    285,
+    420
+   ],
+   "seat": [
+    300,
+    505
+   ],
+   "thigh_front": [
+    213,
+    560
+   ],
+   "thigh_back": [
+    293,
+    560
+   ],
+   "knee_front": [
+    220,
+    672
+   ],
+   "knee_back": [
+    278,
+    672
+   ],
+   "ankle": [
+    250,
+    862
+   ],
+   "heel": [
+    284,
+    885
+   ],
+   "ball": [
+    194,
+    893
+   ],
+   "toe": [
+    155,
+    890
+   ]
+  }
+ },
+ "widths_px": {
+  "front": {
+   "skull": 70,
+   "hair": 76,
+   "neck": 47,
+   "eye": 10,
+   "mouth": 20,
+   "upper_arm": 38,
+   "forearm": 33,
+   "wrist": 27,
+   "hand": 22,
+   "thigh": 70,
+   "knee": 60,
+   "shin": 58,
+   "foot": 60
+  },
+  "side": {
+   "hand": 42,
+   "neck": 46
+  }
+ }
+}

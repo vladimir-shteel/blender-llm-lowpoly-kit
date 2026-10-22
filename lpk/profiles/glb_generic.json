@@ -1,0 +1,32 @@
+{
+  "name": "glb_generic",
+  "description": "Binary glTF: the exporter converts to +Y up (its fixed conversion is the same as -Z forward, Y up), images embedded in the file, deform bones only, no leaf bones, no animation, no shape keys, rest pose. Bone names unchanged. No vertex colours: the look is the baked atlas, and the build's flat palette colours would otherwise go out as a second colour stream beside a forced white one; a target that wants them declares its own profile.",
+  "format": "glb",
+  "skeleton": "biped",
+  "bone_map": {},
+  "deform_only": true,
+  "leaf_bones": false,
+  "influence_limit": 4,
+  "axes": {"forward": "-Z", "up": "Y"},
+  "textures": "embedded",
+  "exporter": {
+    "export_yup": true,
+    "export_apply": false,
+    "export_animations": false,
+    "export_morph": false,
+    "export_skins": true,
+    "export_def_bones": true,
+    "export_leaf_bone": false,
+    "export_influence_nb": 4,
+    "export_all_influences": false,
+    "export_rest_position_armature": true,
+    "export_materials": "EXPORT",
+    "export_image_format": "AUTO",
+    "export_texcoords": true,
+    "export_normals": true,
+    "export_vertex_color": "NONE",
+    "export_cameras": false,
+    "export_lights": false,
+    "export_extras": false
+  }
+}
