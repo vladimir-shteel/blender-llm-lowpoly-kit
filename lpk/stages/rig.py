@@ -540,9 +540,7 @@ def heat_proxy_weights(obj_name, rig_name, allowed, fixed=None, voxel=0.01, smoo
                        influences=MAX_INFLUENCES):
     """Blender's bone heat solved on a watertight voxel proxy of the mesh and carried back to it by
     nearest-surface interpolation, in place of the distance weights on the body (distance_weights first);
-    then vhd_weights' rules: a vertex keeps only its part's allowed bones, fixed parts take their fixed
-    weights, the export limits apply (`influences` as for distance_weights), and a vertex left with no weight keeps its
-    distance weights.
+    then vhd_weights' rules, as heat_weights applies them.
     Bone heat on the mesh itself fails for every bone at once when any island has no vertex that sees its
     closest bone, which open shells nested in other shells cause. The proxy is one closed surface per
     connected volume: a temporary object with the mesh's faces (fixed parts left out: their weights are

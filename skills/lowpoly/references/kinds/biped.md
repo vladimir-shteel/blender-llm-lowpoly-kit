@@ -3,10 +3,6 @@
 A character on two legs, rigged on the `biped` skeleton template (`SKELETON = 'biped'`). The worked example is
 `examples/mannequin/mannequin.py`: read it before writing a model of this kind.
 
-The human reviews at the points marked **Review**: show them what the step made, say what to look at, and
-wait for their answer before the next step. A part goes through at most a few passes; if it still does
-not read right, say what is off and ask how to go on.
-
 1. **Brief.** Read the brief and the references. Decide the tier with the human: the triangle total, the
    atlas size, the skeleton, the read size (how tall the character stands on screen at
    the farthest distance players must read it), and, when the environment offers an image tool, whether
@@ -55,6 +51,3 @@ not read right, say what is off and ask how to go on.
     may come much later, for several models at once. When asked, settle the targets with the human,
     write `EXPORTS`, run `export` ([export](../export.md)); every `reimport` must have an empty `diffs`.
     **Review:** the human checks the import in the target engine.
-
-Throughout: one runner or review call per bridge call, a short report back, and the human's corrections
-turned into numbers in the model file.
