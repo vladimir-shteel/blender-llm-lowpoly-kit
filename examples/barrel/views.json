@@ -1,0 +1,84 @@
+{
+ "views": {
+  "front": {
+   "image": "refs/front.png",
+   "facing": "front",
+   "note": "drawn by the agent in Blender (draw_refs.py); the bung faces the viewer",
+   "size": [
+    600,
+    1000
+   ],
+   "calibration": {
+    "mode": "rows",
+    "height_m": 0.9,
+    "crown_px": 100,
+    "feet_px": 900
+   },
+   "mid_px": 300
+  }
+ },
+ "landmarks": {
+  "front": {
+   "crown": [
+    300,
+    100
+   ],
+   "sole": [
+    300,
+    900
+   ],
+   "bilge": [
+    300,
+    500
+   ],
+   "bung": [
+    300,
+    500
+   ],
+   "hoop.1.bottom": [
+    300,
+    873
+   ],
+   "hoop.1.top": [
+    300,
+    829
+   ],
+   "hoop.2.bottom": [
+    300,
+    687
+   ],
+   "hoop.2.top": [
+    300,
+    642
+   ],
+   "hoop.3.bottom": [
+    300,
+    358
+   ],
+   "hoop.3.top": [
+    300,
+    313
+   ],
+   "hoop.4.bottom": [
+    300,
+    171
+   ],
+   "hoop.4.top": [
+    300,
+    127
+   ],
+   "hoop.3.rim": [
+    572,
+    335
+   ]
+  }
+ },
+ "widths_px": {
+  "front": {
+   "top": 445,
+   "bilge": 553,
+   "base": 445,
+   "bung": 45
+  }
+ }
+}
