@@ -19,8 +19,8 @@ read it before writing a model of this kind.
    ([the model file](../model-file.md#a-prop)).
 4. **Blockout.** `run.model(MODEL, stages=('reference', 'blocks'))`: every part as its primitive beside the
    references. **Review:** the human compares the blocks with the drawings in Blender; `outline_diff` on
-   `['<NAME>_Blocks']` gives where they leave each calibrated view
-   ([checking a step](../running.md#checking-a-step)); fix proportions in
+   `['<NAME>_Blocks']` gives where they leave each calibrated view, read
+   for proportions only ([checking a step](../running.md#checking-a-step)); fix proportions in
    `props()` and the shared functions, not in the blocks. Without references, `stages=('blocks',)` and the
    human judges the blocks by eye.
 5. **Build part by part:** the prop's own parts, the main body first, then what sits on it (trims, bands,

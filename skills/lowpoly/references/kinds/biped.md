@@ -14,8 +14,8 @@ A character on two legs, rigged on the `biped` skeleton template (`SKELETON = 'b
    ([the model file](../model-file.md)).
 4. **Blockout.** `run.model(MODEL, stages=('reference', 'blocks'))`: every part as its primitive beside the
    references. **Review:** the human compares the blocks with the drawings in Blender (front, side,
-   three-quarter); `outline_diff` on `['<NAME>_Blocks']` gives where they leave each calibrated view
-   ([checking a step](../running.md#checking-a-step)); fix proportions in `props()` and the sections, not in the blocks. Without references, `stages=('blocks',)`
+   three-quarter); `outline_diff` on `['<NAME>_Blocks']` gives where they leave each calibrated view, read
+   for proportions only ([checking a step](../running.md#checking-a-step)); fix proportions in `props()` and the sections, not in the blocks. Without references, `stages=('blocks',)`
    and the human judges the blocks by eye; so too every later review compares with the human's idea.
 5. **Build part by part:** head and face, hair, torso and clothing, legs and feet, arms and hands, tail,
    gear, each from its area's card ([forms](../forms/README.md)). After each part:

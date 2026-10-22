@@ -120,7 +120,14 @@ result = {k: r.get(k) for k in ('why', 'floor', 'top', 'bottom', 'bands', 'parts
 
 `bands` are the stretches where the build's outline leaves the drawing's, each with its rows, its offset
 in pixels and its part; `parts` give each part's width against the drawn one (`scale`); offsets under
-`floor` are within the fit's and the drawing's own precision. Pass `exclude_parts` for a limb drawn in
+`floor` are within the fit's and the drawing's own precision.
+
+What a band asks for depends on the step. On the blocks, read proportions only: the top and bottom
+offsets (the height), each part's `scale`, and bands that run along a whole part (a limb too long, a trunk
+too wide). A band where a primitive cannot take the drawn shape (a box hand against drawn fingers, an
+ellipsoid head against a jaw, a loft's even taper against a bulge) is the build's to close, not an error in
+`props()`; leave it. On the build, a band past the floor on the part just built is that part's to fix or
+to explain (style, a facet the read size does not show), and the human decides what stays. Pass `exclude_parts` for a limb drawn in
 another pose. The comparison reads the rest mesh: run `pose_rest` after a `pose_test` first. `picture` is for the
 human (grey both, red the build only, blue the drawing only); the overlay is the same comparison drawn
 face by face.
