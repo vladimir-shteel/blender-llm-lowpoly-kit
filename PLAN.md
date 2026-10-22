@@ -38,10 +38,6 @@ notion of the skill, never read by `lpk`.
 - `lpk.stages.export.export_fbx` hard-codes the FBX arguments the profiles' `exporter` already gives, and
   `tests/test_profiles.py` holds `unity_humanoid.json` equal to them: take the arguments from the profile
   alone and drop the test. Needs an export run in Blender.
-- Form docstrings in `lpk/forms` (most in `head.py`) repeat workflow advice the cards under
-  `skills/lowpoly/references/forms/` already give, and a few passages repeat each other: keep each
-  docstring to what the form builds, its parameters, its return and its causal limits, and point the cards
-  at the docstrings instead of restating return keys. `lpk/forms/joins.py` defines `_room_above` twice.
 - Six test files build their own Blender stand-ins (`_Vector`, `_Matrix`, `_Euler`): move them to
   `tests/blender_stand_ins.py`.
 - ARCHITECTURE.md readability: the model module contract as one row per attribute; Build modes as a
