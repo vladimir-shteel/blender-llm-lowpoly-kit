@@ -14,9 +14,9 @@ does not follow the rules yet, or has not run where it must; do not copy its pat
 
 ## Shape of the system
 
-- A **model module** is one Python file per model: data and composition only (measurements, blocks,
-  the mesh built from library forms, colour sources, atlas settings, seam rules, bones, the test pose,
-  export targets). Its reference views, hand-edit file and outputs sit next to it.
+- A **model module** is one Python file per model, a character or a prop: data and composition only
+  (measurements, blocks, the mesh built from library forms, colour sources, atlas settings, seam rules,
+  the bones and the test pose of a rigged model, export targets). Its reference views, hand-edit file and outputs sit next to it.
 - The **runner** (`lpk.run`) loads a model module and runs the stages a call names, in fixed order, and
   returns a plain dict report. It holds no state: every call rebuilds what its stages name.
 - **Tools** do the work: the builder and shape operations, the form library, texture, rig, pose,
@@ -91,7 +91,7 @@ stages. `run.STAGES` is the only list of stage names and fixes their order:
 
 - An unknown stage or option raises before anything runs. Only `pack` may be listed several times (any
   other repeat raises): it runs up to that many packs and stops after the first rescaling pack that
-  settles the face island.
+  settles the face island; without a face island the first pack is final.
 - The runner evaluates `P = props()` once, only when a named stage needs measurements (`run.MEASURED`),
   and adds the stored hand edits as `P['edits']`.
 - Each stage but `pack` is one function of the runner (`run.RUNNERS`) that calls tools with the model
@@ -214,7 +214,7 @@ beside it. It defines, by stage and review call:
 | `joins` | `JOINS`, `SKELETON`; `TEST_POSE` for the pose `'test'`, its default |
 | `check_uvs`, and the `'uv_check'` of other stages | optional `OWN` (its parts left out), `ATLAS`'s size while the scene holds no atlas image |
 | `repair_uvs` | optional `SOURCES`, `OWN` and `GRIT` as the frozen-texture bake reads them |
-| `export` | `EXPORTS` (profile names or JSON paths); optional `EXPORT_DIR` (default `out/`); the rig's influence limit is the smallest of their profiles' |
+| `export` | `EXPORTS` (profile names or JSON paths); optional `EXPORT_DIR` (default `out/`); optional `SKELETON`: with it the body goes out with the rig `<NAME>_Rig`, whose influence limit is the smallest of the profiles', without it the body alone, the profiles' skeleton keys acting on no bone |
 
 `SOURCES` is `{source: entry}` in bake order, a later source covering an earlier one. An entry's keys:
 
@@ -388,8 +388,6 @@ same commit. The stage names the skill gives are held to `run.STAGES` by `tests/
 
 What does not follow the rules yet ([PLAN.md](PLAN.md) holds the deferred work):
 
-- **Captures unverified**: the runner and the example run end to end in Blender, but `run.capture` (its
-  part captures included) and `run.poses` need the user interface and have not run there yet.
 - **Name heuristics**: review poses keyed by biped bone names in `stages.review`.
 - **Flat local forms**: a module directly under `lpk_local/forms/`, outside every model's package, stays
   importable until the human removes it, since only the human sees every model that may import it; a

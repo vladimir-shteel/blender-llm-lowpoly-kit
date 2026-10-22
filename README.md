@@ -1,7 +1,7 @@
 # lowpoly-kit: LLM-assisted low-poly modelling in Blender
 
 > **Work in progress.** Made for the author's own projects; most of the code and docs were written with
-> LLM agents. Interfaces still change. Biped characters only for now.
+> LLM agents. Interfaces still change. Biped characters and props without a rig for now.
 
 An LLM agent drives Blender through MCP and does the repetitive modelling; you give the brief, direct the
 look, check each step in Blender and accept the result. The kit gives the agent forms, texturing, rigging,
@@ -25,15 +25,19 @@ Then:
 
 | Step | You give or do | The agent | You check |
 |---|---|---|---|
-| Brief | references or a description; height; triangle and atlas budget; skeleton; read size (how tall it stands on screen); export targets; whether references may go to an image tool | asks for everything missing in one message | – |
+| Brief | references or a description; height; triangle and atlas budget; skeleton; read size (how tall it stands on screen); whether references may go to an image tool | asks for everything missing in one message | – |
 | Intake | a cleaned sheet, if asked | cuts, calibrates and measures the views | – |
 | Blockout | – | a figure of blocks, `<Name>_Blocks`, beside the drawings | proportions |
 | Build, part by part | corrections (move vertices; see [the two modes](#parametric-and-frozen)) | head, hair, torso and clothing, legs, arms, hands, tail, gear; over the triangle budget, an optimisation pass once all parts stand | each part against the drawing; any cut that changes how a part reads |
 | Texture | – | the colour atlas with the painted face | the atlas on the model |
-| Rig | – | skeleton, weights, test poses | no tearing, limbs bend at the joints |
-| Export | the import check in your engine | the files, re-imported and compared | the file in the engine |
+| Rig (a character) | – | skeleton, weights, test poses | no tearing, limbs bend at the joints |
+| Export, when you ask for it | the targets, then the import check in your engine | the files, re-imported and compared | the file in the engine |
 
-The agent stops and asks at each check; nothing in the kit waits for your answer on its own.
+The agent stops and asks at each check; nothing in the kit waits for your answer on its own. The model is
+finished in the `.blend` without the export: ask for the export when you need the files, now or once all
+your models are ready. A prop (a
+barrel, a crate, a lamp) takes the same steps without the rig: give its pivot (the base, a grip, a hook)
+in the brief.
 
 ## References
 
@@ -59,7 +63,7 @@ generated view.
 **Missing view.** With your permission an image tool can draw it. Your original concept wins wherever the
 two disagree, and the agent tells you which measurements come from the generated view.
 
-**No references.** Describe the character: the agent takes every size from your brief, and you judge each
+**No references.** Describe the model: the agent takes every size from your brief, and you judge each
 step by eye.
 
 ## Parametric and frozen
@@ -151,15 +155,16 @@ The **shared library** (`lpk/forms/`) is the kit's own, documented and tested:
 ## What you get and what to keep
 
 - The requested files in the output folder, and a short message with their paths and anything blocking.
-- Keep, to change the character later:
+- Keep, to change the model later:
   - its folder: the model file, `views.json`, the references, your edits
   - its forms: `lpk_local/forms/<model>/`
   - in the frozen mode, its `.blend`
 
 ## For agents
 
-Start with [skills/lowpoly/SKILL.md](skills/lowpoly/SKILL.md) and the worked example
-`examples/mannequin/mannequin.py`; the structure is in [ARCHITECTURE.md](ARCHITECTURE.md).
+Start with [skills/lowpoly/SKILL.md](skills/lowpoly/SKILL.md) and the worked examples
+`examples/mannequin/mannequin.py` (a character) and `examples/barrel/barrel.py` (a prop); the structure is
+in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Repository
 
@@ -167,7 +172,7 @@ Start with [skills/lowpoly/SKILL.md](skills/lowpoly/SKILL.md) and the worked exa
 |---|---|
 | `lpk/` | the runner, the builder and shape operations, forms by body area, texture, rig, export, review tools, intake, skeleton templates and export profiles |
 | `skills/lowpoly/` | the workflow the agent follows and the technique cards |
-| `examples/mannequin/` | the worked example: one model module, its views and references |
+| `examples/mannequin/`, `examples/barrel/` | the worked examples, a character and a prop: one model module each, its views and references |
 | `lpk_local/` | your local form library, one package per model, created on first use and ignored by git |
 | `dev/`, `tests/`, `lpk_dev/` | development tools, host tests and fingerprints ([contribution rules](CONTRIBUTING.md)) |
 

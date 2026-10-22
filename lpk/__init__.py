@@ -1,4 +1,4 @@
-"""lowpoly-kit: low-poly character modelling in Blender for AI agents (see README.md, ARCHITECTURE.md).
+"""lowpoly-kit: low-poly character and prop modelling in Blender for AI agents (see README.md, ARCHITECTURE.md).
 
 Bootstrap from an MCP execute_blender_code call:
 

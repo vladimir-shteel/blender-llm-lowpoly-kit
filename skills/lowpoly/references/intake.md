@@ -224,6 +224,22 @@ A drawn outline includes fur tips and loose cloth: say which in the view's `note
 - A colour boundary (where dark fur starts, a sock's top, a hem) is read like a joint: it becomes a ring
   position or a painted region's edge.
 
+### Objects
+
+A prop is read the same way, with landmark names of its own parts.
+
+- Calibrate the main view `rows`: `crown` on the prop's top row, `sole` on the row it stands on, the
+  height from the brief (`lpk.intake.rows_calibration`); or `known_span` over a length the brief gives.
+- `mid_px` is the prop's centre line. A held or hung prop's pivot (the grip, the hook) is a landmark too:
+  `props()` places it at the origin.
+- Landmarks are the rows and points of its parts: a band's lower and upper edge, a handle's ends, a
+  fitting's centre, a rim where it crosses the outline. Widths are its outline across a row. The barrel
+  example reads `hoop.<k>.bottom`, `hoop.<k>.top`, a hoop's rim and the widths `base`, `bilge` and `top`.
+- A round or turned prop gives every radius in one view; a boxy one takes its depths from a side view
+  (`side(px, py)`).
+- A smooth curve (a bulge, a taper) is read at three or more rows and fitted in `props()`, as the barrel's
+  staves are a parabola through the base, the bilge and the top, not traced point by point.
+
 ## What the landmarks feed
 
 `props()` turns them into metres: `Views.calib(view)` gives `z(py)`, `m(px_len)`, `model(px, py)` and,
@@ -311,7 +327,7 @@ what it was made from and with which tool.
 
 ## Without references
 
-A character the human describes, or designs as it goes, has no `views.json`: leave `VIEWS` out of the
+A model the human describes, or designs as it goes, has no `views.json`: leave `VIEWS` out of the
 model module, skip the `reference` stage and take every size from the brief as a named value of
 `props()`. The reviews then compare with nothing drawn: show the step, ask the human whether anything
 should change, and turn each answer into numbers in the model module.

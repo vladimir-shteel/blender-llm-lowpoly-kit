@@ -20,7 +20,7 @@ One card per body area says which form fits which look, how to measure it, how t
 | Feet, paws, boots, toes | [feet.md](feet.md) |
 | Tails | [tails.md](tails.md) |
 | The trunk and clothing | [torso-clothing.md](torso-clothing.md) |
-| Straps, plates and hard parts | [gear.md](gear.md) |
+| Straps, plates, hard parts and props | [gear.md](gear.md) |
 | Markings and painted decals | [markings-decals.md](markings-decals.md) |
 | Limbs, welded joins and separate shells | [joins.md](joins.md) |
 

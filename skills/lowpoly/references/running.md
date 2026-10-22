@@ -41,10 +41,10 @@ in, and raises on an unknown stage before anything runs.
 | `pack` | one pack of the atlas; repeat it; refuses when `TEXTURE_FROZEN = True` |
 | `bake` | the atlas image `<NAME>_Atlas`, saved as `out/<NAME>_Atlas.png`; with `TEXTURE_FROZEN = True` the frozen atlas with only the `'over'` sources baked over it (`discard_edits=True` bakes over an atlas painted by hand since) |
 | `freeze_texture` | the frozen texture from the body's UVs and `<NAME>_Atlas` as they stand, hand edits included: the UVs on `<NAME>_Frozen`, the image `<NAME>_AtlasFrozen` packed in the `.blend` (`FROZEN = True` only) |
-| `rig` | the armature `<NAME>_Rig` and the body's weights |
+| `rig` | the armature `<NAME>_Rig` and the body's weights (a model with `SKELETON`) |
 | `preview` | the atlas shown on the body in the `PREVIEW` look |
 | `pose_test`, `pose_rest` | the rig in `TEST_POSE`, back at rest |
-| `export` | one file per `EXPORTS` profile, re-imported and compared |
+| `export` | one file per `EXPORTS` profile, re-imported and compared; without `SKELETON` the body alone; run only when the human asks for an export |
 
 `run.model` returns `{stage: its report}`; `pack` gives a list, one report per pack. Return the few values
 you need in `result`, not whole reports: a response has a size limit.
@@ -73,7 +73,7 @@ cache `out/<NAME>.pack.json`.
 
 Every call rebuilds what it names and keeps nothing else: after editing the model module, run the stages
 from the first one the edit changes. `build` removes `<NAME>_Rig` (the new body is not bound to it), so a
-build is followed by `unwrap`, the packs, `bake` and `rig` again before an export.
+build is followed by `unwrap`, the packs, `bake` and, for a rigged model, `rig` again before an export.
 
 ## Review calls
 

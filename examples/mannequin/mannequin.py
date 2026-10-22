@@ -714,5 +714,6 @@ def bones(P):
 
 # -- export ------------------------------------------------------------------------------------------------
 
-# The brief's engine imports binary glTF; a second output writes FBX from the same body.
+# The brief's engine imports binary glTF; a second output writes FBX from the same body. The example exports
+# because its run is the kit's acceptance test; a model of your own adds EXPORTS when the human asks.
 EXPORTS = ('glb_generic', 'fbx_generic')

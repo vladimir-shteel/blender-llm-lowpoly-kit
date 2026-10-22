@@ -1,17 +1,18 @@
 # lowpoly-kit - instructions for agents
 
-lowpoly-kit (package `lpk`) is a toolkit for AI agents that model low-poly characters in Blender through
+lowpoly-kit (package `lpk`) is a toolkit for AI agents that model low-poly characters and props in Blender through
 Blender MCP: parametric shape blanks, primitives, surface tools, a colour atlas, rigging and skinning,
 review tools and export, run as the stages of one model module, plus one skill for the steps of building a model.
 
 ## Status
 
-The toolkit (version 0.3) is one model module per character run by a stateless stage runner, `lpk.run`;
-the worked example is `examples/mannequin/mannequin.py` and the skill `skills/lowpoly`.
+The toolkit (version 0.3) is one model module per character or prop run by a stateless stage runner,
+`lpk.run`; the worked examples are `examples/mannequin/mannequin.py` (a character) and
+`examples/barrel/barrel.py` (a prop), and the skill `skills/lowpoly`.
 The structure, the one place for each kind of extension and the areas that do not yet conform are in
 [ARCHITECTURE.md](ARCHITECTURE.md).
 Verification follows [CONTRIBUTING.md](CONTRIBUTING.md#verifying-a-change): same-version determinism is
-strict, the worked example run in Blender is the acceptance model, and earlier outputs are diagnostics,
+strict, the worked examples run in Blender are the acceptance models, and earlier outputs are diagnostics,
 not pass/fail.
 
 ## Rules
@@ -20,7 +21,7 @@ not pass/fail.
   or amends it first through its procedure. Never add a local workaround, a parallel route, or a
   parameter or branch that only keeps earlier output unchanged.
 - Production delivery defaults to requested model files and a short message with paths/blockers.
-  Detailed reports are opt-in. Keep the character's folder (model module, views, references, edits)
+  Detailed reports are opt-in. Keep the model's folder (model module, views, references, edits)
   and its local forms (`lpk_local/forms/<model>/`).
 - English everywhere: code, comments, docstrings, docs, commit messages.
 - No names from projects this toolkit came from: no game, character or repository names, no private

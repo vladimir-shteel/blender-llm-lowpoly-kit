@@ -603,14 +603,14 @@ def unwrap(M, P):
 def packs(M, P, count, rescale):
     """Up to `count` packs (pack), the first with `rescale`, the later ones rescaling, stopping after the
     first rescaling pack that settles the face island (lpk.stages.texture.pack_settled); a pack that does
-    not rescale never settles it, since the island has not been sized yet. Returns their reports, each with
-    'settled'."""
+    not rescale never settles it, since the island has not been sized yet. Without a face island
+    ('face_area' None) the first pack is final and settled. Returns their reports, each with 'settled'."""
     from lpk.stages import texture
     out = []
     for i in range(count):
         scaled = rescale if i == 0 else True
         r = pack(M, P, rescale=scaled)
-        r['settled'] = bool(scaled) and texture.pack_settled(r)
+        r['settled'] = (bool(scaled) or r['face_area'] is None) and texture.pack_settled(r)
         out.append(r)
         if r['settled']:
             break
@@ -828,17 +828,19 @@ def pose_rest(M, P):
 def export(M, P):
     """One file per EXPORTS profile (lpk.stages.export.export_output) in EXPORT_DIR (relative to the
     model's folder, default out/), named '<NAME>_<profile>', each re-imported and compared with the model.
-    Returns {profile: export_output's report}."""
+    A model with SKELETON goes out with its rig '<NAME>_Rig', one without as its body alone. Returns
+    {profile: export_output's report}."""
     from lpk.stages import export as export_mod
-    require(M, 'export', 'body', 'rig')
+    rigged = hasattr(M, 'SKELETON')
+    require(M, 'export', 'body', *(('rig',) if rigged else ()))
     n = names(M)
     target = folder(M, M.EXPORT_DIR) if getattr(M, 'EXPORT_DIR', None) else out(M)
     os.makedirs(target, exist_ok=True)
     report = {}
     for profile in need(M, 'EXPORTS'):
         stem = os.path.splitext(os.path.basename(profile))[0]
-        report[profile] = export_mod.export_output(n['body'], n['rig'], target, n['body'] + '_' + stem,
-                                                   _profile(M, profile))
+        report[profile] = export_mod.export_output(n['body'], n['rig'] if rigged else None, target,
+                                                   n['body'] + '_' + stem, _profile(M, profile))
     return report
 
 
