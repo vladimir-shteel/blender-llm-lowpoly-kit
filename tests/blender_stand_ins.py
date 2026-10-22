@@ -1,15 +1,15 @@
 """Stand-ins for bpy, bmesh and mathutils that let host tests import and run the Blender-side kernels.
 
 Vector is the part of mathutils.Vector the kernels touch, Euler and Matrix the part the view fits turn it with
-(numpy); BMesh is bmesh.new(): vertex and face sequences in creation order with int layers keyed by their
-names, faces that compute their normal, centre and area, edges derived from the faces (one object per vertex pair, valid while a face uses it), and the bmesh.ops the
-kernels call (triangulate fans a polygon from its first corner; weld_verts merges the mapped vertices into
-their targets; delete removes faces, and with them the vertices they leave loose; rotate_edges turns the
-edge between two triangles to their other diagonal). BVHTree.FromPolygons keeps its polygons and answers
-ray_cast and find_nearest over their fan triangles by brute force; mathutils.geometry holds
-intersect_point_tri. stand_ins() installs the modules (and any empty ones its `extra` names), and lpk as a
-bare package over its folder, while a block runs and puts sys.modules back afterwards. Not a test file: the
-test files import it."""
+(numpy); BMesh is bmesh.new(): vertex and face sequences in creation order with int layers keyed by their names,
+faces that compute their normal, centre and area, edges derived from the faces (one object per vertex pair, valid
+while a face uses it), and the bmesh.ops the kernels call (triangulate fans a polygon from its first corner;
+weld_verts merges the mapped vertices into their targets; delete removes faces, and with them the vertices they leave
+loose; rotate_edges turns the edge between two triangles to their other diagonal). BVHTree.FromPolygons keeps its
+polygons and answers ray_cast and find_nearest over their fan triangles by brute force; mathutils.geometry holds
+intersect_point_tri. stand_ins() installs the modules (and any empty ones its `extra` names), and lpk as a bare
+package over its folder, while a block runs and puts sys.modules back afterwards. Not a test file: the test files
+import it."""
 import contextlib
 import math
 import os

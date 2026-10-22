@@ -51,6 +51,14 @@ def test_every_profile_loads_and_validates():
         assert p['skeleton'] in skeletons.names()
 
 
+def test_unity_humanoid_keeps_the_template_bone_names():
+    p = profiles.load('unity_humanoid')
+    assert p['bone_map'] == {}
+    assert profiles.bone_renames([b['name'] for b in skeletons.load(p['skeleton'])['bones']], p) == {}
+    assert (p['format'], p['deform_only'], p['leaf_bones'], p['textures']) == ('fbx', True, False, 'files')
+    assert p['axes'] == {'forward': '-Z', 'up': 'Y'}
+
+
 def test_fbx_generic_names_bones_by_role():
     p, u = profiles.load('fbx_generic'), profiles.load('unity_humanoid')
     assert p['format'] == 'fbx' and p['leaf_bones'] is False

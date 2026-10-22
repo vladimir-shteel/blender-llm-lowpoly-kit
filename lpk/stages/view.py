@@ -30,8 +30,7 @@ def window_context():
     manager = getattr(ctx, 'window_manager', None)
     window = getattr(ctx, 'window', None) or next(iter(manager.windows if manager else ()), None)
     if window is None:
-        raise RuntimeError('Blender has no window: rig building and heat weights need a window of its '
-                           'window manager')
+        raise RuntimeError('Blender has no window: the operation needs a window of its window manager')
     return {'window': window, 'screen': window.screen}
 
 

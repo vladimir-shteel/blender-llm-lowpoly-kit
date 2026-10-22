@@ -25,7 +25,8 @@
 - **View transform.** AgX and Filmic grey the baked whites in the viewport and in saved renders. The kit's
   captures and preview switch to Standard themselves; your own renders go through the scene's.
 - **Freshly baked images show black in EEVEE**: save to PNG and load the file (the preview does).
-- **Edit-mode and UV operators** need a `temp_override` with the 3D Viewport area and its WINDOW region.
+- **Mesh edit-mode and UV operators** (those that take an area) need a `temp_override` with the 3D Viewport
+  area and its WINDOW region; switching the mode, parenting and other object operators need only the window.
   UV operators act on every visible face regardless of selection: hide what they must not touch.
 - **`mode_set` invalidates mesh data references**: fetch `ob.data` and its layers again after a switch.
 - **New bmesh faces have no normals** until `bm.normal_update()`; a BVH tree built before that returns
