@@ -84,17 +84,8 @@ def leg_holes(b, ring, part, seam_z, seam_y=0.35, tilt=LEG_TILT):
     toward the hip, and 'back' and 'back_centre' lower the seam under the buttock. A rise stops at
     TILT_ROOM of the band up to the ring above the vertex, so a short band (a hem ring just above the
     crotch ring) never collapses into a sliver. The values are metres added to z as they are, unscaled,
-    whatever the figure's size: LEG_TILT holds values sized
-    for a figure about 1.7 to 2.1 m tall, and a figure far from that size scales them in its own
-    build_mesh.
-    A wrong tilt shows at the hip and the seat in the front, back and side captures: start from
-    LEG_TILT and change a key only where those captures show the seam off the drawing.
-    seam_z is where the crotch seam shows, which need not be the drawn crotch landmark: a seam at the
-    measured crotch can read too low once it is a visible seam. Set it where the front and back
-    captures show the seam on the drawing; no fixed offset from the landmark holds for every figure.
-    No thigh top overlaps the pelvis's lower rings, so they alone give its outer corners, which can
-    come out thinner than the thighs: make them as wide as the trousers and nearly square
-    (torso.trunk's boxes), and check the corners against the thighs in the front and back captures.
+    whatever the figure's size: LEG_TILT holds values sized for a figure about 1.7 to 2.1 m tall.
+    No thigh top overlaps the pelvis's lower rings, so they alone give its outer corners.
     Returns {'L' | 'R': 8-vertex hole loop}. Units: seam_z m, seam_y ratio, tilt m per vertex group. Built
     for the 10-vertex bottom ring of torso.trunk, the one density of the welded family: tilt moves vertices
     by their index in the holes, which on another ring count are other vertices, and weld_leg's n must
@@ -108,16 +99,6 @@ def leg_holes(b, ring, part, seam_z, seam_y=0.35, tilt=LEG_TILT):
     back.co.z += tilt['back_centre']; crotch_back.co.z += tilt['crotch_back']
     _tag(b, holes['L'] + holes['R'])
     return holes
-
-
-def _room_above(v):
-    """The height (m) from the bottom-ring vertex v up to the vertex of the ring above it: the vertex an edge
-    leads to upward, the nearest across when there are several; infinite when no edge leads up."""
-    up = [e.other_vert(v) for e in v.link_edges if e.other_vert(v).co.z > v.co.z]
-    if not up:
-        return float('inf')
-    u = min(up, key=lambda w: ((w.co.x - v.co.x) ** 2 + (w.co.y - v.co.y) ** 2, w.co.z))
-    return u.co.z - v.co.z
 
 
 def weld_limb(b, part, loop, path, first, second, rest, n, ref, col, bridge_col, d, out,
@@ -139,11 +120,10 @@ def weld_limb(b, part, loop, path, first, second, rest, n, ref, col, bridge_col,
     vertices, 's_bot', 'verts': the join's vertices for ridge_flip}.
     Units: path m, first m (s, ra, rb[, opts]), second m (s, ra, rb[, opts]), rest m (s, ra, rb[, opts])
     entries, ref direction, d unit direction, out direction, col palette name or fn(i, j, d)
-    (Builder.loft's), socket_r ratio, socket_in m, next_gap m. Loop must be an 8-vertex armholes loop
-    (torso.ARMHOLE_COLS on torso.trunk, the one density of the welded family): its vertices 5-6, the
-    shoulder corner, move onto the socket ring; the socket ring vertices matched to its vertices 1-2, the
-    armpit, move onto them; 0, 3, 4 and 7 stay and bridge to the socket ring. n must equal the loop size
-    (None takes it from the loop; another value raises). ra and rb follow limb."""
+    (Builder.loft's), socket_r ratio, socket_in m, next_gap m. Loop must be an 8-vertex armholes loop:
+    its vertices 5-6, the shoulder corner, move onto the socket ring; the socket ring vertices matched to
+    its vertices 1-2, the armpit, move onto them; 0, 3, 4 and 7 stay and bridge to the socket ring. ra and
+    rb follow limb."""
     n = _hole_size(n, loop, 'weld_limb')
     S = Vector(path[0])
     top, bottom = set(loop[5:7]), set(loop[1:3])
@@ -172,8 +152,8 @@ def weld_leg(b, part, hole, path, profile, n, ref, col, bridge_col, follow=None)
     next ring (thighs out of tight shorts, where a first ring of an outline of its own can sit off the
     hole and break the hem's outline). Returns (rings, the join's vertices for ridge_flip).
     Units: path m, profile m (s, ra, rb[, opts]), ref direction, col palette name or fn(i, j, d)
-    (Builder.loft's), follow m. The side count n must equal the hole size, 8 from leg_holes on torso.trunk
-    (None takes it from the hole; another value raises); ra and rb follow limb."""
+    (Builder.loft's), follow m. The hole is 8 vertices from leg_holes on torso.trunk; ra and rb follow
+    limb."""
     n = _hole_size(n, hole, 'weld_leg')
     R = limb(b, part, path, profile, n, ref, col)
     if follow:
