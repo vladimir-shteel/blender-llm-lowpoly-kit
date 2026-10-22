@@ -34,11 +34,11 @@ def _write_test(folder):
 
 def check(out_dir=None):
     """What lpk needs from this Blender session, checked: lpk's version and folder, Blender's version and
-    build hash (5.1 or newer), Python and numpy, background mode, the 3D Viewports of the current screen
-    (captures and the edit-mode, bake and UV operators run in one), Cycles (the atlas bakes with it), the scene's unit system,
-    unit scale and view transform, the open .blend and its unsaved changes, the Voxel Heat Diffuse
-    Skinning binary and the weights backend weights(backend='auto') would pick, Blender's temporary
-    folder (vhd weights write there) and, with out_dir, a write test there.
+    build hash (5.1 or newer), Python and numpy, background mode (no viewport captures), the 3D Viewports of
+    the current screen (the edit-mode, bake and UV operators take one's area), Cycles (the atlas bakes with
+    it), the scene's unit system, unit scale and view transform, the open .blend and its unsaved changes,
+    the Voxel Heat Diffuse Skinning binary and the weights backend weights(backend='auto') would pick,
+    Blender's temporary folder (vhd weights write there) and, with out_dir, a write test there.
     out_dir: a folder to test for writing, or None; a missing folder and its missing parents are created for
     the test and removed again.
     Returns a JSON-serialisable dict; 'next' lists anything missing or likely to cause trouble, each
@@ -101,9 +101,9 @@ def check(out_dir=None):
              'lpk uses the Python API of Blender %d.%d.' % MIN_BLENDER[:2],
              'Use Blender %d.%d or newer.' % MIN_BLENDER[:2])
     if rep['background']:
-        need('Blender runs in background mode.',
-             'Viewport captures and the edit-mode, bake and UV operators need a 3D Viewport.',
-             'Start Blender with its user interface.')
+        need('Background mode: viewport captures are unavailable; the stages run (optional).',
+             'Captures are OpenGL viewport renders, which background mode has none of.',
+             'Start Blender with its user interface to take captures.', required=False)
     elif not rep['view3d_areas']:
         need('The current workspace has no 3D Viewport.',
              'Viewport captures and the edit-mode, bake and UV operators run in its context.',

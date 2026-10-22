@@ -2,9 +2,9 @@
 
 ## The bridge
 
-- Run Blender with its user interface: captures, and the edit-mode, bake and UV operators that take an
-  area, need a 3D Viewport, and a background Blender cannot render the viewport. Rig building and heat
-  weights need only a window.
+- Captures need Blender's user interface: in background mode (`blender -b`) the 3D Viewport's area exists
+  but has no OpenGL render. Every stage runs in either; the edit-mode, bake and UV operators take the 3D
+  Viewport's area, and rig building and heat weights need only the window.
 - Install the bridge's add-on and allow online access in Preferences > System > Network; one Blender serves
   one bridge port. Nothing of the kit is installed into Blender: the bootstrap puts its folder on the path.
 - `execute_blender_code` runs your code with `exec` in a fresh namespace on Blender's main thread, the

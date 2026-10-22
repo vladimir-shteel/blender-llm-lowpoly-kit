@@ -37,8 +37,9 @@ def window_context():
 def view3d_context():
     """The temp_override keywords {'window', 'screen', 'area', 'region'} of a 3D Viewport and its main
     region: the context's screen first, then every window of the window manager, because the context has
-    no screen in a bridge call that has just loaded a file. Raises RuntimeError when no window shows a 3D
-    Viewport (background mode)."""
+    no screen in a bridge call that has just loaded a file. Background mode (blender -b) keeps the screens of
+    the open file, so it finds the area there; captures still fail there, for want of an OpenGL render.
+    Raises RuntimeError when no screen holds a 3D Viewport (a workspace without one)."""
     ctx = bpy.context
     screen = getattr(ctx, 'screen', None)
     pairs = [(getattr(ctx, 'window', None), screen)] if screen else []
@@ -51,8 +52,8 @@ def view3d_context():
                 if region is not None:
                     found = {'window': window, 'screen': screen, 'area': area, 'region': region}
                     return {k: v for k, v in found.items() if v is not None}
-    raise RuntimeError('no window shows a 3D Viewport: the edit-mode, bake and viewport operations of the '
-                       'kit need Blender with its UI and a 3D Viewport open')
+    raise RuntimeError('no screen holds a 3D Viewport: the edit-mode, bake, UV and viewport operations of the '
+                       'kit take its area; open a 3D Viewport in the current workspace')
 
 
 def rotation(yaw, pitch):
