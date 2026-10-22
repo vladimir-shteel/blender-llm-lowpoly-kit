@@ -269,8 +269,9 @@ result = run.zones(MODEL, reference='frozen')     # or 'parametric', or None
 For each part: faces, triangles, vertices, centre and size, neighbouring parts with their shared edges,
 the mirror twin and how far off mirror it stands, uncoloured faces, and the deviation from the reference's
 same part. `reference='parametric'` shows how far the frozen body has moved from what the module builds.
-`run.capture(MODEL, tag='edit', part='head')` captures one part alone (it needs Blender's user
-interface, as every capture does).
+The human sees one part alone in Blender with `run.select` and local view;
+`run.capture(MODEL, tag='edit', part='head')` captures it when the human is not at Blender (it needs
+Blender's user interface, as every capture does).
 
 ## What stops working after freezing
 

@@ -60,7 +60,7 @@ How many facets the silhouette shows, and where.
 - **Separate shells:** the limb is a closed or capped loft of its own (`lpk.forms.limbs.limb`,
   `profile_loft`, `point_loft`, a primitive or a local form) whose root ends inside the part it leaves. Any
   density, a limb unlike its pair; no join reads its root, so the roots are judged by eye at rest and in
-  the poses, from below and behind.
+  the poses, from below and behind, in Blender (`pose_test`).
 - Choose from the density the plan needs and from the concept: a body whose density the welded trunk
   cannot carry, or whose paired limbs differ, takes shells.
 - **Default:** welded.
@@ -125,7 +125,8 @@ order of the model's colour stance:
    how far each profile key sits off its neighbours' line; `lpk.core.shapes.polygon_rings` and
    `lift_rings` turn a loft's rings into a source just above the mesh). Under the geometry stance
    colour-only geometry is the style, not a cut.
-2. Facets the silhouette does not show at the read size (the `play_size` sheet).
+2. Facets the silhouette does not show at the read size (`play_size`'s `relief` per part in screen
+   pixels; `images=False` measures it without the sheet).
 3. Rings no bend needs, and rings hidden inside a garment or gear.
 
 Never cut silhouette, the rings a bend needs or detail the reference needs to meet the number. A cut that

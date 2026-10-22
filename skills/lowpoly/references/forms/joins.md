@@ -62,26 +62,28 @@ armpit.
 
 ### An arm welded down the body's side
 
-A weld down the body's side is valid topology: every count stays quiet while the arm reads as glued on. Look
-in the front (no background below the armpit where the drawing shows some), the side (the sleeve meets the body
-far down with no volume of its own, a poncho) and the poses (a deep armpit, the body's side following a raised
-arm); a comparison with the drawn arms hanging agrees with the defect. Ask the human on every welded body, with
-the front, side and three-quarter captures, whether the arm leaves the body where the drawing shows.
+A weld down the body's side is valid topology: every count stays quiet while the arm reads as glued on.
+Measure it: `armhole_report`'s hole much taller than the arm is thick, `limb_separation` with `z_range` from
+the drawn armpit down touching where the front drawing shows background, and `outline_diff`'s front and side
+bands under the armpit (a sleeve meeting the body far down with no volume of its own, a poncho). The poses
+show it too (a deep armpit, the body's side following a raised arm); a comparison with the drawn arms
+hanging agrees with the defect. Ask the human on every welded body to look in Blender, front, side and
+three-quarter, whether the arm leaves the body where the drawing shows.
 
 ## Weld the arm: socket, corners, bridge
 
 `weld_limb` grows the sleeve out of the armhole from a tilted socket section and bridges the rest of the
 hole from the torso's own vertices; its docstring gives the socket, the welded corners and the bridge. A peak
-on the shoulder in the captures is a shoulder ring below the socket's top: raise that ring, or narrow the
+on the shoulder (an `outline_diff` band at the shoulder rows of the front or back view) is a shoulder ring below the socket's top: raise that ring, or narrow the
 socket with `socket_r`. Pass the returned `'verts'` to `ridge_flip`.
 
 ## Leg holes and the crotch
 
 `leg_holes` splits the trunk's bottom ring into two leg holes round a crotch seam at `seam_z` (their size in
-its docstring). Start its `tilt` from `LEG_TILT` and change a key only where the front, back and side captures
-show the seam off the drawing at the hip or the seat; the values are metres, unscaled, sized for the height
+its docstring). Start its `tilt` from `LEG_TILT` and change a key only where `outline_diff`'s front, back and side
+bands show the seam off the drawing at the hip or the seat; the values are metres, unscaled, sized for the height
 range its docstring gives, and a figure far from it scales them in its own `build_mesh`. `seam_z` is where the seam shows, which need not be the drawn crotch (a seam there can read too low): the
-human's call on the front and back captures. Make the pelvis's lower rings as wide as the trousers and nearly
+human's call, looking in Blender from the front and the back. Make the pelvis's lower rings as wide as the trousers and nearly
 square (`trunk`'s `boxes`), or its outer corners come out thinner than the thighs.
 
 `weld_leg`'s `follow` starts the leg on the hole's own outline moved down the leg, the profile's shape from the
@@ -94,7 +96,7 @@ between limb and body (the back of the shoulder). `ridge_flip` rotates each vall
 diagonal where that lowers the summed valley. Pass the parent part only: rotating the limb's tube too can crease
 the thigh or deepen the armpit. A rotation moves the surface, so a mark projected before it lies under the new
 ridge and bakes a hole: run it before any cast onto the body. A rotated triangle takes the colour of the old one
-under its centre. Check the shoulder in a three-quarter back capture.
+under its centre. Have the human check the shoulder from three-quarter back in Blender.
 
 ## Separate-shell limbs
 
@@ -104,8 +106,8 @@ profile; `shapes.snap_ring` lands that ring on the parent's surface when it must
 is counted), `shapes.hug_rings` lays rings just proud of the parent (a sleeve running up over the shoulder to
 the collar). For a mirrored pair build the left side and copy it with `b.mirror_part`. The torso is any closed
 loft at the model's density. No hole and no `ridge_flip`. A snapped or hugged root shares no vertex with its
-parent, so a moving limb can open intersections at it: look at each root from below and behind at rest and in
-the poses (`run.poses`).
+parent, so a moving limb can open intersections at it: have the human look at each root from below and behind in
+Blender, at rest and in the test pose (`pose_test`); the pose sheet (`run.poses`) has no view from below.
 
 ## The A-pose arm frame
 
@@ -137,13 +139,15 @@ surface, and hidden rings cost triangles. Check from below and behind for a show
 - `run.joins(path)` measures how the test pose deforms each join in `JOINS`; `run.poses(path)` shows the review
   poses on one sheet.
 - A dent no count sees (a ring falling behind its neighbours): compare the hole's extents with the limb's first
-  ring and capture the join close from the front, back and side.
+  ring and have the human look at the join close from the front, back and side in Blender.
 
 ## Mesh health before accepting the build
 
-Before the human accepts a full build, and for any part a local form or an edit changed, inspect every
-part in Blender's wireframe and face-orientation views beside close-ups: loose vertices or edges, fragments,
-degenerate faces, duplicate surfaces, flipped normals; fix their construction and rebuild. Tell a designed
+Before the human accepts a full build, and for any part a local form or an edit changed, read the numbers
+first: the build report's `degenerate` triangles per part (`report['build']['body']`), `join_report`'s wire,
+non-manifold and open edges and intersections on every join, and `lpk.stages.checks.mirror_report` for the
+pairs. What no number reads, duplicate surfaces and flipped normals, the human checks in Blender's
+wireframe view and Face Orientation overlay. Fix the construction and rebuild. Tell a designed
 opening, an intended overlapping shell and an unintended hole apart: not every part must be watertight, and
 shells are not welded to satisfy a count. The join counts certify neither degeneracy nor normals nor every
 crossing face; name any inspection you could not make.
@@ -173,11 +177,12 @@ Plantigrade: hip, knee and ankle, a foot form at the ankle. Digitigrade: hip, kn
 forward, the hock back and the ball on the floor, read off the side view; one loft with the colour split at the
 knee and the toes as a part of their own at the ball ([feet.md](feet.md#digitigrade-feet)). Measuring an ankle
 on a digitigrade-looking paw gives a raised heel; whether the raised heel is part of the read is the human's
-call on the side capture. The path is a model-module helper the build and `bones(P)` share.
+call from the side in Blender. The path is a model-module helper the build and `bones(P)` share.
 
 ### Negative space between limbs
 
-Where the drawing shows background between the limbs, the front capture must too. Thin legs at their measured
+Where the drawing shows background between the limbs, the build must too, measured by `limb_separation`
+below. Thin legs at their measured
 spacing can read as one stick: propose a named spacing factor with that reason to the human.
 `lpk.stages.checks.limb_separation(<body>, limb_parts, body_parts, z_range=...)` measures, row by row of the
 front projection, where a limb touches the body (or another limb); pass `z_range` from the armpit down, since a

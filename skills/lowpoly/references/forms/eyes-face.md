@@ -10,7 +10,7 @@ Cast either onto the head's surface taken after its deformers and its `edits.app
 
 Sample the eye's width (the iris, or the whole drawn eye) off the largest calibrated drawing of the face,
 keep it in `P` and size the eye from it, not from the head: the head's dimensions do not set the drawn
-eye's size. The eye's size and place in the finished face are the human's call on the captures.
+eye's size. The eye's size and place in the finished face are the human's call in Blender.
 
 ## Choose geometry or colour
 
@@ -76,7 +76,8 @@ An eye at the face's edge, near the head's top corners, sits where the head turn
 its side. Cast along each view's own axis, the two outlines land at different places, as two eyes; cast
 along the front axis alone, the eye can land on the front where the profile shows none. `eyes.bevel_eye`
 casts from one `direction` (from above and outside, or from the front and outside, into the head), `along`
-the head's forward axis; check that the front and the side capture show one eye in the drawn place.
+the head's forward axis; check in the front and the side overlay (`project` with `include_parts` the eye's part) that one eye lands
+at the drawn eye's landmark.
 
 ## Markings round the eyes
 
@@ -138,7 +139,8 @@ def build_beard(b, P, data):
 
 Weight it to the head (`ALLOWED = {'beard': ['Head']}`). `long_beard` refuses (`ValueError`, naming the ring)
 any band or end triangle that would collapse: stations that fall back onto the root, a tip on the last
-station. Its hanging part does not see the chest: check the side capture and the test pose's nod.
+station. Its hanging part does not see the chest: check it with `lpk.stages.checks.shell_clearance` over the
+chest's parts, and the test pose's nod (`pose_test`) in Blender.
 
 ## Limits
 

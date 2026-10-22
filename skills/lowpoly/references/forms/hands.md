@@ -64,8 +64,8 @@ same points the build used.
 The wrist, `d` and `out` from `limbs.arm_frame` with the side's sign, `across` along +Y for the left hand: the
 back of the hand out, the palm toward the body, the thumb forward, on every model whatever the drawing shows.
 Shared animations and held props then behave alike; a fanned or turned hand in the drawing is pose. A hand
-built directly on the right takes the right side's frame: check that its thumb faces forward in the
-three-quarter capture.
+built directly on the right takes the right side's frame: have the human check from three-quarter in
+Blender that its thumb faces forward.
 
 ## The arm's end inside the hand
 

@@ -127,7 +127,8 @@ carries the deltoid in one line instead of a crease at the weld.
   False) is not a model attribute.
 
 Separate-shell limbs have no weld and no join: their weights are the backend's, and their roots are
-judged for gaps and pierce-through in the poses, from below and behind.
+judged for gaps and pierce-through in the poses, from below and behind, by the human in Blender
+(`pose_test`; the pose sheet has no view from below).
 
 ## The influence limit
 
@@ -152,8 +153,8 @@ After `rig`:
   It says where a zone deforms most, never whether it looks right: less stretch is no better
   deformation. Zones that share vertices (two leg holes at a crotch seam) both read the deformation there.
 - Look at the welded joins first (shoulders, armpits, hips), the most stretched first, then the hands and a
-  tail. No tool reads the weights on a hole loop: judge them in the poses from the front, below and the
-  side, not by reading vertex groups by hand.
+  tail. No tool reads the weights on a hole loop: judge them in the poses from the front and the side on
+  the pose sheet, and from below in Blender (`pose_test`), not by reading vertex groups by hand.
 - Show the deformation in the open `.blend`: `pose_test` sets `TEST_POSE`, `pose_rest` the rest pose. The
   test pose carries what the target's animations ask beyond the review poses (a head turn, a tail swing, a
   crouch, an arm swung back for a garment).
