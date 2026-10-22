@@ -78,6 +78,8 @@ Rules:
    `lpk`: they import L0–L2 and the other forms of their model's package, and follow rules 2–6 like the
    kit's forms. No `lpk` module imports `lpk_local`, at module level, in a function or dynamically; a
    model module may import the kit and its own package.
+9. No `lpk` module imports the development tools `lpk_dev`, at module level, in a function or
+   dynamically: the kit runs without them ([Shape of the system](#shape-of-the-system)).
 
 ## The runner
 
@@ -373,6 +375,8 @@ at HEAD. `--record` writes the baseline from the findings and is refused when th
 5. **Local library** (`local`). No `lpk` module imports `lpk_local`: no `import` or `from` of it, at module level or
    in a function, and no string naming it in a scope that calls `importlib.import_module` or
    `__import__`. `lpk_local` itself is not in the tree and is not scanned.
+6. **Development tools** (`dev`). [Layers](#layers) rule 9: no `lpk` module imports `lpk_dev`, in the same
+   forms as `local`. `lpk_dev` itself is not scanned.
 
 No check holds the rest, which review holds: [Layers](#layers) rules 3, 4 and 7; rule 8's local forms
 (`lpk_local` is not in the tree), including a model or a local form importing another model's package;
