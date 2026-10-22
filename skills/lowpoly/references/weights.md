@@ -133,8 +133,8 @@ judged for gaps and pierce-through in the poses, from below and behind.
 
 The skin keeps at most the smallest `influence_limit` of the `EXPORTS` profiles (`lpk.profiles.load`)
 bones per vertex, `lpk.stages.rig.MAX_INFLUENCES` without `EXPORTS`; `report['rig']['skin']['influences']`
-gives it. Declare the exports before the rig: adding a profile with a lower limit means running `rig`
-again before `export`.
+gives it. An export decided after the rig needs `rig` again before `export` only when a profile's limit is
+lower than the limit the weights were made under.
 
 ## Reading the poses and the joins
 

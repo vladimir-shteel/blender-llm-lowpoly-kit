@@ -25,15 +25,17 @@ Then:
 
 | Step | You give or do | The agent | You check |
 |---|---|---|---|
-| Brief | references or a description; height; triangle and atlas budget; skeleton; read size (how tall it stands on screen); export targets; whether references may go to an image tool | asks for everything missing in one message | – |
+| Brief | references or a description; height; triangle and atlas budget; skeleton; read size (how tall it stands on screen); whether references may go to an image tool | asks for everything missing in one message | – |
 | Intake | a cleaned sheet, if asked | cuts, calibrates and measures the views | – |
 | Blockout | – | a figure of blocks, `<Name>_Blocks`, beside the drawings | proportions |
 | Build, part by part | corrections (move vertices; see [the two modes](#parametric-and-frozen)) | head, hair, torso and clothing, legs, arms, hands, tail, gear; over the triangle budget, an optimisation pass once all parts stand | each part against the drawing; any cut that changes how a part reads |
 | Texture | – | the colour atlas with the painted face | the atlas on the model |
 | Rig (a character) | – | skeleton, weights, test poses | no tearing, limbs bend at the joints |
-| Export | the import check in your engine | the files, re-imported and compared | the file in the engine |
+| Export, when you ask for it | the targets, then the import check in your engine | the files, re-imported and compared | the file in the engine |
 
-The agent stops and asks at each check; nothing in the kit waits for your answer on its own. A prop (a
+The agent stops and asks at each check; nothing in the kit waits for your answer on its own. The model is
+finished in the `.blend` without the export: ask for the export when you need the files, now or once all
+your models are ready. A prop (a
 barrel, a crate, a lamp) takes the same steps without the rig: give its pivot (the base, a grip, a hook)
 in the brief.
 

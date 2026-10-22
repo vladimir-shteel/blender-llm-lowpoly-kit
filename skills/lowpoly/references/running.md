@@ -44,7 +44,7 @@ in, and raises on an unknown stage before anything runs.
 | `rig` | the armature `<NAME>_Rig` and the body's weights (a model with `SKELETON`) |
 | `preview` | the atlas shown on the body in the `PREVIEW` look |
 | `pose_test`, `pose_rest` | the rig in `TEST_POSE`, back at rest |
-| `export` | one file per `EXPORTS` profile, re-imported and compared; without `SKELETON` the body alone |
+| `export` | one file per `EXPORTS` profile, re-imported and compared; without `SKELETON` the body alone; run only when the human asks for an export |
 
 `run.model` returns `{stage: its report}`; `pack` gives a list, one report per pack. Return the few values
 you need in `result`, not whole reports: a response has a size limit.

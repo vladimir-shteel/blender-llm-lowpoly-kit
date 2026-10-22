@@ -10,7 +10,7 @@ wait for their answer before the next step. A part goes through at most a few pa
 not read right, say what is off and ask how to go on.
 
 1. **Brief.** Read the brief and the references. Decide with the human: the triangle total, the atlas
-   size, the export targets, the read size (how tall the prop stands on screen at the farthest distance
+   size, the read size (how tall the prop stands on screen at the farthest distance
    players must read it) and the **pivot**, the point the engine places and turns the prop by: the centre
    of its base on the floor for a prop that stands, the grip for one that is held, the hook for one that
    hangs. The model is built round that point at the origin, its front facing -Y. They go into the
@@ -39,12 +39,15 @@ not read right, say what is off and ask how to go on.
    ([where a new form goes](../forms/README.md#where-a-new-form-goes)).
 8. **Freeze when detail needs it.** Topology edits by hand, or a model that exists already, go to the
    frozen mode as for any model ([the frozen mode](../frozen.md)).
-9. **Texture.** `unwrap`, `pack`, `bake`, `preview` ([atlas](../atlas.md)). A prop has no face island
-   unless it carries painted detail that needs one (a label, a sign): then its first pack after the
-   unwrap is final and reports `settled`. **Review:** the atlas on the model
+9. **Texture.** `unwrap`, `pack`, `bake`, `preview` ([atlas](../atlas.md)). Without a face island the first
+   pack after the unwrap is final and reports `settled`; a prop takes a face island only for painted
+   detail that needs one (a label, a sign). **Review:** the atlas on the model
    (`run.capture(MODEL, tag='tex', shade='tex')`): the seams and the colour borders.
-10. **Export.** `export` ([export](../export.md)); every `reimport` must have an empty `diffs`. **Review:**
-    the human checks the import in the target engine: the pivot, the size, the facing and the material.
+10. **Export, only when the human asks.** The prop is finished with the texture's review; the export may
+    come much later, for several models at once. When asked, settle the targets with the human, write
+    `EXPORTS`, run `export` ([export](../export.md)); every `reimport` must have an empty `diffs`.
+    **Review:** the human checks the import in the target engine: the pivot, the size, the facing and the
+    material.
 
 Limits: one model module holds one prop, so a set of props is a module each; the captures frame a model
 no closer than `lpk.stages.review.MIN_HEIGHT`, so a very small prop reads small in them.

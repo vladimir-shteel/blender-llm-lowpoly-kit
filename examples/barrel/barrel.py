@@ -180,5 +180,6 @@ def seams(P):
 # -- export ------------------------------------------------------------------------------------------------
 
 # No SKELETON: the barrel has no rig, and the export writes its body alone. The brief's engine imports
-# binary glTF; a second output writes FBX from the same body.
+# binary glTF; a second output writes FBX from the same body. The example exports because its run is the
+# kit's acceptance test; a model of your own adds EXPORTS when the human asks.
 EXPORTS = ('glb_generic', 'fbx_generic')

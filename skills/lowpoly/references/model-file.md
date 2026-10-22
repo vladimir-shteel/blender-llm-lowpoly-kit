@@ -39,7 +39,7 @@ def bones(P): ...                               # {bone: (head, tail)} in metres
 ALLOWED = {'hair': ['Head'], 'ear.{s}': ['Head']}   # bones per part over the template's binding
 JOINS = [('trunk', 'arm.{s}', {'UpperArm.{s}': 0.10})]   # welded joins to smooth, caps per join
 TEST_POSE = {'UpperArm.L': (0, 0, 60), 'Head': (0, 20, 0)}
-EXPORTS = ('glb_generic', 'fbx_generic')        # lpk.profiles names or JSON paths
+EXPORTS = ('glb_generic', 'fbx_generic')        # only once the human asks for an export
 ```
 
 `'{s}'` in `ALLOWED`, `FIXED` and `JOINS` expands per side (`lpk.skeletons.sided`).
@@ -61,7 +61,7 @@ def build_mesh(P): ...           # (body Builder, {}): no colour source unless t
 ATLAS = (256, {'Prop': 1.0})
 def sheet_of(colour, part): ...
 def seams(P): ...                # optional: the seamed unwrap
-EXPORTS = ('glb_generic', 'fbx_generic')
+EXPORTS = ('glb_generic', 'fbx_generic')   # only once the human asks for an export
 ```
 
 - **No `SKELETON`.** `rig`, `pose_test`, `pose_rest`, `run.poses` and `run.joins` need a rig and raise;

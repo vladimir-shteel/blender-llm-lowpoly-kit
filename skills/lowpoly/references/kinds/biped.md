@@ -8,7 +8,7 @@ wait for their answer before the next step. A part goes through at most a few pa
 not read right, say what is off and ask how to go on.
 
 1. **Brief.** Read the brief and the references. Decide the tier with the human: the triangle total, the
-   atlas size, the skeleton, the export targets, the read size (how tall the character stands on screen at
+   atlas size, the skeleton, the read size (how tall the character stands on screen at
    the farthest distance players must read it), and, when the environment offers an image tool, whether
    the references may be sent to it. They go into the module's docstring when it is written (step 3).
 2. **Intake** ([intake](../intake.md)): choose the source before any cleaning, cut the views, calibrate each,
@@ -51,8 +51,10 @@ not read right, say what is off and ask how to go on.
    human's word ([mesh edits under a frozen texture](../frozen.md#mesh-edits-under-a-frozen-texture)).
 10. **Rig.** `rig`, then `run.poses(MODEL)` and `run.joins(MODEL)` ([weights](../weights.md)). **Review:** the
    poses: no tearing at the joins, limbs that bend where the joints are.
-11. **Export.** `export` ([export](../export.md)); every `reimport` must have an empty `diffs`. **Review:** the
-    human checks the import in the target engine.
+11. **Export, only when the human asks.** The character is finished with the rig's review; the export
+    may come much later, for several models at once. When asked, settle the targets with the human,
+    write `EXPORTS`, run `export` ([export](../export.md)); every `reimport` must have an empty `diffs`.
+    **Review:** the human checks the import in the target engine.
 
 Throughout: one runner or review call per bridge call, a short report back, and the human's corrections
 turned into numbers in the model file.

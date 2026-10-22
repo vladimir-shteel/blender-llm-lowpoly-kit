@@ -1,5 +1,11 @@
 # Export
 
+Export is a step of its own, run only when the human asks for it: the model is finished when it is built,
+textured and, for a rigged model, rigged and reviewed in the `.blend`. The export may come much later, for
+several models at once and for the target chosen then. Until asked, leave `EXPORTS` out of the module and
+`export` out of the calls; when asked, settle the targets with the human, write `EXPORTS` and run the
+stages below.
+
 The `export` stage writes one file per entry of `EXPORTS` into `EXPORT_DIR` (relative to the model's folder,
 default `out/`), named `<NAME>_<stem>` after the stem of the profile's name or file (`fbx_generic` and
 `profiles/engine.json` give `<NAME>_fbx_generic` and `<NAME>_engine`), re-imports each and compares it with

@@ -1,13 +1,13 @@
 ---
 name: lowpoly
-description: Model a low-poly character or prop in Blender through Blender MCP with lowpoly-kit (lpk) - read the references, write one model module (measurements, blocks, build_mesh, atlas, bones when rigged), run its stages with lpk.run, review each step with the human, and export. Use for any new character or prop, a revision of one, or a question about the kit's forms, atlas, rig or export.
+description: Model a low-poly character or prop in Blender through Blender MCP with lowpoly-kit (lpk) - read the references, write one model module (measurements, blocks, build_mesh, atlas, bones when rigged), run its stages with lpk.run, review each step with the human, and export when the human asks. Use for any new character or prop, a revision of one, or a question about the kit's forms, atlas, rig or export.
 ---
 
 # Low-poly models with lowpoly-kit
 
 A model, a character or a prop, is one Python file, its **model module**: measurements read off the
 references, the blocks, the mesh composed of the kit's forms, the atlas settings, the bones of a rigged
-model and the export targets. `lpk.run` runs the stages a call names and returns a dict; every call
+model and, once the human asks for files, the export targets. `lpk.run` runs the stages a call names and returns a dict; every call
 rebuilds what it names. The human reviews in the conversation: nothing in code waits for an answer, so
 stop and ask where the kind's card says so.
 
@@ -35,4 +35,6 @@ attributes.
 
 Each kind's card names its worked example: read it before writing a model of that kind.
 
-Delivery: the requested model files and a short message with their paths and any blocker.
+Delivery: the model, built and reviewed in the open `.blend`, its model module and folder, and a short
+message with their paths and any blocker. Export only when the human asks for it
+([export](references/export.md)): the model is finished without exported files.
