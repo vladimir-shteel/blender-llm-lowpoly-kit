@@ -388,8 +388,6 @@ same commit. The stage names the skill gives are held to `run.STAGES` by `tests/
 
 What does not follow the rules yet ([PLAN.md](PLAN.md) holds the deferred work):
 
-- **Captures unverified**: the runner and the example run end to end in Blender, but `run.capture` (its
-  part captures included) and `run.poses` need the user interface and have not run there yet.
 - **Name heuristics**: review poses keyed by biped bone names in `stages.review`.
 - **Flat local forms**: a module directly under `lpk_local/forms/`, outside every model's package, stays
   importable until the human removes it, since only the human sees every model that may import it; a

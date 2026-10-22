@@ -28,7 +28,10 @@ not read right, say what is off and ask how to go on.
    human judges the blocks by eye.
 5. **Build part by part:** the prop's own parts, the main body first, then what sits on it (trims, bands,
    handles, fittings), each cast onto the surface it sits on ([gear](../forms/gear.md)). Hard surface takes
-   flat caps and crisp colour borders ([style](../style.md#hard-surface)). After each part:
+   flat caps and crisp colour borders ([style](../style.md#hard-surface)). A piece the prop repeats
+   (plates, boards, rivets, studs) is one local form called once per copy from a list in P, each copy in
+   a part of its own (`plate.1`, `plate.2`) or all in one part; a mirrored pair is built once and copied
+   with `Builder.mirror_part`. After each part:
    `run.model(MODEL, stages=('build',))` and `run.capture(MODEL, tag=<part>)`. **Review:** the part
    against its blocks and the references. If the human corrects a part by hand, run `capture_edits` before
    the next build and read what they moved.

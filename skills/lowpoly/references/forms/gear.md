@@ -18,6 +18,7 @@ hand): build them from the primitives below as local forms of the model
 | A block or a case | `Builder.box(part, center, half, rot, col)` (`rot` a `mathutils.Matrix` or None) |
 | A turned body (a barrel, a bottle, a column) | `Builder.loft` up a fixed `axis` through rings a profile function of P gives, flat caps coloured by `col0` and `col1`; or `shapes.profile_loft` through profile keys |
 | A band, rim or hoop standing off a turned body | step rings in the body's own loft, the band's faces coloured by the loft's colour function (`examples/barrel/barrel.py`, `_staves`) |
+| A bent handle, a rail or a pipe with corners | `Builder.loft` through the path's points, every ring carrying its own `axis` (its ring option; at a corner the mean of the two segments' directions), so each corner is a mitred joint: without it a ring turns to the path through its neighbours' centres, which a sharp bend does not carry through |
 | A fitting on a body (a bung, a knob, a bolt head) | a short `Builder.loft` from a point cast onto the body, its open base sunk into it, its outer end flat (`_bung` in the barrel example) |
 | A rounded-box, plate or chamfered section | `Builder.loft` with flat caps (`cap0='flat'`, `cap1='flat'`), its ring options shaping the section |
 | Spikes and studs | `Builder.pyramid(part, base, apex, col)`, the base buried |
