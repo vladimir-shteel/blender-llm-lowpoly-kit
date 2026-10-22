@@ -29,8 +29,3 @@ notion of the skill, never read by `lpk`.
   forms of several props into `lpk/forms/` on the human's request
   ([Where forms live](ARCHITECTURE.md#where-forms-live)).
 - **A set of props in one module**: one model module holds one prop today.
-
-## Open notes
-
-- ARCHITECTURE.md readability: the model module contract as one row per attribute; Build modes as a
-  matrix of the two mode axes and a table of the build stamp's guards.
