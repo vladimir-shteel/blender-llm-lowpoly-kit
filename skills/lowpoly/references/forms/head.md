@@ -102,12 +102,9 @@ def build_head(b, P, data):
     return h, bvh_of(b, ['head'])
 ```
 
-`profile_head` returns `'rings'`, `'keys'` (the sections as lofted, in `snout_head`'s form, for
-`front_envelope` with the origin as centre, `wedge_muzzle` and `profile_key_deviation` with length and h 1),
-`'names'`, `'stop'`, `'pt'` and, with `stop` and `eye_height`, `'eye'` and `'eye_x'` for the eyes.
-`snout_head` returns `'rings'`, `'eye'`, `'eye_x'` and `'pt'`. `human_head` returns `'eye'`, `'eye_x'`,
-`'front_y'` and `'pt'` (head units to world, for decals and gear). Its `color(i, j, normal)` names the bands
-and columns in its docstring; `profile_head` also takes `{key name: palette name}`.
+Each head form's docstring lists what it returns and how its `color` names the bands and columns.
+`profile_head`'s `'keys'` are the sections as lofted, which `front_envelope`, `wedge_muzzle` and
+`profile_key_deviation` take; its `color` may also be `{key name: palette name}`.
 
 ## Shape it after the loft
 

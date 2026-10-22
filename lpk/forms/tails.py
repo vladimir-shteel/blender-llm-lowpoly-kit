@@ -41,8 +41,7 @@ def lock_fan(b, part, root, locks, col, knot=((0.05, 0.05), (0.06, 0.055), (0.04
     curl down. spread, drop: the sideways and downward components of a lock's direction before it is
     normalised, not distances: a larger value turns the lock further, it does not move it.
     knot: the (ra, rb) of a closed six-sided loft along +Y round the roots.
-    Units: root m, knot ((m, m) half sizes, ...), thick m (half size), wide m (half size), bend rad. Spread
-    and drop are components of a lock's direction before normalising, not distances."""
+    Units: root m, knot ((m, m) half sizes, ...), thick m (half size), wide m (half size), bend rad."""
     from lpk.forms.hands import talon
     offs = (Vector((0, -0.04, 0)), Vector((0, 0.03, -0.01)), Vector((0, 0.08, -0.03)))
     b.loft(part, [(root + o, ra, rb) for o, (ra, rb) in zip(offs, knot)], 6, X, col,

@@ -26,15 +26,11 @@ def hair_cap(b, part, bvh, center, line, thick, color, n=12, rows=4, tuck=0.008,
     side for both: an exact mirror image, for a centre on the midline (x = 0; ValueError otherwise).
     n * (2 * rows + 1) triangles. Returns covered(p): True where a point lies above the hairline
     with a margin, for removing the head faces the cap hides.
-    thick: keep it a few millimetres toward the face and full over the crown and the back; a thick
-    edge over the forehead can read as a helmet rim. n: the cap's columns; a parting or a hairline
-    running diagonally across them follows them only as finely as they are spaced: add columns until
-    it follows the drawing. The vertices land on the head and the faces run as chords between them, so
-    over a faceted head a thin cap of few columns or rows can let the head's own vertices through near
-    its edge, and more columns and rows alone need not cover them: inspect the cap's edge for the skull
-    showing through and add thickness where it shows. Anything
-    rising out of the head above the tuck ring (an ear tip) pierces the cap from inside: keep it under
-    the tuck ring, or root it in the cap.
+    n: the cap's columns; a hairline running diagonally across them follows them only as finely as they
+    are spaced. The vertices land on the head and the faces run as chords between them, so over a
+    faceted head a thin cap can let the head's own vertices through near its edge, which more columns
+    and rows alone need not cover. Anything rising out of the head above the tuck ring (an ear tip)
+    pierces the cap from inside.
     Units: center m, color palette name or fn(i, j, normal) (point_loft's), tuck m. A ray that misses bvh
     puts its vertex 0.1 m out from the centre and is counted in the builder's probe misses (shapes.miss)."""
     c = Vector(center)
@@ -280,15 +276,9 @@ def long_beard(b, part, bvh, center, line, tip, width, depth, color, stations=((
     Returns the rings (lists of BMVerts), the root row first, 2 * cols points each (the front from -X to +X,
     then the back from +X to -X). 4 * cols * len(stations) + 4 * cols triangles, plus 4 * 3 per fork lock.
 
-    How it relates to the other facial-hair and hair forms: head.face_shell lays every row on the face, a
-    close beard, a moustache or a goatee; long_beard lays only its root that way and hangs the rest free, so
-    keep a moustache as a face_shell of its own over it. hair_mantle is the same idea for hair down the back;
-    fur.tuft makes its fork and any loose strands on it.
-
     Limits: every band and end triangle is checked, and one under BEARD_MIN_AREA raises ValueError naming
     its ring: stations that fall back onto the root, or a tip on the last station. The hanging part ignores
-    the chest: set the tip forward of it from the side view, and weight the beard to the head (ALLOWED =
-    {'beard': ['Head']}): a nod swings it into the chest."""
+    the chest: a tip behind the chest's front passes through it."""
     c, tip = Vector(center), Vector(tip)
     if cols < 2 or not stations or width <= 0 or depth <= 0 or thick <= 0 or inset < 0:
         raise ValueError('long_beard: cols >= 2, one or more stations, positive width, depth and thick, inset >= 0 '

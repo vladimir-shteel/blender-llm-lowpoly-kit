@@ -17,7 +17,9 @@ def _part_verts(b, part):
 def _ground_new(b, part, old):
     """Move the vertices of `part` that are not in `old` straight up or down so that the lowest of them
     sits on the floor, z = 0, and return the shift in metres: a form grounds what it built and leaves
-    what the part held before where it was."""
+    what the part held before where it was (Builder.ground_part's rule on the new vertices only). A boot
+    lays its heights out with the sole's nominal bottom at z = 0, and the slab's superellipse corners stand
+    above that bottom, so grounding moves it down by that gap."""
     pid = b.pid(part)
     new = [v for v in b.bm.verts if v[b.vpart] == pid and v not in old]
     dz = -min(v.co.z for v in new)
@@ -36,11 +38,8 @@ def platform_boot(b, part, x, sx, ankle_z, col, sole_col, length=0.30, width=0.0
     is and lean forward from the ankle, so the upper's back reaches heel_y only near the ankle and
     stands about 3 to 4.5 cm in front of the sole's end at the sole's top (the vertex positions for
     ankle_z 0.12 to 0.08 m, the rest at the defaults).
-    The boot stands on the floor: the heights are laid out with the sole's nominal bottom at z = 0, and
-    the slab's lowest vertices, its superellipse corners, stand above that bottom (4.4 mm at the
-    defaults), so once built the boot moves straight down until its lowest vertex sits on z = 0
-    (Builder.ground_part's rule on the boot's own vertices; what the part held before stays). ankle_z
-    moves with it.
+    Once built, the boot is grounded (_ground_new; 4.4 mm down at the defaults), ankle_z moving with
+    it.
     Units: x m, sx sign, length m, width m (half size), sole_h m, heel_y m, sole_w ratio."""
     old = _part_verts(b, part)
     toe_y = heel_y - length
@@ -121,11 +120,8 @@ def work_boot(b, part, x, top_z, col, sole_col, tread_col, band_col=None, length
     the ankle (y = 0), the heel counter behind it. ~110 triangles.
     cuff: the shaft's top ring over shaft_r, the flare of its top (1.0 for a straight shaft); band_h:
     the height of the shaft's top band, from its top ring down to the next, the band band_col paints.
-    The boot stands on the floor: the heights are laid out with the sole's nominal bottom at z = 0, and
-    the slab's lowest vertices, its superellipse corners, stand above that bottom (2.8 mm at the
-    defaults), so once built the boot moves straight down until its lowest vertex sits on z = 0
-    (Builder.ground_part's rule on the boot's own vertices; what the part held before stays). top_z
-    moves with it. Returns the ball and toe points on the top of the sole, moved with the boot.
+    Once built, the boot is grounded (_ground_new; 2.8 mm down at the defaults), top_z moving with it.
+    Returns the ball and toe points on the top of the sole, moved with the boot.
     work_boot_points gives these points and the ankle, shaft top and heel without building, for a rig
     whose bones are placed before the build.
     Units: x m, top_z m, length m, width m (half size), sole_h m, heel_y m, shaft_r m, cuff ratio, band_h
@@ -239,13 +235,12 @@ def talon_toes(b, part, ball, sx, toes, col, claw_col, tip_col=None, scale=1.0, 
     """Bird- or raptor-like toes fanning from the ball of a digitigrade foot, each a three-sided loft
     through a knuckle dipping toward the floor, closed flat and carrying a curved `talon` (a large
     digitigrade foot; a toe at 180 degrees adds a back toe). toes: (angle from straight ahead in
-    degrees, toward the foot's outside for sx = 1, toe length); scale: the sections and dips (1.0 at
-    the size the notes name). Toes lean toward the floor, so place the ball a toe radius above it.
+    degrees, toward the foot's outside for sx = 1, toe length); scale: the sections and dips. Toes lean
+    toward the floor, so place the ball a toe radius above it.
     28 triangles a toe: 13 for the toe's loft and flat end, 15 for its talon.
     Units: ball m, scale ratio, claw_len m, claw_bend rad. Scale 1.0 and claw_len are sized for a figure
-    about 2.7 m tall, not the figure of about 1.7 to 2.1 m the other defaults are sized for; for another
-    figure set scale and claw_len each from its own toes and claws, not by one body-height ratio, and
-    compare the foot with the drawing."""
+    about 2.7 m tall, not the figure of about 1.7 to 2.1 m the other defaults are sized for; another
+    figure sets each from its own toes and claws, not by one body-height ratio."""
     from lpk.forms.hands import talon
     for ang, ln in toes:
         a = math.radians(ang) * sx
