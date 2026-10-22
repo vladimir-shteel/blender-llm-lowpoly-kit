@@ -64,8 +64,10 @@ a parallel route. A refusal of bad input fails fast with a message that names th
   snapshots. Compare runs without the pack cache (`out/<NAME>.pack.json`), which restores packs.
 - **The worked examples** (`examples/mannequin`, a character, and `examples/barrel`, a prop) are the
   acceptance models: a change that can touch geometry, UVs, weights or exports runs their stages in
-  Blender before integration, and every `reimport` of their exports has empty `diffs`. `bpy` from pip runs every stage but the captures, which need Blender's user
-  interface.
+  Blender before integration, and every `reimport` of their exports has empty `diffs`. The stages run in
+  Blender through the bridge or in background mode (`blender -b`), where the 3D Viewport's area exists but
+  has no OpenGL render: only the captures need Blender's user interface. `tests/blender/*.py` run the
+  worked examples' paths in background Blender and fail without it.
 - **An intentional output change** says so in its commit message with a before/after summary and the
   reason. Earlier outputs are diagnostics, not pass/fail.
 

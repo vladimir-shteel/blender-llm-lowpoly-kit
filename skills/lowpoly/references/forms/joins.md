@@ -70,13 +70,10 @@ the front, side and three-quarter captures, whether the arm leaves the body wher
 
 ## Weld the arm: socket, corners, bridge
 
-`weld_limb` starts the sleeve with a socket section `socket_in` inside the shoulder joint, tilted: its top
-stays at the shoulder corner, its bottom slides down the arm to the armpit, since a perpendicular section's
-inner side would lie inside the torso and fold the armpit. Only the hole's shoulder-corner and armpit vertices
-weld; the front and back of the hole fill as a bridge from the torso's own vertices, which keeps the chest and
-back full. The shoulder corner moves up to the socket's top, so a shoulder ring below it peaks the shoulder:
-raise that ring, or narrow the socket with `socket_r`. The returned `'verts'` are the join's vertices for
-`ridge_flip`.
+`weld_limb` grows the sleeve out of the armhole from a tilted socket section and bridges the rest of the
+hole from the torso's own vertices; its docstring gives the socket, the welded corners and the bridge. A peak
+on the shoulder in the captures is a shoulder ring below the socket's top: raise that ring, or narrow the
+socket with `socket_r`. Pass the returned `'verts'` to `ridge_flip`.
 
 ## Leg holes and the crotch
 

@@ -1,4 +1,4 @@
-"""The colour sources on the frozen surface in Blender (bpy as a Python module, background mode): the worked
+"""The colour sources on the frozen surface in Blender (background mode): the worked
 example built, frozen and switched to the frozen mode; a frozen build of the unchanged body leaves every
 source where the parametric build put it; then the head moved forward and scaled and the trunk widened
 with a falloff (run.transform), and a frozen build carries the Face and Trousers sources onto the reshaped
@@ -7,9 +7,9 @@ builds give the same sources. The same edit with 'conform': False on Face leaves
 new surface, out of the bake's reach. The sources live in '<NAME>_Sources' under '<NAME>', excluded from
 the view layer, and neither export carries them.
 
-Not a host test (the host loop runs tests/test_*.py): run it where bpy imports,
+Not a host test (the host loop runs tests/test_*.py): run it in Blender,
 
-    python3 tests/blender/sources.py
+    blender -b --python-exit-code 1 --python tests/blender/sources.py
 
 It works on a copy of examples/mannequin in a temporary folder and prints a short summary; any failed
 check raises."""
@@ -22,11 +22,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-try:
-    import bpy
-except ImportError:
-    print('skipped: bpy does not import here (pip install bpy, or run inside Blender)')
-    sys.exit(0)
+import bpy
 
 import numpy as np
 

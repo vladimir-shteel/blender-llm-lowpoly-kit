@@ -34,8 +34,7 @@ def _seg_dist(p, h, t):
 def _armature(ob, rig_name, bones, rolls):
     """A new armature object `rig_name` in the body `ob`'s collection, in place of any object of that name,
     carrying the body's world transform: bones {name: (head, tail, parent or None, connected)} in the body's
-    own space, in that order, each bone's Z axis aligned to rolls[name]. Needs a 3D Viewport in the current
-    screen (edit mode)."""
+    own space, in that order, each bone's Z axis aligned to rolls[name]. Needs a window (edit mode)."""
     coll = ob.users_collection[0]
     bpy.context.view_layer.update()
     world = ob.matrix_world.copy()
@@ -57,7 +56,7 @@ def _armature(ob, rig_name, bones, rolls):
         o.select_set(False)
     rig.select_set(True); vl.objects.active = rig
     from lpk.stages import view
-    with bpy.context.temp_override(**view.view3d_context(), active_object=rig, object=rig, selected_objects=[rig]):
+    with bpy.context.temp_override(**view.window_context(), active_object=rig, object=rig, selected_objects=[rig]):
         bpy.ops.object.mode_set(mode='EDIT')
         eb = arm.edit_bones
         for name, (h, t, p, c) in bones.items():
@@ -255,15 +254,6 @@ def _kept_report(kept):
             'distance_kept_parts': {p: len(v) for p, v in kept.items()}, 'distance_kept_verts': kept}
 
 
-def _view3d():
-    """lpk.stages.view.view3d_context(), or None when no window shows a 3D Viewport (background mode)."""
-    from lpk.stages import view
-    try:
-        return view.view3d_context()
-    except RuntimeError:
-        return None
-
-
 def heat_weights(obj_name, rig_name, allowed, fixed=None, influences=MAX_INFLUENCES):
     """Blender's automatic bone heat weights (Parent > With Automatic Weights) in place of the distance
     weights on the body (distance_weights first), then vhd_weights' rules: a vertex keeps only its part's
@@ -279,16 +269,15 @@ def heat_weights(obj_name, rig_name, allowed, fixed=None, influences=MAX_INFLUEN
     parented the usual way, and afterwards the parent, the parent inverse, the local transform, the
     modifier stack, visibility, selection and the active object are put back as they were; on
     an error the distance weights are put back too.
-    Needs a 3D Viewport in the current screen and both objects in Object mode.
+    Needs both objects in Object mode.
     Returns {'weights': 'heat', 'no_heat': vertices of non-fixed parts without any heat weight,
     'no_heat_parts': {part: count}, 'distance_kept': vertices that kept distance weights,
     'distance_kept_parts': {part: count}, 'distance_kept_verts': {part: [those vertices' indices]},
     'max_influences': n}."""
     fixed = fixed or {}
     ob, rig = bpy.data.objects[obj_name], bpy.data.objects[rig_name]
-    viewport = _view3d()
-    if viewport is None:
-        raise RuntimeError('heat_weights needs a window with a 3D Viewport (Blender with its UI)')
+    from lpk.stages import view
+    window = view.window_context()
     for o in (ob, rig):
         if o.mode != 'OBJECT':
             raise RuntimeError('heat_weights needs Object mode; %s is in %s mode' % (o.name, o.mode))
@@ -315,7 +304,7 @@ def heat_weights(obj_name, rig_name, allowed, fixed=None, influences=MAX_INFLUEN
             o.hide_set(False)
             o.select_set(True)
         vl.objects.active = rig
-        with bpy.context.temp_override(**viewport, active_object=rig, object=rig,
+        with bpy.context.temp_override(**window, active_object=rig, object=rig,
                                        selected_objects=[ob, rig], selected_editable_objects=[ob, rig]):
             res = bpy.ops.object.parent_set(type='ARMATURE_AUTO')
         if 'FINISHED' not in res:
@@ -551,9 +540,7 @@ def heat_proxy_weights(obj_name, rig_name, allowed, fixed=None, voxel=0.01, smoo
                        influences=MAX_INFLUENCES):
     """Blender's bone heat solved on a watertight voxel proxy of the mesh and carried back to it by
     nearest-surface interpolation, in place of the distance weights on the body (distance_weights first);
-    then vhd_weights' rules: a vertex keeps only its part's allowed bones, fixed parts take their fixed
-    weights, the export limits apply (`influences` as for distance_weights), and a vertex left with no weight keeps its
-    distance weights.
+    then vhd_weights' rules, as heat_weights applies them.
     Bone heat on the mesh itself fails for every bone at once when any island has no vertex that sees its
     closest bone, which open shells nested in other shells cause. The proxy is one closed surface per
     connected volume: a temporary object with the mesh's faces (fixed parts left out: their weights are
@@ -568,7 +555,7 @@ def heat_proxy_weights(obj_name, rig_name, allowed, fixed=None, voxel=0.01, smoo
     voxel: the remesh voxel size, metres in the mesh's local space; gaps narrower than about
     (2 * thickness + 1) voxels close in the proxy and heat crosses them. smooth: smoothing iterations of
     the proxy's weights (0: none). thickness: the Solidify slab in voxels (0: no Solidify, closed shells only).
-    Needs a 3D Viewport in the current screen and both objects in Object mode. Raises RuntimeError, with
+    Needs both objects in Object mode. Raises RuntimeError, with
     the weights unchanged, when the grid would be more than PROXY_MAX_CELLS voxels across, or the proxy has
     no surface, no island that gets heat, or no heat weights.
     Returns {'weights': 'heat_proxy', 'voxel', 'thickness', 'smooth', 'proxy_verts': vertices of the solved
@@ -590,9 +577,8 @@ def heat_proxy_weights(obj_name, rig_name, allowed, fixed=None, voxel=0.01, smoo
     if not voxel > 0 or thickness < 0 or smooth < 0:
         raise ValueError('heat_proxy_weights: voxel must be > 0, thickness and smooth >= 0')
     ob, rig = bpy.data.objects[obj_name], bpy.data.objects[rig_name]
-    viewport = _view3d()
-    if viewport is None:
-        raise RuntimeError('heat_proxy_weights needs a window with a 3D Viewport (Blender with its UI)')
+    from lpk.stages import view
+    window = view.window_context()
     for o in (ob, rig):
         if o.mode != 'OBJECT':
             raise RuntimeError('heat_proxy_weights needs Object mode; %s is in %s mode' % (o.name, o.mode))
@@ -671,7 +657,7 @@ def heat_proxy_weights(obj_name, rig_name, allowed, fixed=None, voxel=0.01, smoo
         for o in (proxy, rig):
             o.select_set(True)
         vl.objects.active = rig
-        with bpy.context.temp_override(**viewport, active_object=rig, object=rig,
+        with bpy.context.temp_override(**window, active_object=rig, object=rig,
                                        selected_objects=[proxy, rig], selected_editable_objects=[proxy, rig]):
             res = bpy.ops.object.parent_set(type='ARMATURE_AUTO')
         if 'FINISHED' not in res:
@@ -775,16 +761,12 @@ def _keep_distance(obj_name, rig_name, allowed, fixed=None, influences=MAX_INFLU
             'max_influences': max((len(w) for w in _weights(bpy.data.objects[obj_name])), default=0)}
 
 
-def _has_view3d():
-    return _view3d() is not None
-
-
 # The weights backends bound to their implementations, in auto's order of preference: {name: (the function
 # that replaces the distance weights on the body, whether it can run in this session)}. Every implementation
 # runs on the distance weights already on the body (distance_weights') and leaves a vertex it gives no weight
 # on them.
-WEIGHTS = {'vhd': (vhd_weights, lambda: vhd_exe() is not None), 'heat_proxy': (heat_proxy_weights, _has_view3d),
-           'heat': (heat_weights, _has_view3d), 'distance': (_keep_distance, lambda: True)}
+WEIGHTS = {'vhd': (vhd_weights, lambda: vhd_exe() is not None), 'heat_proxy': (heat_proxy_weights, lambda: True),
+           'heat': (heat_weights, lambda: True), 'distance': (_keep_distance, lambda: True)}
 # The backend names weights() takes besides AUTO, in WEIGHTS order.
 BACKENDS = tuple(WEIGHTS)
 # The backend name that tries the available backends in order.
@@ -793,8 +775,8 @@ AUTO = 'auto'
 
 def available_backends():
     """The weight backends usable in this session, in the order weights(backend='auto') tries them: 'vhd'
-    when the add-on and its binary for this platform are present, 'heat_proxy' and 'heat' when the current
-    screen has a 3D Viewport, and 'distance' always (WEIGHTS)."""
+    when the add-on and its binary for this platform are present, and 'heat_proxy', 'heat' and 'distance'
+    always (WEIGHTS)."""
     return [name for name, (_, usable) in WEIGHTS.items() if usable()]
 
 
@@ -1058,7 +1040,7 @@ def build_rig(obj_name, rig_name, template, joints, extra_bones=None):
     extra_bones) in their order with their parents, connections and rolls, each deforming as its entry says
     (Blender's use_deform), in place of any object of that name, carrying the body's world transform. The
     body is parented to it with one Armature modifier and an identity local transform, so its own space is
-    the armature's. Writes no vertex weights (skin does). Needs a 3D Viewport in the current screen.
+    the armature's. Writes no vertex weights (skin does). Needs a window.
     Raises ValueError as bone_table, before anything changes. Returns {'bones': the armature's bone count,
     'deform': its deform bone count, 'object': the rig object's name, 'armature': its armature data's
     name}."""

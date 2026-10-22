@@ -1,4 +1,4 @@
-"""Mesh edits under a frozen texture end to end in Blender (bpy as a Python module, background mode): the
+"""Mesh edits under a frozen texture end to end in Blender (background mode): the
 worked example built, frozen and its texture frozen; edits with Blender's own operators that keep the UVs
 (the head subdivided, a knife cut across the left leg, an edge ring of the right leg cut, the left foot
 subdivided by the zone operation) leave the UV check with nothing on those parts; edits that break the UVs
@@ -10,9 +10,9 @@ their cells byte-identical in the frozen atlas and the atlas, the frozen texture
 accepts it, the same UVs and texels from the same scene again; build, bake, rig and export re-import with
 empty diffs.
 
-Not a host test (the host loop runs tests/test_*.py): run it where bpy imports,
+Not a host test (the host loop runs tests/test_*.py): run it in Blender,
 
-    python3 tests/blender/uv_repair.py
+    blender -b --python-exit-code 1 --python tests/blender/uv_repair.py
 
 It works on a copy of examples/mannequin in a temporary folder and prints a short summary; any failed
 check raises."""
@@ -25,12 +25,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-try:
-    import bpy
-    import bmesh
-except ImportError:
-    print('skipped: bpy does not import here (pip install bpy, or run inside Blender)')
-    sys.exit(0)
+import bpy
+import bmesh
 
 import numpy as np
 

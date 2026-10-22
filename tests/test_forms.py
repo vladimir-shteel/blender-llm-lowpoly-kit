@@ -8,7 +8,6 @@ rings as BMVerts or as points, straight_tail's loft along its direction, and on 
 blender_stand_ins the garments over a trunk's sections (torso.section_at, skirt, belt) and hair.long_beard.
 
 python tests/test_forms.py"""
-import contextlib
 import importlib
 import math
 import os
@@ -16,102 +15,8 @@ import sys
 import types
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-class _Vector:
-    """The part of mathutils.Vector the forms under test touch."""
-
-    def __init__(self, seq=(0.0, 0.0, 0.0)):
-        self.v = [float(c) for c in seq]
-
-    x = property(lambda s: s.v[0])
-    y = property(lambda s: s.v[1])
-    z = property(lambda s: s.v[2])
-
-    def __iter__(self):
-        return iter(self.v)
-
-    def __len__(self):
-        return len(self.v)
-
-    def __getitem__(self, i):
-        return self.v[i]
-
-    def __eq__(self, o):
-        return list(self) == list(o)
-
-    def __add__(self, o):
-        return _Vector(a + b for a, b in zip(self, o))
-
-    def __sub__(self, o):
-        return _Vector(a - b for a, b in zip(self, o))
-
-    def __mul__(self, k):
-        return _Vector(a * k for a in self)
-
-    __rmul__ = __mul__
-
-    def __truediv__(self, k):
-        return _Vector(a / k for a in self)
-
-    def __neg__(self):
-        return self * -1.0
-
-    def dot(self, o):
-        return sum(a * b for a, b in zip(self, o))
-
-    def cross(self, o):
-        a, b = self.v, list(o)
-        return _Vector((a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]))
-
-    @property
-    def length(self):
-        return math.sqrt(self.dot(self))
-
-    def normalized(self):
-        n = self.length
-        return _Vector(a / n for a in self) if n else _Vector(self)
-
-    def lerp(self, o, t):
-        return self + (_Vector(o) - self) * t
-
-    def copy(self):
-        return _Vector(self)
-
-    def rotation_difference(self, o):
-        assert _close(self, o), 'the stand-in turns nothing: give Builder.loft an axis'
-        return _Identity()
-
-
-class _Identity:
-    def __matmul__(self, v):
-        return _Vector(v)
-
-
-@contextlib.contextmanager
-def _blender_stand_ins():
-    """bpy, bmesh and mathutils stand-ins for the module-level imports of lpk.core and lpk.forms, and lpk as
-    a bare package over its folder; sys.modules is restored afterwards."""
-    stand_ins = ('bpy', 'bmesh', 'mathutils', 'mathutils.bvhtree', 'mathutils.geometry')
-    ours = lambda name: name in stand_ins or name == 'lpk' or name.startswith('lpk.')
-    saved = {k: v for k, v in sys.modules.items() if ours(k)}
-    for k in saved:
-        del sys.modules[k]
-    mathutils = types.ModuleType('mathutils')
-    mathutils.Vector, mathutils.Matrix = _Vector, type('Matrix', (), {})
-    bvhtree = types.ModuleType('mathutils.bvhtree')
-    bvhtree.BVHTree = type('BVHTree', (), {})
-    mathutils.bvhtree = bvhtree
-    lpk = types.ModuleType('lpk')
-    lpk.__path__ = [os.path.join(ROOT, 'lpk')]
-    sys.modules.update({'bpy': types.ModuleType('bpy'), 'bmesh': types.ModuleType('bmesh'), 'mathutils': mathutils,
-                        'mathutils.bvhtree': bvhtree, 'lpk': lpk})
-    try:
-        yield
-    finally:
-        for k in [k for k in sys.modules if ours(k)]:
-            del sys.modules[k]
-        sys.modules.update(saved)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from blender_stand_ins import BVHTree, Vector as _Vector, stand_ins as _blender_stand_ins  # noqa: E402
 
 
 with _blender_stand_ins():
@@ -493,10 +398,7 @@ def test_profile_head_refuses_what_it_cannot_build():
 # -- garments over the trunk and the long beard (torso.section_at, skirt, belt; hair.long_beard), on the
 # stand-ins of blender_stand_ins with the real Builder ---------------------------------------------------
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import blender_stand_ins as _bsi  # noqa: E402
-
-with _bsi.stand_ins():
+with _blender_stand_ins():
     _gbuilder = importlib.import_module('lpk.core.builder')
     _gsections = importlib.import_module('lpk.core.sections')
     _torso = importlib.import_module('lpk.forms.torso')
@@ -590,7 +492,7 @@ def _sphere(centre, r, rings=8, cols=12):
     polys = [(0, at(1, j + 1), at(1, j)) for j in range(cols)]
     polys += [(at(i, j), at(i, j + 1), at(i + 1, j + 1), at(i + 1, j)) for i in range(1, rings - 1) for j in range(cols)]
     polys += [(len(verts) - 1, at(rings - 1, j), at(rings - 1, j + 1)) for j in range(cols)]
-    return _bsi.BVHTree.FromPolygons(verts, [p[::-1] for p in polys])          # wound outward
+    return BVHTree.FromPolygons(verts, [p[::-1] for p in polys])          # wound outward
 
 
 def test_long_beard_hangs_from_the_jaw_to_its_tip():
@@ -609,7 +511,7 @@ def test_long_beard_hangs_from_the_jaw_to_its_tip():
         mirrored = sorted((-x, y, z) for x, y, z in pts)
         assert all(_close(p, q) for p, q in zip(sorted(pts), mirrored)), 'an exact mirror image'
     for v in R[0][:5]:
-        assert (v.co - _bsi.Vector(centre)).length > 0.1, 'the root row front stands off the head'
+        assert (v.co - _Vector(centre)).length > 0.1, 'the root row front stands off the head'
     apex = [v for v in b.bm.verts if _close(v.co, tip)]
     assert len(apex) == 1, 'closes on its tip'
     assert getattr(b, 'misses', None) is None

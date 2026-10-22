@@ -5,10 +5,6 @@ there is no rig, no pose and no join to review, and the export writes its body a
 parts (a lid, a door) needs a rig and is not this kind. The worked example is `examples/barrel/barrel.py`:
 read it before writing a model of this kind.
 
-The human reviews at the points marked **Review**: show them what the step made, say what to look at, and
-wait for their answer before the next step. A part goes through at most a few passes; if it still does
-not read right, say what is off and ask how to go on.
-
 1. **Brief.** Read the brief and the references. Decide with the human: the triangle total, the atlas
    size, the read size (how tall the prop stands on screen at the farthest distance
    players must read it) and the **pivot**, the point the engine places and turns the prop by: the centre
@@ -54,6 +50,3 @@ not read right, say what is off and ask how to go on.
 
 Limits: one model module holds one prop, so a set of props is a module each; the captures frame a model
 no closer than `lpk.stages.review.MIN_HEIGHT`, so a very small prop reads small in them.
-
-Throughout: one runner or review call per bridge call, a short report back, and the human's corrections
-turned into numbers in the model file.

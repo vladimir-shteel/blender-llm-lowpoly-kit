@@ -2,8 +2,9 @@
 
 ## The bridge
 
-- Run Blender with its user interface: captures, rig building and heat weights need a 3D Viewport, and a
-  background Blender (the bridge's CLI tool, `bpy` from pip) cannot render the viewport.
+- Captures need Blender's user interface: in background mode (`blender -b`) the 3D Viewport's area exists
+  but has no OpenGL render. Every stage runs in either; the edit-mode, bake and UV operators take the 3D
+  Viewport's area, and rig building and heat weights need only the window.
 - Install the bridge's add-on and allow online access in Preferences > System > Network; one Blender serves
   one bridge port. Nothing of the kit is installed into Blender: the bootstrap puts its folder on the path.
 - `execute_blender_code` runs your code with `exec` in a fresh namespace on Blender's main thread, the
@@ -24,7 +25,8 @@
 - **View transform.** AgX and Filmic grey the baked whites in the viewport and in saved renders. The kit's
   captures and preview switch to Standard themselves; your own renders go through the scene's.
 - **Freshly baked images show black in EEVEE**: save to PNG and load the file (the preview does).
-- **Edit-mode and UV operators** need a `temp_override` with the 3D Viewport area and its WINDOW region.
+- **Mesh edit-mode and UV operators** (those that take an area) need a `temp_override` with the 3D Viewport
+  area and its WINDOW region; switching the mode, parenting and other object operators need only the window.
   UV operators act on every visible face regardless of selection: hide what they must not touch.
 - **`mode_set` invalidates mesh data references**: fetch `ob.data` and its layers again after a switch.
 - **New bmesh faces have no normals** until `bm.normal_update()`; a BVH tree built before that returns

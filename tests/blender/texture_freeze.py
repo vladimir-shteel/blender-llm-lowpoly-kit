@@ -1,4 +1,4 @@
-"""The frozen texture end to end in Blender (bpy as a Python module, background mode): the worked example
+"""The frozen texture end to end in Blender (background mode): the worked example
 built, frozen and textured; freeze_texture stores its UVs and atlas; a block of the atlas painted by script
 (a hand paint) and the UVs of one part moved (a hand UV edit) are refused by the frozen bake until
 freeze_texture stores them; with TEXTURE_FROZEN = True the build brings the stored UVs back, unwrap and pack
@@ -10,9 +10,9 @@ unfreeze_texture removes the frozen texture and says what is lost, and the proce
 Last, adopt of the example's own GLB re-imported: the face colours are sampled from its texture, its UVs
 and image become the frozen texture, the build restores them and the export re-imports with empty diffs.
 
-Not a host test (the host loop runs tests/test_*.py): run it where bpy imports,
+Not a host test (the host loop runs tests/test_*.py): run it in Blender,
 
-    python3 tests/blender/texture_freeze.py
+    blender -b --python-exit-code 1 --python tests/blender/texture_freeze.py
 
 It works on a copy of examples/mannequin in a temporary folder and prints a short summary; any failed
 check raises."""
@@ -25,11 +25,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-try:
-    import bpy
-except ImportError:
-    print('skipped: bpy does not import here (pip install bpy, or run inside Blender)')
-    sys.exit(0)
+import bpy
 
 import numpy as np
 

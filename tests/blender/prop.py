@@ -1,12 +1,12 @@
-"""A prop end to end in Blender (bpy as a Python module, background mode): the barrel example from its
+"""A prop end to end in Blender (background mode): the barrel example from its
 blocks to its export without a rig. Its stages run in the calls the example's docstring gives; the rig
 stage refuses a model without SKELETON; the single pack of a model without a face island is settled; both
 exports come back with no armature, no bone and no difference; and a second clean build and export gives
 the same bytes. Captures need Blender's user interface and are not run.
 
-Not a host test (the host loop runs tests/test_*.py): run it where bpy imports,
+Not a host test (the host loop runs tests/test_*.py): run it in Blender,
 
-    python3 tests/blender/prop.py
+    blender -b --python-exit-code 1 --python tests/blender/prop.py
 
 It works on a copy of examples/barrel in a temporary folder and prints a short summary; any failed check
 raises."""
@@ -19,11 +19,7 @@ import tempfile
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, ROOT)
 
-try:
-    import bpy
-except ImportError:
-    print('skipped: bpy does not import here (pip install bpy, or run inside Blender)')
-    sys.exit(0)
+import bpy
 
 from lpk import run
 

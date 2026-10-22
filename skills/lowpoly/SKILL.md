@@ -9,7 +9,10 @@ A model, a character or a prop, is one Python file, its **model module**: measur
 references, the blocks, the mesh composed of the kit's forms, the atlas settings, the bones of a rigged
 model and, once the human asks for files, the export targets. `lpk.run` runs the stages a call names and returns a dict; every call
 rebuilds what it names. The human reviews in the conversation: nothing in code waits for an answer, so
-stop and ask where the kind's card says so.
+stop at the points the kind's card marks **Review**, show them what the step made, say what to look at,
+and wait for their answer before the next step. A part goes through at most a few passes; if it still
+does not read right, say what is off and ask how to go on. Throughout: one runner or review call per
+bridge call, a short report back, and the human's corrections turned into numbers in the model file.
 
 Choose the kind of model with the human at the brief; its card is the route of steps, and the topic cards
 below hold what every kind shares. The kind is a choice of the workflow: the code reads only the module's

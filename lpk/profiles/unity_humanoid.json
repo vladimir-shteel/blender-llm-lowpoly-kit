@@ -1,6 +1,6 @@
 {
   "name": "unity_humanoid",
-  "description": "FBX for Unity's Humanoid avatar: the template's bone names unchanged (Unity's auto-mapping recognises them), -Z forward and Y up with the space transform baked, unit scale applied, deform bones only, no leaf bones, no animation, textures as PNG files beside the FBX under relative paths. The exporter arguments are export_fbx's own.",
+  "description": "FBX for Unity's Humanoid avatar: the template's bone names unchanged (Unity's auto-mapping recognises them), -Z forward and Y up with the space transform baked, unit scale applied, deform bones only, no leaf bones, no animation, textures as PNG files beside the FBX under relative paths.",
   "format": "fbx",
   "skeleton": "biped",
   "bone_map": {},

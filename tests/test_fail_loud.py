@@ -4,116 +4,15 @@ reach only the code before any mesh is built). The guards raise on misuse that w
 silently wrong; the probes count their misses on the builder (lpk.core.shapes.miss).
 
 python tests/test_fail_loud.py"""
-import contextlib
 import importlib
 import json
 import math
 import os
 import sys
-import types
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-class _Vector:
-    """The part of mathutils.Vector the code under test touches before it builds geometry."""
-
-    def __init__(self, seq=(0.0, 0.0, 0.0)):
-        self.v = [float(c) for c in seq]
-
-    x = property(lambda s: s.v[0], lambda s, a: s.v.__setitem__(0, a))
-    y = property(lambda s: s.v[1], lambda s, a: s.v.__setitem__(1, a))
-    z = property(lambda s: s.v[2], lambda s, a: s.v.__setitem__(2, a))
-
-    def __iter__(self):
-        return iter(self.v)
-
-    def __len__(self):
-        return len(self.v)
-
-    def __getitem__(self, i):
-        return self.v[i]
-
-    def __add__(self, o):
-        return _Vector(a + b for a, b in zip(self, o))
-
-    def __sub__(self, o):
-        return _Vector(a - b for a, b in zip(self, o))
-
-    def __mul__(self, k):
-        return _Vector(a * k for a in self)
-
-    __rmul__ = __mul__
-
-    def __truediv__(self, k):
-        return _Vector(a / k for a in self)
-
-    def __neg__(self):
-        return self * -1.0
-
-    def dot(self, o):
-        return sum(a * b for a, b in zip(self, o))
-
-    @property
-    def length(self):
-        return math.sqrt(self.dot(self))
-
-    def normalized(self):
-        n = self.length
-        return _Vector(a / n for a in self) if n else _Vector(self)
-
-    def copy(self):
-        return _Vector(self)
-
-
-class _IntLayers(dict):
-    def new(self, name):
-        self[name] = name
-        return name
-
-
-class _Elements(list):
-    def __init__(self):
-        super().__init__()
-        self.layers = types.SimpleNamespace(int=_IntLayers())
-
-    def ensure_lookup_table(self):
-        pass
-
-
-class _BMesh:
-    """bmesh.new(): empty vertex and face sequences with int layers keyed by their names."""
-
-    def __init__(self):
-        self.verts, self.faces = _Elements(), _Elements()
-
-
-@contextlib.contextmanager
-def _blender_stand_ins():
-    """bpy, bmesh and mathutils stand-ins for the module-level imports of lpk.core and lpk.forms, and lpk as
-    a bare package over its folder; sys.modules is restored afterwards."""
-    stand_ins = ('bpy', 'bmesh', 'mathutils', 'mathutils.bvhtree', 'mathutils.geometry')
-    ours = lambda name: name in stand_ins or name == 'lpk' or name.startswith('lpk.')
-    saved = {k: v for k, v in sys.modules.items() if ours(k)}
-    for k in saved:
-        del sys.modules[k]
-    mathutils = types.ModuleType('mathutils')
-    mathutils.Vector, mathutils.Matrix = _Vector, type('Matrix', (), {})
-    bvhtree = types.ModuleType('mathutils.bvhtree')
-    bvhtree.BVHTree = type('BVHTree', (), {})
-    mathutils.bvhtree = bvhtree
-    bmesh = types.ModuleType('bmesh')
-    bmesh.new = _BMesh
-    lpk = types.ModuleType('lpk')
-    lpk.__path__ = [os.path.join(ROOT, 'lpk')]
-    sys.modules.update({'bpy': types.ModuleType('bpy'), 'bmesh': bmesh, 'mathutils': mathutils,
-                        'mathutils.bvhtree': bvhtree, 'lpk': lpk})
-    try:
-        yield
-    finally:
-        for k in [k for k in sys.modules if ours(k)]:
-            del sys.modules[k]
-        sys.modules.update(saved)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from blender_stand_ins import Vector as _Vector, stand_ins as _blender_stand_ins  # noqa: E402
 
 
 with _blender_stand_ins():

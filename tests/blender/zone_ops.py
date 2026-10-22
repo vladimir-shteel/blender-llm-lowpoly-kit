@@ -1,4 +1,4 @@
-"""The operations on a whole part in Blender (bpy as a Python module, background mode): the worked example
+"""The operations on a whole part in Blender (background mode): the worked example
 built, frozen and switched to the frozen mode, then each runner operation on one part, each stored as the
 frozen mesh by its call: hand.L moved and scaled (a separate shell: nothing else moves), arm.L turned with
 a falloff of two rings (the trunk round the armhole follows, the seam stays closed), the head replaced by
@@ -8,9 +8,9 @@ added, no face of no area, the part count and the build stamp kept. Decimate and
 from the same frozen mesh and compared. Then build (frozen), unwrap, packs, bake, rig and export, every
 re-import without diffs; and every operation refused in the parametric mode.
 
-Not a host test (the host loop runs tests/test_*.py): run it where bpy imports,
+Not a host test (the host loop runs tests/test_*.py): run it in Blender,
 
-    python3 tests/blender/zone_ops.py
+    blender -b --python-exit-code 1 --python tests/blender/zone_ops.py
 
 It works on a copy of examples/mannequin in a temporary folder and prints a short summary; any failed
 check raises."""
@@ -23,11 +23,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-try:
-    import bpy
-except ImportError:
-    print('skipped: bpy does not import here (pip install bpy, or run inside Blender)')
-    sys.exit(0)
+import bpy
 
 import numpy as np
 
