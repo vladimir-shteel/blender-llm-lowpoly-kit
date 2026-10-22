@@ -1,5 +1,5 @@
 {
  "about": "Permitted exceptions of the architecture conformance test (tests/test_architecture.py), keyed by rule, module and name with their counts of sites. The list only shrinks: a new exception or a higher count fails; an entry that no longer occurs, or whose count fell, fails until python tests/test_architecture.py --prune removes it or lowers the count; the test fails while the list holds more than the version committed at HEAD.",
- "rules": ["layers", "host", "private", "dynamic", "local"],
+ "rules": ["layers", "host", "private", "dynamic", "local", "dev"],
  "exceptions": []
 }

@@ -91,6 +91,32 @@ Hits in identifiers and string literals are listed apart as code hits. Without t
 runs the neutral `dev/scrub_words.example.json`, which shows the file format, and says so: only a run with
 the private list counts.
 
+### Your own word list
+
+The maintainer's list knows only the projects the kit came from. A change that brings work from your own
+projects (a form, a technique card, a skeleton or export profile, an example) can carry their names, which
+no list in the kit knows. Before you send such a change, write a list of your own in the same format and
+run the scrub with it as well:
+
+```sh
+python dev/scrub_check.py --words ~/lpk-scrub/my_words.json
+```
+
+- **hard**: names that must never appear in a comment, docstring or text file: your projects, games,
+  characters, studios, repositories, user names and private paths (a pattern such as `[A-Z]:\\Users\\` or
+  `/home/<you>/` catches a pasted path).
+- **soft**: words that are allowed in context but worth a look on every hit, such as an engine named in a
+  compatibility note.
+- Write each entry as a regular expression; `\b` around a short name keeps it from matching inside other
+  words.
+
+Keep the list outside the kit, as the script requires, and fix every hard hit before the change goes up.
+A code hit (an identifier or a string literal) is renamed in the change itself, with its tests.
+
+The scrub finds only the words a list holds. The rest of the rule is for review: docs, cards, comments and
+docstrings state what the code does and its limits, never where a recipe came from, which model it was
+tuned on or what a run measured.
+
 ## Running the tests
 
 The host tests need plain Python with numpy, never Blender. Modules that import `bpy` are parsed with `ast`

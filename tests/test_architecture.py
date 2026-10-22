@@ -1,7 +1,7 @@
 """The architecture conformance test (ARCHITECTURE.md, "Conformance checks"), on the host Python: lpk is
 parsed with ast, and only the host-importability check imports modules, each in a subprocess of its own
-that refuses the Blender modules. The scan covers lpk/; tests/ and dev/ are not scanned, so a test may
-reach the private names of the module it tests.
+that refuses the Blender modules. The scan covers lpk/; tests/, dev/ and lpk_dev/ are not scanned, so a
+test may reach the private names of the module it tests.
 
 Every finding is an exception keyed by (rule, module, name), never by line number, with its count of
 sites. The rules:
@@ -30,6 +30,8 @@ local    rule 8. No lpk module imports the local library lpk_local: an import or
          module level or in a function, or a string constant naming it in a scope that calls
          importlib.import_module or __import__. lpk_local is ignored by git and not scanned. name: the
          imported dotted name.
+dev      rule 9. No lpk module imports the development tools lpk_dev, in the same forms as local.
+         lpk_dev is not scanned. name: the imported dotted name.
 
 Baseline. tests/architecture_baseline.json lists the permitted exceptions with their counts. A finding the
 baseline lacks, or a count above the recorded one, fails. An entry that no longer occurs, or whose count is
@@ -54,7 +56,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASELINE_FILE = os.path.join(ROOT, 'tests', 'architecture_baseline.json')
 BASELINE_REL = 'tests/architecture_baseline.json'
-RULES = ('layers', 'host', 'private', 'dynamic', 'local')
+RULES = ('layers', 'host', 'private', 'dynamic', 'local', 'dev')
 
 # ARCHITECTURE.md "Layers": the current modules of each layer. A pattern `pkg.*` covers the submodules of
 # pkg, not the package itself.
@@ -83,6 +85,9 @@ DYNAMIC_BUILTINS = ('exec', 'eval', '__import__', 'globals')
 KEY_FIELDS = ('rule', 'module', 'name')
 # ARCHITECTURE.md "Layers", rule 8: the local form library, which no lpk module imports.
 LOCAL = 'lpk_local'
+# Rule 9: the development tools, which no lpk module imports either.
+DEV = 'lpk_dev'
+BARRED = (LOCAL, DEV)
 
 
 def _private(part):
@@ -188,7 +193,7 @@ class Scanner(ast.NodeVisitor):
         self.external = []         # (top-level module name, line)
         self.private = []          # (dotted private name, line)
         self.dynamic = []          # (call name, line)
-        self.local = []            # (dotted lpk_local name, line)
+        self.barred = []           # (dotted lpk_local or lpk_dev name, line)
         self.visit(mod.tree)
 
     def _base(self, node):
@@ -219,8 +224,8 @@ class Scanner(ast.NodeVisitor):
                 s = _str(n)
                 if s and re.fullmatch(r'lpk(\.\w+)*\.?', s) and s.rstrip('.') in modules():
                     self.imports.append((s.rstrip('.'), 'dynamic', n.lineno))
-                elif s and re.fullmatch(r'%s(\.\w+)*\.?' % LOCAL, s):
-                    self.local.append((s.rstrip('.'), n.lineno))
+                elif s and re.fullmatch(r'(%s)(\.\w+)*\.?' % '|'.join(BARRED), s):
+                    self.barred.append((s.rstrip('.'), n.lineno))
 
     def _loader_call(self, call):
         return self.resolve(call.func) == 'importlib.import_module' or self._builtin(call.func) == '__import__'
@@ -272,8 +277,8 @@ class Scanner(ast.NodeVisitor):
         where = 'function' if self.depth else 'module'
         for a in node.names:
             top = a.name.split('.')[0]
-            if top == LOCAL:
-                self.local.append((a.name, node.lineno))
+            if top in BARRED:
+                self.barred.append((a.name, node.lineno))
             if top != 'lpk':
                 self.external.append((top, node.lineno))
                 continue
@@ -282,8 +287,8 @@ class Scanner(ast.NodeVisitor):
     def visit_ImportFrom(self, node):
         where = 'function' if self.depth else 'module'
         base = self._base(node)
-        if base and not node.level and base.split('.')[0] == LOCAL:
-            self.local.append((base, node.lineno))
+        if base and not node.level and base.split('.')[0] in BARRED:
+            self.barred.append((base, node.lineno))
         if not base or base.split('.')[0] != 'lpk':
             if base and not node.level:
                 self.external.append((base.split('.')[0], node.lineno))
@@ -494,19 +499,29 @@ def check_dynamic():
     return out
 
 
-def check_local():
+def _check_barred(rule, package):
     out = Findings()
     for name in scanned():
-        for dotted, line in scan(name).local:
-            out.count('local', name, dotted, '%s:%d imports %s' % (modules()[name].rel, line, dotted))
+        for dotted, line in scan(name).barred:
+            if dotted.split('.')[0] == package:
+                out.count(rule, name, dotted, '%s:%d imports %s' % (modules()[name].rel, line, dotted))
     return out
 
 
+def check_local():
+    return _check_barred('local', LOCAL)
+
+
+def check_dev():
+    return _check_barred('dev', DEV)
+
+
 CHECKS = {'layers': check_layers, 'host': check_host, 'private': check_private,
-          'dynamic': check_dynamic, 'local': check_local}
+          'dynamic': check_dynamic, 'local': check_local, 'dev': check_dev}
 TITLES = {'layers': 'imports follow the layers',
           'host': 'L0 and host commands import on host', 'private': 'no private access across modules',
-          'dynamic': 'dynamic loading only in the runner', 'local': 'lpk never imports lpk_local'}
+          'dynamic': 'dynamic loading only in the runner', 'local': 'lpk never imports lpk_local',
+          'dev': 'lpk never imports lpk_dev'}
 
 
 @functools.lru_cache(None)
@@ -669,21 +684,30 @@ def test_local_library():
     run_rule('local')
 
 
-def test_local_rule_sees_every_import_form():
-    """The local rule's scanner finds a module-level import, a from-import, a function-local one and a
-    dynamic one in a module of lpk (parsed from text, never written), and not a name that only starts
-    the same."""
+def test_dev_tools():
+    run_rule('dev')
+
+
+def test_barred_rules_see_every_import_form():
+    """The scanner of the local and dev rules finds a module-level import, a from-import, a
+    function-local one and a dynamic one in a module of lpk (parsed from text, never written), and not a
+    name that only starts the same."""
     source = ('import lpk_local.forms.a\n'
               'import lpk_localish\n'
               'from lpk_local.forms import b\n'
               'def f():\n'
               '    from lpk_local import forms\n'
               '    import importlib\n'
-              '    return importlib.import_module("lpk_local.forms.c")\n')
+              '    return importlib.import_module("lpk_local.forms.c")\n'
+              'import lpk_dev.fingerprint\n'
+              'import lpk_devtools\n'
+              'def g():\n'
+              '    from lpk_dev import fingerprint\n'
+              '    return __import__("lpk_dev")\n')
     probe = Module('lpk.forms.probe', os.path.join(ROOT, 'lpk', 'forms', 'probe.py'), source)
-    seen = sorted(Scanner(probe).local)
-    assert seen == [('lpk_local', 5), ('lpk_local.forms', 3), ('lpk_local.forms.a', 1),
-                    ('lpk_local.forms.c', 7)], seen
+    seen = sorted(Scanner(probe).barred)
+    assert seen == [('lpk_dev', 11), ('lpk_dev', 12), ('lpk_dev.fingerprint', 8), ('lpk_local', 5),
+                    ('lpk_local.forms', 3), ('lpk_local.forms.a', 1), ('lpk_local.forms.c', 7)], seen
 
 
 def test_baseline_complete():
