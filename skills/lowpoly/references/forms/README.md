@@ -20,7 +20,7 @@ One card per body area says which form fits which look, how to measure it, how t
 | Feet, paws, boots, toes | [feet.md](feet.md) |
 | Tails | [tails.md](tails.md) |
 | The trunk and clothing | [torso-clothing.md](torso-clothing.md) |
-| Straps, plates, hard parts and props | [gear.md](gear.md) |
+| Straps, plates, hard-surface parts and props | [gear.md](gear.md) |
 | Markings and painted decals | [markings-decals.md](markings-decals.md) |
 | Limbs, welded joins and separate shells | [joins.md](joins.md) |
 
@@ -147,6 +147,18 @@ when the kit is replaced by a new copy: nothing else holds it.
 - `leg_holes`: splits the trunk's bottom ring into two leg holes round a crotch seam (`LEG_TILT`).
 - `weld_limb`: an arm grown out of an armhole: socket section, welded corners, bridged front and back.
 - `weld_leg`: a leg grown out of a leg hole, its first ring bridged to it.
+
+### `lpk.forms.hard`
+
+- `chamfer_section`: the vertices of a rectangle with cut corners, in `SIDES` order.
+- `chamfer_loft`: a prism through chamfered sections along a frame's axis, steps included, flat caps.
+- `chamfer_box`: a box with cut edges, bevelled ends and an optional taper.
+- `segment_plate`: a chamfered housing or plate along a segment, its outer face toward a direction.
+- `standoff_plate`: a convex plate standing off a flat face, its back open.
+- `slot`: a rectangle decal on a flat face.
+- `hinge`: an n-sided pin or roller with flat ends.
+- `hub`: a round axle housing with a cap disc.
+- `mech_hand`: a chamfered palm housing with hinged two-segment digits.
 
 ### `lpk.forms.markings`
 

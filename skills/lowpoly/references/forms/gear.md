@@ -7,15 +7,25 @@ part of its own. Under the texture stance gear that does not change the silhouet
 ([markings-decals.md](markings-decals.md)); under the geometry stance it is an in-mesh decal or a plate in a
 part of its own, or left out by the human's decision.
 
-The library has no hard-surface forms yet (a chamfered box, a hinge pin, a hub, a plate stack, a mechanical
-hand): build them from the primitives below as local forms of the model
-([README.md](README.md#where-a-new-form-goes)).
+The hard-surface forms are `lpk.forms.hard`. Their frame `axes` is three directions: a section lies in the
+first two, a prism runs along the third; `hard.FRONT` is a plane on the model's front. Their colour
+functions take `(band, side)`, `side` one of `hard.SIDES`, so a cut corner (`hard.CORNERS`) or one face of
+one band takes its own colour. A piece neither the forms nor the primitives below make is a local form
+of the model ([README.md](README.md#where-a-new-form-goes)).
 
 ## Choose the primitive
 
 | The piece | Call |
 |---|---|
-| A block or a case | `Builder.box(part, center, half, rot, col)` (`rot` a `mathutils.Matrix` or None) |
+| A block or a case with cut edges or bevelled ends, a housing that narrows | `hard.chamfer_box` |
+| A shell whose section steps or changes along its length (a case with a parting groove, a stepped housing) | `hard.chamfer_loft` through its stations; two stations at one depth make the step |
+| A housing or plate along a limb or a strut, its outer face turned one way | `hard.segment_plate` |
+| A panel, a strap or a latch plate standing off a flat face | `hard.standoff_plate` |
+| A slot, a groove or a light on a flat face | `hard.slot` |
+| A hinge pin, a roller, an axle | `hard.hinge` |
+| An axle housing on a mechanical joint | `hard.hub` on the flexion axis |
+| A mechanical hand | `hard.mech_hand` |
+| A plain block | `Builder.box(part, center, half, rot, col)` (`rot` a `mathutils.Matrix` or None) |
 | A turned body (a barrel, a bottle, a column) | `Builder.loft` up a fixed `axis` through rings a profile function of P gives, flat caps coloured by `col0` and `col1`; or `shapes.profile_loft` through profile keys |
 | A band, rim or hoop standing off a turned body | step rings in the body's own loft, the band's faces coloured by the loft's colour function (`examples/barrel/barrel.py`, `_staves`) |
 | A bent handle, a rail or a pipe with corners | `Builder.loft` through the path's points, every ring carrying its own `axis` (its ring option; at a corner the mean of the two segments' directions), so each corner is a mitred joint: without it a ring turns to the path through its neighbours' centres, which a sharp bend does not carry through |
