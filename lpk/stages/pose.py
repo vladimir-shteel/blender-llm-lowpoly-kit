@@ -12,8 +12,8 @@ CHANNELS = ('rotation_mode', 'location', 'rotation_quaternion', 'rotation_euler'
 
 def set_pose(rig_name, rotations=None):
     """Pose the armature `rig_name`: rotations {bone name: (x, y, z) Euler degrees, bone-local XYZ}, as
-    in lpk.stages.review.POSES and a model's TEST_POSE. Every bone it does not name, and every bone when
-    rotations is None, goes back to the rest pose (no rotation, no offset). Returns the names in
+    in a skeleton template's review poses (lpk.skeletons.poses) and a model's TEST_POSE. Every bone it does
+    not name, and every bone when rotations is None, goes back to the rest pose (no rotation, no offset). Returns the names in
     `rotations` the rig has no bone for, in their order: they turn nothing ([] when every name is a
     bone)."""
     rig = bpy.data.objects[rig_name]

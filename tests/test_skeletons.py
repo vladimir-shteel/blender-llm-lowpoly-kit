@@ -1,7 +1,8 @@
 """The skeleton templates' loader on the host Python: every shipped template validates, and validate()
 names the problem of each kind of broken section; the biped's body-plan sections (part binding, roll rule,
-review poses) hold the data the rig and review stages use; part_binding() and roll() read them; the options
-give the bones a rig has (bones_for()) and are read back from a rig's bone names (options_for()); sided()
+review poses) hold the data the rig and review stages use; part_binding(), roll() and poses() read them; the
+options give the bones a rig has (bones_for()), a light rig hanging the children of a bone it leaves out from
+the nearest bone it has, and are read back from a rig's bone names (options_for()); sided()
 expands '{s}' in model data.
 
 python tests/test_skeletons.py"""
@@ -15,6 +16,8 @@ from lpk import skeletons  # noqa: E402
 
 RIG = ROOT / 'lpk' / 'stages' / 'rig.py'
 REVIEW = ROOT / 'lpk' / 'stages' / 'review.py'
+DEFAULTS = {'tail': 0, 'hands': 'plain', 'neck': 'bone', 'shoulders': 'bones', 'toes': 'bones'}
+LIGHT = {'neck': 'none', 'shoulders': 'none', 'toes': 'none'}
 
 
 def _functions(path, *names):
@@ -92,15 +95,18 @@ def test_the_biped_roll_rule_and_poses_are_the_stage_data():
         expected = (0.0, 0.0, 1.0) if bone['name'].startswith('Tail') else (0.0, -1.0, 0.0)
         assert skeletons.roll(bone['name'], 'biped') == expected, bone['name']
     assert skeletons.roll('Tail.12') == (0.0, 0.0, 1.0) and skeletons.roll('Ear.L') == (0.0, -1.0, 0.0)
-    poses = {p: {b: tuple(e) for b, e in r.items()} for p, r in skeletons.load('biped')['poses'].items()}
-    assert poses == _constant(REVIEW, 'POSES')
+    poses = skeletons.poses('biped')
+    assert list(poses) == list(skeletons.load('biped')['poses']), 'in template order'
+    assert poses['side75'] == {'UpperArm.L': (0.0, 0.0, 75.0), 'UpperArm.R': (0.0, 0.0, -75.0)}
+    assert 'POSES' not in REVIEW.read_text(encoding='utf-8'), 'the template is the one source of the review poses'
 
 
 def test_options_give_the_bones_a_rig_of_the_template_has():
-    assert skeletons.option_values('biped') == {'tail': 0, 'hands': 'plain'}
+    assert skeletons.option_values('biped') == DEFAULTS
     plain = skeletons.bones_for('biped')
     listed = {b['name']: b for b in skeletons.load('biped')['bones']}
-    assert [b['name'] for b in plain] == [n for n, b in listed.items() if not b.get('optional')]
+    by_default = {'Neck', 'Shoulder.L', 'Shoulder.R', 'Toes.L', 'Toes.R'}
+    assert [b['name'] for b in plain] == [n for n, b in listed.items() if not b.get('optional') or n in by_default]
     assert all(b == {k: listed[b['name']][k] for k in ('name', 'role', 'parent', 'connect')} for b in plain)
     names = [b['name'] for b in skeletons.bones_for('biped', {'tail': 2, 'hands': 'mitten'})]
     assert names[-8:] == ['Tail.1', 'Tail.2', 'Index.L', 'Middle.L', 'Thumb.L', 'Index.R', 'Middle.R', 'Thumb.R']
@@ -129,13 +135,26 @@ def test_options_give_the_bones_a_rig_of_the_template_has():
     assert skeletons.validate(without, 'biped') == [], 'the options are optional'
 
 
+def test_a_light_rig_hangs_children_from_the_nearest_bone_it_has():
+    light = {b['name']: b for b in skeletons.bones_for('biped', LIGHT)}
+    assert len(light) == 16 and not {'Neck', 'Shoulder.L', 'Toes.R'} & set(light)
+    assert light['Head'] == {'name': 'Head', 'role': 'head', 'parent': 'Chest', 'connect': False}
+    assert light['UpperArm.L']['parent'] == 'Chest' and light['UpperArm.L']['connect'] is False
+    assert light['LowerArm.L']['parent'] == 'UpperArm.L' and light['LowerArm.L']['connect'] is True, 'the rest stays'
+    with_tail = skeletons.bones_for('biped', dict(LIGHT, tail=2))
+    assert [b['name'] for b in with_tail][-2:] == ['Tail.1', 'Tail.2'] and len(with_tail) == 18
+    binding = skeletons.part_binding('biped', bones=list(light))
+    assert binding['trunk'] == ['Hips', 'Spine', 'Chest', 'UpperArm.L', 'UpperArm.R', 'UpperLeg.L', 'UpperLeg.R']
+    assert binding['foot.L'] == ['LowerLeg.L', 'Foot.L']
+
 
 def test_options_for_reads_the_options_back_from_a_rigs_bones():
-    for options in ({}, {'tail': 3}, {'tail': 8, 'hands': 'mitten'}, {'hands': 'mitten'}):
+    for options in ({}, {'tail': 3}, {'tail': 8, 'hands': 'mitten'}, {'hands': 'mitten'}, LIGHT,
+                    dict(LIGHT, tail=2, neck='bone')):
         names = [b['name'] for b in skeletons.bones_for('biped', options)]
         assert skeletons.options_for('biped', names) == skeletons.option_values('biped', options), options
     plain = [b['name'] for b in skeletons.bones_for('biped')]
-    assert skeletons.options_for('biped', plain + ['Socket', 'Ear.L']) == {'tail': 0, 'hands': 'plain'}
+    assert skeletons.options_for('biped', plain + ['Socket', 'Ear.L']) == DEFAULTS
     for extra, needle in ((['Tail.1', 'Tail.3'], 'gap'), (['Index.L'], 'no choice')):
         try:
             skeletons.options_for('biped', plain + extra)

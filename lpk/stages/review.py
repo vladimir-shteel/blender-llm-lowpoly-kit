@@ -2,7 +2,8 @@
 the viewport (lpk.stages.view) and restore the user's view afterwards; contact sheets and overlays are
 composed from the captures by lpk.stages.imaging.
 
-Poses are Blender bone-local Euler degrees; the right side mirrors the sign of Z (and of the finger curl).
+Poses are Blender bone-local Euler degrees, the skeleton template's review poses (lpk.skeletons.poses) or a
+model's own.
 join_metrics gives the numbers of how a pose deforms each join zone; the pose captures show it.
 
 The measurements against a drawing: outline_diff (the build's outline against the drawing's ink in one
@@ -29,15 +30,6 @@ from lpk.stages.view import load_image, save_image
 FIT_PER_M = 2.4 / 1.8     # view distance per metre of framed height: the viewport fits a 1.8 m figure at 2.4
 MARGIN = 1.1              # room round the framed height
 MIN_HEIGHT = 0.2          # metres: a part built alone (an eye, a skull) is framed no closer than this
-POSES = {
-    'side75': {'UpperArm.L': (0, 0, 75), 'UpperArm.R': (0, 0, -75)},
-    'fwd70': {'UpperArm.L': (70, 0, 0), 'UpperArm.R': (70, 0, 0)},
-    'shrug': {'Shoulder.L': (0, 0, 20), 'UpperArm.L': (0, 0, 55), 'Shoulder.R': (0, 0, -20), 'UpperArm.R': (0, 0, -55)},
-    'stride': {'UpperLeg.R': (45, 0, 0), 'LowerLeg.R': (-60, 0, 0), 'UpperLeg.L': (-20, 0, 0)},
-    'spread': {'UpperLeg.L': (0, 0, 35), 'UpperLeg.R': (0, 0, -35)},
-    'grip': {'Index.L': (0, 0, -10), 'Middle.L': (0, 0, -75), 'Thumb.L': (0, 0, -45),
-             'Index.R': (0, 0, 10), 'Middle.R': (0, 0, 75), 'Thumb.R': (0, 0, 45)},
-}
 # Pixels an edge of the build may read off the drawing's before silhouette_report lists it as a band: each
 # outline holds an edge to its pixel (the build's at pixel centres, the drawing's where its ink is), so one
 # true edge can read a pixel apart in the two.
@@ -392,8 +384,8 @@ def _area(co, poly):
 def join_metrics(obj_name, rig_name, pose, pairs, rings=2):
     """How a pose deforms each join zone of a rigged mesh, against the rest pose.
 
-    obj_name: the skinned mesh object; rig_name: its armature; pose: a POSES key or a rotation dict
-    {bone: (x, y, z) degrees}; pairs: [{'parent', 'child', 'caps'}] join pairs (parent and child part
+    obj_name: the skinned mesh object; rig_name: its armature; pose: a rotation dict {bone: (x, y, z)
+    degrees}; pairs: [{'parent', 'child', 'caps'}] join pairs (parent and child part
     names, caps as lpk.stages.rig.smooth_zones takes them); rings: the edge rings round each loop the zone
     takes (lpk.stages.rig.join_zones). The rig holds the pose it was found in again afterwards
     (lpk.stages.pose.held_pose).
@@ -409,7 +401,7 @@ def join_metrics(obj_name, rig_name, pose, pairs, rings=2):
     zones = rig_stage.join_zones(ob, [(p['parent'], p['child'], p.get('caps')) for p in pairs], rings)
     with pose_stage.held_pose(rig_name, None):
         rest = _evaluated(ob)
-        pose_stage.set_pose(rig_name, POSES.get(pose, pose) if isinstance(pose, str) else pose)
+        pose_stage.set_pose(rig_name, pose)
         posed = _evaluated(ob)
     out = {}
     for p, (zone, loop, _) in zip(pairs, zones):
@@ -437,8 +429,8 @@ def pose_captures(body, rig, out, poses, *, views=('front', 'q34', 'side'), widt
 
     body: the name of the body object, which names nothing else; rig: the name of its armature object; out:
     the folder of the captures, named <pose>_<view>.png, and of the sheet, poses.png; poses: {name: {bone:
-    (x, y, z) degrees}} as POSES, in column order; views: lpk.stages.view.VIEWS names; width: the captures'
-    width in pixels.
+    (x, y, z) degrees}} as lpk.skeletons.poses gives them, in column order; views: lpk.stages.view.VIEWS
+    names; width: the captures' width in pixels.
 
     A bone a pose names that the rig lacks turns nothing, so the pose shows less than it names: those names
     are returned per pose, and a pose none of whose bones the rig has is left out, since its column would

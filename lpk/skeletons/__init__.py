@@ -6,8 +6,9 @@ in it. Its sections:
     name, description  the template's name (its file name) and what it describes
     bones              [{'name', 'role', 'parent', 'connect', 'optional'?}] in creation order: each bone's
                        neutral role ('hips', 'upper_arm.L', ...), its parent (an earlier bone, or None) and
-                       whether it is connected to it; an optional bone (a tail, fingers) may be absent from a
-                       rig
+                       whether it is connected to it; an optional bone (a tail, fingers, a neck) may be absent
+                       from a rig, and the bones it parents then hang unconnected from its nearest ancestor the
+                       rig has
     chains             [{'prefix', 'role_prefix', 'root_parent'}]: bone runs whose length the rig chooses; a
                        chain with prefix 'Tail.' and role prefix 'tail.' gives 'Tail.<i>' the role 'tail.<i>'
                        for any i >= 1
@@ -122,6 +123,13 @@ def roll(bone_name, template='biped'):
     return tuple(float(v) for v in rule['default'])
 
 
+def poses(template='biped'):
+    """The template's review poses, {pose: {bone: (x, y, z) degrees}} in template order: bone-local Euler XYZ
+    rotations from the rest pose."""
+    return {p: {b: tuple(float(v) for v in e) for b, e in r.items()}
+            for p, r in _template(template)['poses'].items()}
+
+
 def option_values(template, options=None):
     """{option: value} of every option the template declares (its 'options' section, in its order): the
     value `options` ({option: value}) gives, else the option's default. Raises ValueError listing every
@@ -153,7 +161,9 @@ def bones_for(template, options=None):
     the template's creation order. A chain option of count n requires its chain's bones 1 to n; a chain bone
     past the ones the template lists follows the chain's last listed bone, parented and connected to the bone
     before it, with the chain's role prefix and its number as its role. A choice option requires the bones of
-    its choice, '{s}' expanded over the sides in side order. Raises ValueError as option_values()."""
+    its choice, '{s}' expanded over the sides in side order. A bone whose parent the rig lacks hangs from that
+    parent's nearest ancestor the rig has, unconnected (a head without a neck hangs from the chest). Raises
+    ValueError as option_values()."""
     t = _template(template)
     values = option_values(template, options)
     wanted, extra = set(), {}
@@ -180,6 +190,14 @@ def bones_for(template, options=None):
         if not b.get('optional') or b['name'] in wanted:
             out.append({k: b[k] for k in ('name', 'role', 'parent', 'connect')})
         out.extend(after.get(b['name'], ()))
+    parent_of = {b['name']: b['parent'] for b in t['bones']}
+    have = {b['name'] for b in out}
+    for b in out:
+        if b['parent'] is not None and b['parent'] not in have:
+            up = b['parent']
+            while up is not None and up not in have:
+                up = parent_of[up]
+            b['parent'], b['connect'] = up, False
     return out
 
 

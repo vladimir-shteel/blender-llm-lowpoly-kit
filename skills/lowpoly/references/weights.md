@@ -25,7 +25,10 @@ roles, parents and rolls, its sides (`L` +X, `R` -X), its options, its part bind
 - **Bones.** The rig has every bone the template does not mark optional, plus the optional bones
   `bones(P)` names: the biped's tail chain `Tail.1`, `Tail.2`, ... from 1 without a gap, and the mitten
   fingers `Index`, `Middle`, `Thumb` per side, complete or not at all. A hand without finger bones is
-  rigid on its hand bone. The biped has no twist bones; whether a target needs them is checked against
+  rigid on its hand bone. The biped's `Neck`, `Shoulder` and `Toes` bones are optional too: a light rig
+  (a low budget, a target that animates no neck, clavicle or toes) leaves them out of `bones(P)`, each
+  side's pair together, and the bones they parent hang from the nearest bone the rig has (the head and the
+  upper arms from the chest), unconnected. The poses leave out what the rig lacks (`ignored`). The biped has no twist bones; whether a target needs them is checked against
   its clips and its importer.
 - **Names.** A template bone keeps the template's name; export profiles rename bones by role
   (`lpk.skeletons.role_of`) on a copy, during the export only.
@@ -141,13 +144,13 @@ lower than the limit the weights were made under.
 
 After `rig`:
 
-- `run.poses(MODEL)` sets each review pose of `lpk.stages.review.POSES` and `TEST_POSE` (as `'test'`) and
+- `run.poses(MODEL)` sets each review pose of the skeleton template (`lpk.skeletons.poses`) and `TEST_POSE` (as `'test'`) and
   captures the body on one sheet, a pose per column, a view per row (`out/captures/poses/poses.png`); the
   rig returns to its pose afterwards. `ignored` lists per pose the bones it names that the rig lacks, which
   turn nothing; `skipped` the poses none of whose bones the rig has (the grip on a hand without finger
   bones). Read them before judging a pose. The framing reads the rest shape, so a posed part can leave the
   frame.
-- `run.joins(MODEL, pose)` (a `POSES` name, `'test'` or `{bone: degrees}`) returns, per
+- `run.joins(MODEL, pose)` (a review pose's name, `'test'` or `{bone: degrees}`) returns, per
   `'<parent>/<child>'` join, `stretch` and `squash` (the largest and smallest edge-length ratio posed over
   rest in the zone), `area` (the smallest face-area ratio) and `loop_cm` (how far the hole loop moves).
   It says where a zone deforms most, never whether it looks right: less stretch is no better

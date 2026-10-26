@@ -1,28 +1,28 @@
 {
   "name": "biped",
-  "description": "Two-legged body plan: hips, spine, chest, neck and head; per side (L, then R) a clavicle, an arm with its hand, a leg with its foot and toes; an optional tail chain from the hips and optional mitten fingers (Index, Middle, Thumb) on each hand. Bones are listed in creation order, a six-bone tail and fingers on both hands included. The names are the ones humanoid-retargeting importers map by name; roles are neutral.",
+  "description": "Two-legged body plan: hips, spine, chest, neck and head; per side (L, then R) a clavicle, an arm with its hand, a leg with its foot and toes; an optional tail chain from the hips and optional mitten fingers (Index, Middle, Thumb) on each hand. The neck, the clavicles and the toes may be left out, down to the fifteen bones a humanoid avatar requires and the chest. Bones are listed in creation order, a six-bone tail and fingers on both hands included. The names are the ones humanoid-retargeting importers map by name; roles are neutral.",
   "bones": [
     {"name": "Hips", "role": "hips", "parent": null, "connect": false},
     {"name": "Spine", "role": "spine", "parent": "Hips", "connect": true},
     {"name": "Chest", "role": "chest", "parent": "Spine", "connect": true},
-    {"name": "Neck", "role": "neck", "parent": "Chest", "connect": false},
+    {"name": "Neck", "role": "neck", "parent": "Chest", "connect": false, "optional": true},
     {"name": "Head", "role": "head", "parent": "Neck", "connect": true},
-    {"name": "Shoulder.L", "role": "clavicle.L", "parent": "Chest", "connect": false},
+    {"name": "Shoulder.L", "role": "clavicle.L", "parent": "Chest", "connect": false, "optional": true},
     {"name": "UpperArm.L", "role": "upper_arm.L", "parent": "Shoulder.L", "connect": true},
     {"name": "LowerArm.L", "role": "lower_arm.L", "parent": "UpperArm.L", "connect": true},
     {"name": "Hand.L", "role": "hand.L", "parent": "LowerArm.L", "connect": true},
     {"name": "UpperLeg.L", "role": "upper_leg.L", "parent": "Hips", "connect": false},
     {"name": "LowerLeg.L", "role": "lower_leg.L", "parent": "UpperLeg.L", "connect": true},
     {"name": "Foot.L", "role": "foot.L", "parent": "LowerLeg.L", "connect": true},
-    {"name": "Toes.L", "role": "toes.L", "parent": "Foot.L", "connect": true},
-    {"name": "Shoulder.R", "role": "clavicle.R", "parent": "Chest", "connect": false},
+    {"name": "Toes.L", "role": "toes.L", "parent": "Foot.L", "connect": true, "optional": true},
+    {"name": "Shoulder.R", "role": "clavicle.R", "parent": "Chest", "connect": false, "optional": true},
     {"name": "UpperArm.R", "role": "upper_arm.R", "parent": "Shoulder.R", "connect": true},
     {"name": "LowerArm.R", "role": "lower_arm.R", "parent": "UpperArm.R", "connect": true},
     {"name": "Hand.R", "role": "hand.R", "parent": "LowerArm.R", "connect": true},
     {"name": "UpperLeg.R", "role": "upper_leg.R", "parent": "Hips", "connect": false},
     {"name": "LowerLeg.R", "role": "lower_leg.R", "parent": "UpperLeg.R", "connect": true},
     {"name": "Foot.R", "role": "foot.R", "parent": "LowerLeg.R", "connect": true},
-    {"name": "Toes.R", "role": "toes.R", "parent": "Foot.R", "connect": true},
+    {"name": "Toes.R", "role": "toes.R", "parent": "Foot.R", "connect": true, "optional": true},
     {"name": "Tail.1", "role": "tail.1", "parent": "Hips", "connect": false, "optional": true},
     {"name": "Tail.2", "role": "tail.2", "parent": "Tail.1", "connect": true, "optional": true},
     {"name": "Tail.3", "role": "tail.3", "parent": "Tail.2", "connect": true, "optional": true},
@@ -61,12 +61,15 @@
   },
   "options": {
     "tail": {"chain": "Tail.", "default": 0},
-    "hands": {"choices": {"plain": [], "mitten": ["Index.{s}", "Middle.{s}", "Thumb.{s}"]}, "default": "plain"}
+    "hands": {"choices": {"plain": [], "mitten": ["Index.{s}", "Middle.{s}", "Thumb.{s}"]}, "default": "plain"},
+    "neck": {"choices": {"bone": ["Neck"], "none": []}, "default": "bone"},
+    "shoulders": {"choices": {"bones": ["Shoulder.{s}"], "none": []}, "default": "bones"},
+    "toes": {"choices": {"bones": ["Toes.{s}"], "none": []}, "default": "bones"}
   },
   "about": {
     "parts": "The default part binding, for a model that gives none of its own: the bones that may weight each part of a trunk, a head, a neck built apart from the trunk, the limbs, hands and feet, and a tail. The trunk allows the upper arms and the upper legs: the loop of a welded armhole or leg hole belongs to the trunk, and a loop that takes no weight from the limb's first bone, while the limb's ring beside it does, can break when the limb moves. A hand allows the mitten fingers; a rig without them keeps the hand bone alone.",
     "roll": "Every bone's Z axis points forward (-Y) at rest, so limbs bend about a common axis; tail bones point Z up.",
-    "options": "The sets of optional bones a rig may have: tail, the number of bones of the tail chain from the hips (0: no tail); hands, 'plain' for the hand bone alone or 'mitten' for the mitten fingers (Index, Middle, Thumb) hanging off each hand unconnected. Every bone not marked optional is required; an optional bone belongs to the rig exactly when an option requires it.",
+    "options": "The sets of optional bones a rig may have: tail, the number of bones of the tail chain from the hips (0: no tail); hands, 'plain' for the hand bone alone or 'mitten' for the mitten fingers (Index, Middle, Thumb) hanging off each hand unconnected; neck, shoulders and toes, the bone or bones, or 'none' for a light rig whose head hangs from the chest, whose upper arms hang from the chest and whose feet end the legs. Every bone not marked optional is required; an optional bone belongs to the rig exactly when an option requires it.",
     "poses": "The review poses: bone-local Euler XYZ rotations in degrees from the rest pose. The right side mirrors the sign of Z, the finger curl included. A bone the rig lacks (an optional bone) is left out of a pose."
   }
 }

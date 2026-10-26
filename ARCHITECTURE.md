@@ -242,7 +242,7 @@ such a stage or review call runs, naming the attribute.
 
 | Attribute | Read by | Meaning |
 |---|---|---|
-| `SKELETON` | `rig`, `joins`; `adopt` for the part names of the template's binding, `export` (optional) | the skeleton template name. With it `export` writes the body with the rig `<NAME>_Rig`, whose influence limit is the smallest of the profiles'; without it the body alone, the profiles' skeleton keys acting on no bone |
+| `SKELETON` | `rig`, `poses`, `joins`; `adopt` for the part names of the template's binding, `export` (optional) | the skeleton template name. With it `export` writes the body with the rig `<NAME>_Rig`, whose influence limit is the smallest of the profiles'; without it the body alone, the profiles' skeleton keys acting on no bone |
 | `bones(P)` | `rig` | `{bone: (head, tail)}` in metres, keyed by the template's bone names with each side's bones written out |
 | `EXTRA_BONES` | `rig` (optional) | bones beyond the template's |
 | `ALLOWED` | `rig`, `adopt` with `SKELETON` for the part names (optional) | bones per part over the template's binding |
@@ -428,7 +428,6 @@ same commit. The stage names the skill gives are held to `run.STAGES` by `tests/
 
 What does not follow the rules yet ([PLAN.md](PLAN.md) holds the deferred work):
 
-- **Name heuristics**: review poses keyed by biped bone names in `stages.review`.
 - **Flat local forms**: a module directly under `lpk_local/forms/`, outside every model's package, stays
   importable until the human removes it, since only the human sees every model that may import it; a
   model still importing it gets its own copy when next worked on, and its forms in the model module move
