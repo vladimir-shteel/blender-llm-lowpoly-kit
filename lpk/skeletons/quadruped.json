@@ -1,0 +1,70 @@
+{
+  "name": "quadruped",
+  "description": "Four-legged body plan, the trunk level and the legs digitigrade: hips, spine, chest, neck and head, an optional jaw; per side (L, then R) a front leg (scapula, upper arm, forearm, front foot, optional front toes) and a hind leg (thigh, shin, hind foot, optional hind toes); an optional tail chain from the hips. Bones are listed in creation order, a six-bone tail, the jaw and the toes included. Roles are neutral.",
+  "bones": [
+    {"name": "Hips", "role": "hips", "parent": null, "connect": false},
+    {"name": "Spine", "role": "spine", "parent": "Hips", "connect": true},
+    {"name": "Chest", "role": "chest", "parent": "Spine", "connect": true},
+    {"name": "Neck", "role": "neck", "parent": "Chest", "connect": false},
+    {"name": "Head", "role": "head", "parent": "Neck", "connect": true},
+    {"name": "Jaw", "role": "jaw", "parent": "Head", "connect": false, "optional": true},
+    {"name": "Scapula.L", "role": "front_leg.scapula.L", "parent": "Chest", "connect": false},
+    {"name": "UpperArm.L", "role": "front_leg.upper.L", "parent": "Scapula.L", "connect": true},
+    {"name": "Forearm.L", "role": "front_leg.lower.L", "parent": "UpperArm.L", "connect": true},
+    {"name": "FrontFoot.L", "role": "front_leg.foot.L", "parent": "Forearm.L", "connect": true},
+    {"name": "FrontToes.L", "role": "front_toes.L", "parent": "FrontFoot.L", "connect": true, "optional": true},
+    {"name": "Thigh.L", "role": "hind_leg.upper.L", "parent": "Hips", "connect": false},
+    {"name": "Shin.L", "role": "hind_leg.lower.L", "parent": "Thigh.L", "connect": true},
+    {"name": "HindFoot.L", "role": "hind_leg.foot.L", "parent": "Shin.L", "connect": true},
+    {"name": "HindToes.L", "role": "hind_toes.L", "parent": "HindFoot.L", "connect": true, "optional": true},
+    {"name": "Scapula.R", "role": "front_leg.scapula.R", "parent": "Chest", "connect": false},
+    {"name": "UpperArm.R", "role": "front_leg.upper.R", "parent": "Scapula.R", "connect": true},
+    {"name": "Forearm.R", "role": "front_leg.lower.R", "parent": "UpperArm.R", "connect": true},
+    {"name": "FrontFoot.R", "role": "front_leg.foot.R", "parent": "Forearm.R", "connect": true},
+    {"name": "FrontToes.R", "role": "front_toes.R", "parent": "FrontFoot.R", "connect": true, "optional": true},
+    {"name": "Thigh.R", "role": "hind_leg.upper.R", "parent": "Hips", "connect": false},
+    {"name": "Shin.R", "role": "hind_leg.lower.R", "parent": "Thigh.R", "connect": true},
+    {"name": "HindFoot.R", "role": "hind_leg.foot.R", "parent": "Shin.R", "connect": true},
+    {"name": "HindToes.R", "role": "hind_toes.R", "parent": "HindFoot.R", "connect": true, "optional": true},
+    {"name": "Tail.1", "role": "tail.1", "parent": "Hips", "connect": false, "optional": true},
+    {"name": "Tail.2", "role": "tail.2", "parent": "Tail.1", "connect": true, "optional": true},
+    {"name": "Tail.3", "role": "tail.3", "parent": "Tail.2", "connect": true, "optional": true},
+    {"name": "Tail.4", "role": "tail.4", "parent": "Tail.3", "connect": true, "optional": true},
+    {"name": "Tail.5", "role": "tail.5", "parent": "Tail.4", "connect": true, "optional": true},
+    {"name": "Tail.6", "role": "tail.6", "parent": "Tail.5", "connect": true, "optional": true}
+  ],
+  "chains": [
+    {"prefix": "Tail.", "role_prefix": "tail.", "root_parent": "Hips"}
+  ],
+  "sides": {"L": 1, "R": -1},
+  "parts": {
+    "trunk": ["Hips", "Spine", "Chest", "Scapula.L", "Scapula.R", "Thigh.L", "Thigh.R"],
+    "neck": ["Chest", "Neck", "Head"],
+    "head": ["Head", "Jaw"],
+    "front_leg.{s}": ["Scapula.{s}", "UpperArm.{s}", "Forearm.{s}", "FrontFoot.{s}"],
+    "front_paw.{s}": ["Forearm.{s}", "FrontFoot.{s}", "FrontToes.{s}"],
+    "hind_leg.{s}": ["Hips", "Thigh.{s}", "Shin.{s}", "HindFoot.{s}"],
+    "hind_paw.{s}": ["Shin.{s}", "HindFoot.{s}", "HindToes.{s}"],
+    "tail": ["Hips", "Tail.*"]
+  },
+  "roll": {"default": [0, 0, 1], "roles": {"front_leg.": [0, -1, 0], "hind_leg.": [0, -1, 0]}},
+  "poses": {
+    "front_step": {"UpperArm.L": [35, 0, 0], "Forearm.L": [20, 0, 0], "FrontFoot.L": [-50, 0, 0]},
+    "hind_step": {"Thigh.R": [35, 0, 0], "Shin.R": [-50, 0, 0], "HindFoot.R": [45, 0, 0]},
+    "crouch": {"Thigh.L": [35, 0, 0], "Shin.L": [-60, 0, 0], "HindFoot.L": [40, 0, 0], "Thigh.R": [35, 0, 0], "Shin.R": [-60, 0, 0], "HindFoot.R": [40, 0, 0], "UpperArm.L": [-20, 0, 0], "Forearm.L": [35, 0, 0], "UpperArm.R": [-20, 0, 0], "Forearm.R": [35, 0, 0]},
+    "head_turn": {"Neck": [0, 0, 25], "Head": [0, 0, 20]},
+    "head_down": {"Neck": [-35, 0, 0], "Jaw": [-20, 0, 0]},
+    "tail_up": {"Tail.1": [30, 0, 0], "Tail.2": [20, 0, 0], "Tail.3": [15, 0, 0]}
+  },
+  "options": {
+    "tail": {"chain": "Tail.", "default": 0},
+    "jaw": {"choices": {"none": [], "bone": ["Jaw"]}, "default": "none"},
+    "toes": {"choices": {"bones": ["FrontToes.{s}", "HindToes.{s}"], "none": []}, "default": "bones"}
+  },
+  "about": {
+    "parts": "The default part binding of separate shells: a trunk that takes the hips, the spine, the chest and the roots of the legs it hides; a neck built apart; a head with its jaw; each leg's shell on its chain and each paw on the bones round the joint it hangs from; a tail.",
+    "roll": "The trunk, the neck, the head, the toes and the tail lie along the body, so their Z axis points up; the leg bones stand, so theirs points forward (-Y), as a biped's limbs, and a positive X turn swings a leg forward.",
+    "poses": "The review poses: bone-local Euler XYZ rotations in degrees from the rest pose. Each pose exercises one group of joints: a front step, a hind step, a crouch on all four legs, the head turned and lowered, the tail raised. A bone the rig lacks (an optional bone) is left out of a pose.",
+    "options": "The sets of optional bones a rig may have: tail, the number of bones of the tail chain from the hips (0: no tail); jaw, 'bone' for a jaw that opens; toes, the toe bones of all four paws, or 'none' for paws rigid on their feet. Every bone not marked optional is required; an optional bone belongs to the rig exactly when an option requires it."
+  }
+}

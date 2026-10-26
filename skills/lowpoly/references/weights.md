@@ -41,6 +41,10 @@ roles, parents and rolls, its sides (`L` +X, `R` -X), its options, its part bind
   `foot.{s}`, `tail`). The runner takes it for the rig's bones and updates it with `ALLOWED`; `FIXED`
   parts take the weights given. Every built part must be bound or fixed: parts the template does not
   name (hair, ears, gear) take the bone they move with through `ALLOWED`.
+- **The quadruped** (`lpk.skeletons.load('quadruped')`): the spine, neck and head, per side a front leg
+  (`Scapula`, `UpperArm`, `Forearm`, `FrontFoot`) and a hind leg (`Thigh`, `Shin`, `HindFoot`); its options
+  are a tail chain, a `Jaw` and the toe bones of all four paws. Its part binding names separate shells:
+  `trunk`, `neck`, `head`, `front_leg.{s}`, `front_paw.{s}`, `hind_leg.{s}`, `hind_paw.{s}`, `tail`.
 - **A body plan no template covers** is a question for the human, not a set of extra bones.
 
 ## Joints: bones(P)

@@ -63,7 +63,7 @@ a parallel route. A refusal of bad input fails fast with a message that names th
   `lpk_dev/fingerprint.py` snapshots every array a stage leaves on the objects and images and compares two
   snapshots. Compare runs without the pack cache (`out/<NAME>.pack.json`), which restores packs.
 - **The worked examples** (`examples/mannequin`, a character, `examples/trooper`, a light character,
-  `examples/barrel`, a prop, and `examples/turret`, a rigid mechanism) are the
+  `examples/hound`, a quadruped, `examples/barrel`, a prop, and `examples/turret`, a rigid mechanism) are the
   acceptance models: a change that can touch geometry, UVs, weights or exports runs their stages in
   Blender before integration, and every `reimport` of their exports has empty `diffs`. The stages run in
   Blender through the bridge or in background mode (`blender -b`), where the 3D Viewport's area exists but

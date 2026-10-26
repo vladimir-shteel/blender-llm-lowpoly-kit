@@ -45,7 +45,7 @@ def _broken(edit):
 
 
 def test_every_shipped_template_validates():
-    assert skeletons.names() == ['biped', 'rigid']
+    assert skeletons.names() == ['biped', 'quadruped', 'rigid']
     for name in skeletons.names():
         data = skeletons.load(name)
         assert skeletons.validate(data, name) == [], name
@@ -155,6 +155,18 @@ def test_the_rigid_template_is_a_root_the_model_builds_on():
     assert skeletons.role_of('Turret', 'rigid') is None and skeletons.roll('Turret', 'rigid') == (0.0, -1.0, 0.0)
     assert skeletons.sided({'leg.{s}': {'Leg.{s}': 1.0}}, 'rigid') == {'leg.L': {'Leg.L': 1.0},
                                                                        'leg.R': {'Leg.R': 1.0}}
+
+
+def test_the_quadruped_rolls_its_body_up_and_its_legs_forward():
+    bones = [b['name'] for b in skeletons.bones_for('quadruped', {'tail': 3, 'jaw': 'bone'})]
+    assert len(bones) == 27 and bones[-3:] == ['Tail.1', 'Tail.2', 'Tail.3'] and 'Jaw' in bones
+    assert len(skeletons.bones_for('quadruped', {'toes': 'none'})) == 19
+    for bone, roll in (('Spine', (0.0, 0.0, 1.0)), ('Tail.5', (0.0, 0.0, 1.0)), ('HindToes.L', (0.0, 0.0, 1.0)),
+                       ('Scapula.R', (0.0, -1.0, 0.0)), ('Shin.L', (0.0, -1.0, 0.0))):
+        assert skeletons.roll(bone, 'quadruped') == roll, bone
+    binding = skeletons.part_binding('quadruped', bones=bones)
+    assert binding['front_paw.L'] == ['Forearm.L', 'FrontFoot.L', 'FrontToes.L'] and binding['head'] == ['Head', 'Jaw']
+    assert set(skeletons.poses('quadruped')) >= {'front_step', 'hind_step', 'head_turn', 'tail_up'}
 
 
 def test_options_for_reads_the_options_back_from_a_rigs_bones():
