@@ -163,7 +163,8 @@ The **shared library** (`lpk/forms/`) is the kit's own, documented and tested:
 ## For agents
 
 Start with [skills/lowpoly/SKILL.md](skills/lowpoly/SKILL.md) and the worked examples
-`examples/mannequin/mannequin.py` (a character) and `examples/barrel/barrel.py` (a prop); the structure is
+`examples/mannequin/mannequin.py` (a character), `examples/trooper/trooper.py` (a light character on the
+light rig) and `examples/barrel/barrel.py` (a prop); the structure is
 in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Repository
@@ -172,7 +173,7 @@ in [ARCHITECTURE.md](ARCHITECTURE.md).
 |---|---|
 | `lpk/` | the runner, the builder and shape operations, forms by body area, texture, rig, export, review tools, intake, skeleton templates and export profiles |
 | `skills/lowpoly/` | the workflow the agent follows and the technique cards |
-| `examples/mannequin/`, `examples/barrel/` | the worked examples, a character and a prop: one model module each, its views and references |
+| `examples/mannequin/`, `examples/trooper/`, `examples/barrel/` | the worked examples, a character, a light character and a prop: one model module each, with its views and references when it has them |
 | `lpk_local/` | your local form library, one package per model, created on first use and ignored by git |
 | `dev/`, `tests/`, `lpk_dev/` | development tools, host tests and fingerprints ([contribution rules](CONTRIBUTING.md)) |
 

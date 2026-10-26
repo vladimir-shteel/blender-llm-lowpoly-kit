@@ -1,10 +1,13 @@
 # A biped character
 
-A character on two legs, rigged on the `biped` skeleton template (`SKELETON = 'biped'`). The worked example is
-`examples/mannequin/mannequin.py`: read it before writing a model of this kind.
+A character on two legs, rigged on the `biped` skeleton template (`SKELETON = 'biped'`). The worked examples
+are `examples/mannequin/mannequin.py`, measured from drawings with welded limbs and the full rig, and
+`examples/trooper/trooper.py`, a light body without references, its limbs separate shells on the light rig:
+read the one nearer the brief before writing a model of this kind.
 
 1. **Brief.** Read the brief and the references. Decide the tier with the human: the triangle total, the
-   atlas size, the skeleton, the read size (how tall the character stands on screen at
+   atlas size, the skeleton and its options (a light rig leaves out the neck, the clavicles and the toes:
+   [weights](../weights.md#the-template-and-its-part-binding)), the read size (how tall the character stands on screen at
    the farthest distance players must read it), and, when the environment offers an image tool, whether
    the references may be sent to it. They go into the module's docstring when it is written (step 3).
 2. **Intake** ([intake](../intake.md)): choose the source before any cleaning, cut the views, calibrate each,

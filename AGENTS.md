@@ -7,8 +7,9 @@ review tools and export, run as the stages of one model module, plus one skill f
 ## Status
 
 The toolkit (version 0.3) is one model module per character or prop run by a stateless stage runner,
-`lpk.run`; the worked examples are `examples/mannequin/mannequin.py` (a character) and
-`examples/barrel/barrel.py` (a prop), and the skill `skills/lowpoly`.
+`lpk.run`; the worked examples are `examples/mannequin/mannequin.py` (a character),
+`examples/trooper/trooper.py` (a light character on the light rig) and `examples/barrel/barrel.py` (a prop),
+and the skill `skills/lowpoly`.
 The structure, the one place for each kind of extension and the areas that do not yet conform are in
 [ARCHITECTURE.md](ARCHITECTURE.md).
 Verification follows [CONTRIBUTING.md](CONTRIBUTING.md#verifying-a-change): same-version determinism is
