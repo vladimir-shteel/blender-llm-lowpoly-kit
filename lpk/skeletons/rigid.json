@@ -1,0 +1,17 @@
+{
+  "name": "rigid",
+  "description": "A body of rigid pieces that move against each other (a turret, a drone, a walking machine, a weapon with moving parts, a chest with a lid): one root bone at the pivot; the model adds every moving piece's bone (extra_bones) and pins each part to one bone (FIXED). Sides L and R expand '{s}' in the model's data for paired pieces.",
+  "bones": [
+    {"name": "Root", "role": "root", "parent": null, "connect": false}
+  ],
+  "chains": [],
+  "sides": {"L": 1, "R": -1},
+  "parts": {},
+  "roll": {"default": [0, -1, 0], "roles": {}},
+  "poses": {},
+  "about": {
+    "parts": "No default binding: every part of a rigid body is pinned to the bone it moves with through the model's FIXED, so no part takes blended weights.",
+    "roll": "Every bone's Z axis points forward (-Y) at rest, as the biped's; a model bone may give its own roll.",
+    "poses": "None: the moving pieces are the model's own bones, so the model gives its review poses (POSES) and its test pose."
+  }
+}

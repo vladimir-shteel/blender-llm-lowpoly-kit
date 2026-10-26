@@ -1,7 +1,7 @@
 # lowpoly-kit: LLM-assisted low-poly modelling in Blender
 
 > **Work in progress.** Made for the author's own projects; most of the code and docs were written with
-> LLM agents. Interfaces still change. Biped characters and props without a rig for now.
+> LLM agents. Interfaces still change. Biped characters, quadrupeds, props without a rig and rigid mechanisms for now.
 
 An LLM agent drives Blender through MCP and does the repetitive modelling; you give the brief, direct the
 look, check each step in Blender and accept the result. The kit gives the agent forms, texturing, rigging,
@@ -163,7 +163,9 @@ The **shared library** (`lpk/forms/`) is the kit's own, documented and tested:
 ## For agents
 
 Start with [skills/lowpoly/SKILL.md](skills/lowpoly/SKILL.md) and the worked examples
-`examples/mannequin/mannequin.py` (a character) and `examples/barrel/barrel.py` (a prop); the structure is
+`examples/mannequin/mannequin.py` (a character), `examples/trooper/trooper.py` (a light character on the
+light rig), `examples/hound/hound.py` (a quadruped), `examples/barrel/barrel.py` (a prop) and `examples/turret/turret.py`
+(a rigid mechanism); the structure is
 in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Repository
@@ -172,7 +174,7 @@ in [ARCHITECTURE.md](ARCHITECTURE.md).
 |---|---|
 | `lpk/` | the runner, the builder and shape operations, forms by body area, texture, rig, export, review tools, intake, skeleton templates and export profiles |
 | `skills/lowpoly/` | the workflow the agent follows and the technique cards |
-| `examples/mannequin/`, `examples/barrel/` | the worked examples, a character and a prop: one model module each, its views and references |
+| `examples/mannequin/`, `examples/trooper/`, `examples/hound/`, `examples/barrel/`, `examples/turret/` | the worked examples, a character, a light character, a quadruped, a prop and a rigid mechanism: one model module each, with its views and references when it has them |
 | `lpk_local/` | your local form library, one package per model, created on first use and ignored by git |
 | `dev/`, `tests/`, `lpk_dev/` | development tools, host tests and fingerprints ([contribution rules](CONTRIBUTING.md)) |
 

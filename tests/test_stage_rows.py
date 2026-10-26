@@ -353,6 +353,11 @@ def test_bone_table_takes_parents_connections_and_rolls_from_the_template():
     assert (table['Tail.8']['parent'], table['Tail.8']['connect']) == ('Tail.7', True), 'the chain goes on'
     assert table['Tail.8']['roll'] == (0.0, 0.0, 1.0) and table['Index.R']['parent'] == 'Hand.R'
     assert list(table).index('Tail.8') < list(table).index('Index.L'), 'chain bones follow their chain'
+    light = [b['name'] for b in skeletons.bones_for('biped', {'neck': 'none', 'shoulders': 'none', 'toes': 'none'})]
+    table = {b['name']: b for b in rig.bone_table('biped', _joints(light))}
+    assert len(table) == 16, 'joints without the neck, the clavicles and the toes give the light rig'
+    assert (table['Head']['parent'], table['Head']['connect']) == ('Chest', False)
+    assert (table['UpperArm.R']['parent'], table['UpperArm.R']['connect']) == ('Chest', False)
 
 
 def test_bone_table_refuses_joints_the_template_does_not_give():

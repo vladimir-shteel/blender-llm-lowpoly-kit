@@ -366,7 +366,7 @@ its patch); the ground is every like pixel 4-connected to a point. Choose the po
 | A grid whose lines must key with the paper | points on the paper, and one on a line keyed with `--radius` below half the line's width |
 | A grid whose lines may stay ink | points on the paper farther from the lines than the patch reaches; the lines stay ink, ignore regions take them where they touch the figure |
 | A gradient, compression noise, a grid finer than a few patches | `seeds` from a few samples, one on each colour and along the gradient as often as it changes; its `points` go to `key` with the same radius |
-| Ground a figure or frame encloses (a pocket between the legs) | one more point inside it |
+| Ground a figure or frame encloses (a pocket between the legs, the hole of a trigger guard or a handle) | one more point inside it |
 
 `seeds` proposes one point per lattice cell (`--step`, default `lpk.stages.imaging.GROUND_STEP`) where a
 clear patch of the samples' ground fits; light paint inside an outline gets none. Its `ground` share

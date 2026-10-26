@@ -38,6 +38,7 @@ def _blender_stand_ins():
 
 with _blender_stand_ins():
     review = importlib.import_module('lpk.stages.review')
+    REVIEW_POSES = importlib.import_module('lpk.skeletons').poses('biped')
     view = importlib.import_module('lpk.stages.view')
     preview = importlib.import_module('lpk.stages.preview')
     setup_check = importlib.import_module('lpk.setup_check')
@@ -259,6 +260,16 @@ def test_set_pose_returns_the_names_the_rig_lacks():
         assert np.allclose(left.rotation_euler, (0, 0, np.pi / 2)) and left.location == (0, 0, 0)
         assert right.rotation_euler == [0, 0, 0] and right.rotation_mode == 'XYZ', 'a bone it does not name rests'
         assert pose.set_pose('Figure_Rig', None) == [] and left.rotation_euler == [0, 0, 0]
+        pose.set_pose('Figure_Rig', {'UpperArm.R': {'loc': (0, 0.02, 0)}, 'UpperArm.L': {'rot': (10, 0, 0)}})
+        assert right.location == (0.0, 0.02, 0.0) and right.rotation_euler == [0, 0, 0], 'an offset alone'
+        assert np.allclose(left.rotation_euler, (np.radians(10), 0, 0)) and left.location == (0.0, 0.0, 0.0)
+        for bad in ({'move': (0, 0, 1)}, {'loc': (0, 1)}, 'up'):
+            try:
+                pose.channels(bad)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError('%r accepted' % (bad,))
     finally:
         del bpy.data
 
@@ -267,7 +278,7 @@ def test_pose_captures_set_each_pose_and_leave_out_the_poses_the_rig_cannot_turn
     rig = _rig('Shoulder.L', 'Shoulder.R', 'UpperArm.L', 'UpperArm.R', 'UpperLeg.L', 'UpperLeg.R', 'LowerLeg.R')
     objects = {'Figure': types.SimpleNamespace(type='MESH'), 'Figure_Rig': rig}
     out = os.path.join(tempfile.mkdtemp(), 'review', 'rig')
-    poses = dict(review.POSES, test_pose={'Tail.1': (0, 0, 30)})
+    poses = dict(REVIEW_POSES, test_pose={'Tail.1': (0, 0, 30)})
     sheet = lambda **kw: review.pose_captures('Figure', 'Figure_Rig', kw.pop('out', out), kw.pop('poses', poses),
                                               **kw)
     failing = []
@@ -300,17 +311,17 @@ def test_pose_captures_set_each_pose_and_leave_out_the_poses_the_rig_cannot_turn
                 mock.patch.object(LIVE['lpk.stages'], 'pose', stand_in, create=True):
             got = sheet(views=('front', 'side'))
             assert got['skipped'] == ['grip', 'test_pose'], 'no bone of theirs is in the rig'
-            assert got['ignored'] == {'grip': list(review.POSES['grip']), 'test_pose': ['Tail.1']}, got['ignored']
+            assert got['ignored'] == {'grip': list(REVIEW_POSES['grip']), 'test_pose': ['Tail.1']}, got['ignored']
             columns = [t for t, _, _ in shots]
             assert columns == ['side75', 'fwd70', 'shrug', 'stride', 'spread'], columns
             assert {(s, tuple(k)) for _, s, k in shots} == {('color', ('Figure',))}
-            assert [p[1] for p in posed] == [review.POSES[t] for t in columns]
+            assert [p[1] for p in posed] == [REVIEW_POSES[t] for t in columns]
             assert held == [('hold', 'Figure_Rig'), ('back', 'Figure_Rig')], 'the pose the rig was found in comes back'
             assert got['sheet'].endswith(os.path.join('review', 'rig', 'poses.png')) and len(got['files']) == 10
             rig.pose.bones.append(types.SimpleNamespace(name='Index.L'))
             posed.clear()
             shots.clear()
-            part = sheet(poses={'grip': review.POSES['grip']}, views=('front', 'side'))
+            part = sheet(poses={'grip': REVIEW_POSES['grip']}, views=('front', 'side'))
             assert part['ignored'] == {'grip': ['Middle.L', 'Thumb.L', 'Index.R', 'Middle.R', 'Thumb.R']}
             assert part['skipped'] == [] and len(part['files']) == 2
             none = sheet(poses={'tail': {'Tail.1': (0, 0, 30)}})
@@ -318,7 +329,7 @@ def test_pose_captures_set_each_pose_and_leave_out_the_poses_the_rig_cannot_turn
             failing.append(True)
             held.clear()
             try:
-                sheet(poses={'shrug': review.POSES['shrug']}, out=tempfile.mkdtemp())
+                sheet(poses={'shrug': REVIEW_POSES['shrug']}, out=tempfile.mkdtemp())
             except RuntimeError:
                 pass
             else:

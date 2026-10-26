@@ -4,7 +4,9 @@ One Python file per model, next to its `views.json`, `refs/` and an `out/` folde
 model without references has neither: [without references](intake.md#without-references)).
 It holds data and composition only: every number is a measurement, a style choice with its reason, or a
 form's parameter. The worked example of the model's kind is the pattern (`examples/mannequin/mannequin.py`
-for a character, `examples/barrel/barrel.py` for a prop); copy its layout. The listing below is a
+for a character, `examples/trooper/trooper.py` for a light character without references,
+`examples/hound/hound.py` for a quadruped, `examples/barrel/barrel.py` for a prop, `examples/turret/turret.py` for a
+rigid mechanism); copy its layout. The listing below is a
 character's; [a prop](#a-prop) leaves out the rig's attributes.
 
 ## What each stage reads

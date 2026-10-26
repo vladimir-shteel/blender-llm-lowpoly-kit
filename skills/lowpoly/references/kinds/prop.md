@@ -2,7 +2,7 @@
 
 An object without a rig: a barrel, a crate, a lamp, a weapon held whole. Its module has no `SKELETON`, so
 there is no rig, no pose and no join to review, and the export writes its body alone. A prop with moving
-parts (a lid, a door) needs a rig and is not this kind. The worked example is `examples/barrel/barrel.py`:
+parts (a lid, a door) needs a rig and is a [rigid mechanism](rigid.md). The worked example is `examples/barrel/barrel.py`:
 read it before writing a model of this kind.
 
 1. **Brief.** Read the brief and the references. Decide with the human: the triangle total, the atlas
@@ -35,7 +35,7 @@ read it before writing a model of this kind.
    the next build and read what they moved.
 6. **Budget.** Once every part is built, count the triangles (`report['build']['body']['tris']`) against
    the brief. An overrun goes to the optimisation pass ([style](../style.md)) now, before the texture.
-7. **New forms.** A piece the library lacks (a chamfered box, a hinge, a handle) is a form in the local
+7. **New forms.** A piece the library lacks (a vent grille, a hinge leaf, a moulded handle) is a form in the local
    package of this model, `lpk_local.forms.<model>`; never move one into `lpk/forms` on your own
    ([where a new form goes](../forms/README.md#where-a-new-form-goes)).
 8. **Freeze when detail needs it.** Topology edits by hand, or a model that exists already, go to the

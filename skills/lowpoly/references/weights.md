@@ -12,8 +12,12 @@ FIXED = {'buckle': {'Hips': 1.0}}                            # rigid parts, weig
 JOINS = [('trunk', 'arm.{s}', {'UpperArm.{s}': 0.10}),       # (parent part, child part, caps)
          ('trunk', 'leg.{s}', {})]
 WEIGHTS = 'heat_proxy'                                       # a backend, or 'auto'
-EXTRA_BONES = {'Prop': {'head': (0.2, 0.0, 1.0), 'tail': (0.2, 0.0, 1.1), 'parent': 'Hand.R',
-                        'deform': False}}
+
+
+def extra_bones(P):                                          # the model's own bones, off its measurements
+    return {'Prop': {'head': P['grip'], 'tail': P['grip_top'], 'parent': 'Hand.R', 'deform': False}}
+
+
 TEST_POSE = {'UpperArm.L': (0, 0, 60), 'LowerLeg.L': (-45, 0, 0), 'Head': (0, 20, 0)}
 ```
 
@@ -25,7 +29,10 @@ roles, parents and rolls, its sides (`L` +X, `R` -X), its options, its part bind
 - **Bones.** The rig has every bone the template does not mark optional, plus the optional bones
   `bones(P)` names: the biped's tail chain `Tail.1`, `Tail.2`, ... from 1 without a gap, and the mitten
   fingers `Index`, `Middle`, `Thumb` per side, complete or not at all. A hand without finger bones is
-  rigid on its hand bone. The biped has no twist bones; whether a target needs them is checked against
+  rigid on its hand bone. The biped's `Neck`, `Shoulder` and `Toes` bones are optional too: a light rig
+  (a low budget, a target that animates no neck, clavicle or toes) leaves them out of `bones(P)`, each
+  side's pair together, and the bones they parent hang from the nearest bone the rig has (the head and the
+  upper arms from the chest), unconnected. The poses leave out what the rig lacks (`ignored`). The biped has no twist bones; whether a target needs them is checked against
   its clips and its importer.
 - **Names.** A template bone keeps the template's name; export profiles rename bones by role
   (`lpk.skeletons.role_of`) on a copy, during the export only.
@@ -34,6 +41,10 @@ roles, parents and rolls, its sides (`L` +X, `R` -X), its options, its part bind
   `foot.{s}`, `tail`). The runner takes it for the rig's bones and updates it with `ALLOWED`; `FIXED`
   parts take the weights given. Every built part must be bound or fixed: parts the template does not
   name (hair, ears, gear) take the bone they move with through `ALLOWED`.
+- **The quadruped** (`lpk.skeletons.load('quadruped')`): the spine, neck and head, per side a front leg
+  (`Scapula`, `UpperArm`, `Forearm`, `FrontFoot`) and a hind leg (`Thigh`, `Shin`, `HindFoot`); its options
+  are a tail chain, a `Jaw` and the toe bones of all four paws. Its part binding names separate shells:
+  `trunk`, `neck`, `head`, `front_leg.{s}`, `front_paw.{s}`, `hind_leg.{s}`, `hind_paw.{s}`, `tail`.
 - **A body plan no template covers** is a question for the human, not a set of extra bones.
 
 ## Joints: bones(P)
@@ -50,7 +61,7 @@ sections that built the mesh, so the joints follow when the measurements move:
 - A posture authored into the rest pose can be undone by an engine that retargets clips from its own
   reference pose: keep posture in the clips, not only in the rest.
 
-`EXTRA_BONES = {name: {'head', 'tail', 'parent', 'roll'?, 'deform'?}}` adds the model's own bones after the
+`extra_bones(P)`, returning `{name: {'head', 'tail', 'parent', 'roll'?, 'deform'?}}`, adds the model's own bones after the
 template's (ears, a prop socket, a root above the hips): `parent` a template bone the rig has, an earlier
 extra bone or None, unconnected; `roll` a direction for the bone's Z axis at rest; `deform=False` for a
 bone that deforms nothing. An extra bone never takes a template bone's name; it has no role, so profiles
@@ -63,7 +74,7 @@ nothing cannot take weight.
 `'{s}'` in a key of `ALLOWED` or `FIXED` and in a `JOINS` entry expands over the template's sides
 (`lpk.skeletons.sided`): `{'ear.{s}': ['Head']}` binds `ear.L` and `ear.R`, and one `JOINS` entry gives one
 join per side. A value that names `'{s}'` under a key without it raises: no side would fill it.
-`bones(P)` and `EXTRA_BONES` give each side's bones by name.
+`bones(P)` and `extra_bones(P)` give each side's bones by name.
 
 ## The weights backends
 
@@ -141,13 +152,14 @@ lower than the limit the weights were made under.
 
 After `rig`:
 
-- `run.poses(MODEL)` sets each review pose of `lpk.stages.review.POSES` and `TEST_POSE` (as `'test'`) and
+- `run.poses(MODEL)` sets each review pose of the skeleton template (`lpk.skeletons.poses`), the model's
+  own `POSES` and `TEST_POSE` (as `'test'`) and
   captures the body on one sheet, a pose per column, a view per row (`out/captures/poses/poses.png`); the
   rig returns to its pose afterwards. `ignored` lists per pose the bones it names that the rig lacks, which
   turn nothing; `skipped` the poses none of whose bones the rig has (the grip on a hand without finger
   bones). Read them before judging a pose. The framing reads the rest shape, so a posed part can leave the
   frame.
-- `run.joins(MODEL, pose)` (a `POSES` name, `'test'` or `{bone: degrees}`) returns, per
+- `run.joins(MODEL, pose)` (a review pose's name, `'test'` or `{bone: pose entry}`) returns, per
   `'<parent>/<child>'` join, `stretch` and `squash` (the largest and smallest edge-length ratio posed over
   rest in the zone), `area` (the smallest face-area ratio) and `loop_cm` (how far the hole loop moves).
   It says where a zone deforms most, never whether it looks right: less stretch is no better

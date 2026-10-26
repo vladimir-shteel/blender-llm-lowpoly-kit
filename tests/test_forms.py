@@ -5,7 +5,8 @@ loft of plain profile keys at the kernel's exact extents, its apexes and colours
 sections with and without the lower half width, the readers
 from traced views to metre keys and the front envelope the keys make, the colour sources that read a loft's
 rings as BMVerts or as points, straight_tail's loft along its direction, and on the stand-ins of
-blender_stand_ins the garments over a trunk's sections (torso.section_at, skirt, belt) and hair.long_beard.
+blender_stand_ins the garments over a trunk's sections (torso.section_at, skirt, belt), hair.long_beard and the
+hard-surface forms (sections, steps, facing, colours by band and side, triangle counts).
 
 python tests/test_forms.py"""
 import importlib
@@ -539,6 +540,105 @@ def test_long_beard_refuses_collapsing_faces():
                   'hair')
     assert 'collapses' in msg, msg
     assert not b.bm.faces, 'nothing is built before a refusal'
+
+
+# -- hard-surface forms (lpk.forms.hard), on the stand-ins with the real Builder -------------------------------
+
+with _blender_stand_ins():
+    _hard = importlib.import_module('lpk.forms.hard')
+
+_HPALETTE = {'shell': (0.3, 0.3, 0.3), 'edge': (0.5, 0.5, 0.5), 'cap': (0.1, 0.1, 0.1), 'face': (0.8, 0.2, 0.2)}
+
+
+def _tris(b):
+    return sum(len(f.verts) - 2 for f in b.bm.faces)
+
+
+def _outward(b, centre):
+    """Every face of a closed convex body built round `centre` looks away from it."""
+    c = _Vector(centre)
+    return all(f.normal.dot(f.calc_center_median() - c) > 0 for f in b.bm.faces)
+
+
+def test_chamfer_section_runs_counter_clockwise_from_the_plus_x_side():
+    assert _hard.chamfer_section(0.2, 0.1, 0.0) == [(0.2, -0.1), (0.2, 0.1), (-0.2, 0.1), (-0.2, -0.1)]
+    cut = _hard.chamfer_section(0.2, 0.1, 0.02)
+    assert len(cut) == len(_hard.SIDES) == 8
+    assert _close(cut[0], (0.2, -0.08)) and _close(cut[2], (0.18, 0.1)) and _close(cut[7], (0.18, -0.1))
+    area = sum(p[0] * q[1] - q[0] * p[1] for p, q in zip(cut, cut[1:] + cut[:1])) / 2
+    assert area > 0, 'counter-clockwise seen from +z'
+    _raises(ValueError, _hard.chamfer_section, 0.2, 0.1, 0.1)
+
+
+def test_chamfer_box_counts_its_triangles_and_faces_outward():
+    turned = ((0.0, 1.0, 0.0), (0.0, 0.0, 1.0), (1.0, 0.0, 0.0))
+    for corner, edge, tris in ((0.0, 0.0, 12), (0.02, 0.0, 28), (0.0, 0.01, 28), (0.02, 0.01, 60)):
+        for axes in (None, turned):
+            b = _gbuilder.Builder(_HPALETTE)
+            _hard.chamfer_box(b, 'box', (0.1, 0.2, 0.3), (0.1, 0.06, 0.2), axes, 'shell', corner=corner, edge=edge)
+            assert _tris(b) == tris, (corner, edge, _tris(b))
+            assert _outward(b, (0.1, 0.2, 0.3)), (corner, edge, axes)
+
+
+def test_chamfer_box_colours_by_band_and_side():
+    b = _gbuilder.Builder(_HPALETTE)
+    paint = lambda band, side: 'face' if band == 1 and side == '+y' else ('edge' if side in _hard.CORNERS else 'shell')
+    _hard.chamfer_box(b, 'box', (0, 0, 0), (0.1, 0.1, 0.2), None, paint, 'cap', 'cap', corner=0.02, edge=0.01)
+    names = list(_HPALETTE)
+    cols = [names[f[b.fpal]] for f in b.bm.faces]
+    assert cols.count('face') == 1 and cols.count('cap') == 2 and cols.count('edge') == 12
+    front = [f for f in b.bm.faces if names[f[b.fpal]] == 'face'][0]
+    assert _close(front.normal, (0.0, 1.0, 0.0)), 'the +y side of the middle band'
+    _raises(ValueError, _hard.chamfer_box, b, 'box', (0, 0, 0), (0.1, 0.1, 0.2), None, paint)
+
+
+def test_chamfer_loft_steps_look_toward_the_open_side():
+    b = _gbuilder.Builder(_HPALETTE)
+    rings = _hard.chamfer_loft(b, 'shell', (0, 0, 0), None,
+                               [(0.0, 0.1, 0.1, 0.02), (0.1, 0.1, 0.1, 0.02), (0.1, 0.15, 0.15, 0.03),
+                                (0.3, 0.15, 0.15, 0.03, {'offset': (0.0, 0.01)})], 'shell', 'cap', 'cap')
+    assert len(rings) == 4 and all(len(r) == 8 for r in rings)
+    step = [f for f in b.bm.faces if all(abs(v.co.z - 0.1) < 1e-12 for v in f.verts) and len(f.verts) == 4]
+    assert len(step) == 8 and all(f.normal.z < -0.999 for f in step), 'a step out looks back toward z = 0'
+    caps = [f for f in b.bm.faces if len(f.verts) == 8]
+    assert sorted(round(f.normal.z) for f in caps) == [-1, 1]
+    assert _close(rings[3][0].co, (0.15, -0.11, 0.3)), 'the offset moves the last section up'
+    _raises(ValueError, _hard.chamfer_loft, b, 's', (0, 0, 0), None, [(0.1, 0.1, 0.1, 0), (0.0, 0.1, 0.1, 0)],
+            'shell', 'cap', 'cap')
+    _raises(ValueError, _hard.chamfer_loft, b, 's', (0, 0, 0), None, [(0.0, 0.1, 0.1, 0), (0.1, 0.1, 0.1, 0.02)],
+            'shell', 'cap', 'cap')
+
+
+def test_standoff_plate_and_slot_lie_on_the_front():
+    b = _gbuilder.Builder(_HPALETTE)
+    front = _hard.standoff_plate(b, 'plate', [(-0.05, 0.1), (0.05, 0.1), (0.05, 0.2), (-0.05, 0.2)],
+                                 (0.0, -0.1, 0.0), 0.01, 'face', 'shell')
+    assert all(math.isclose(v.co.y, -0.11) for v in front), 'raised toward -Y'
+    assert _tris(b) == 10
+    face = [f for f in b.bm.faces if all(v in front for v in f.verts)][0]
+    assert _close(face.normal, (0.0, -1.0, 0.0))
+    b = _gbuilder.Builder(_HPALETTE)
+    _hard.slot(b, 'slot', (0.0, 0.5), (1.0, 0.0), 0.1, 0.01, 'cap', (0.0, -0.2, 0.0))
+    (f,) = b.bm.faces
+    assert _close(f.normal, (0.0, -1.0, 0.0)) and math.isclose(f.calc_area(), 0.001)
+    assert all(math.isclose(v.co.y, -0.2) and abs(v.co.z - 0.5) <= 0.005 + 1e-12 for v in f.verts)
+
+
+def test_hinge_hub_and_mech_hand_hold_their_triangle_counts():
+    b = _gbuilder.Builder(_HPALETTE)
+    _hard.hinge(b, 'pin', (0, 0, 0), (0.1, 0, 0), 0.01, 'shell', n=6)
+    assert _tris(b) == 4 * 6 - 4
+    b = _gbuilder.Builder(_HPALETTE)
+    _hard.hub(b, 'hub', (0, 0, 0), (0, -1, 0), 0.02, 0.01, 'shell', 'cap', n=8)
+    assert _tris(b) == 4 * 8 - 4
+    made = []
+    for _ in range(2):
+        b = _gbuilder.Builder(_HPALETTE)
+        _hard.mech_hand(b, 'hand', (0.3, 0, 1.0), (1, 0, -0.2), (0, 0, 1), (0, -1, 0), 0.08, 0.07, 0.04,
+                        'shell', 'edge', back_col='face', fingers=4)
+        made.append([tuple(v.co) for v in b.bm.verts])
+    assert _tris(b) == 28 + 18 * 5
+    assert made[0] == made[1], 'deterministic'
 
 
 if __name__ == '__main__':
