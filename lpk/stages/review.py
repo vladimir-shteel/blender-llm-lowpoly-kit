@@ -30,6 +30,7 @@ from lpk.stages.view import load_image, save_image
 FIT_PER_M = 2.4 / 1.8     # view distance per metre of framed height: the viewport fits a 1.8 m figure at 2.4
 MARGIN = 1.1              # room round the framed height
 MIN_HEIGHT = 0.2          # metres: a part built alone (an eye, a skull) is framed no closer than this
+EYE_PIVOT = 0.5           # metres ahead of the eye the 'eye' view turns about: the viewport stands at the eye
 # Pixels an edge of the build may read off the drawing's before silhouette_report lists it as a band: each
 # outline holds an edge to its pixel (the build's at pixel centres, the drawing's where its ink is), so one
 # true edge can read a pixel apart in the two.
@@ -60,10 +61,12 @@ def capture(out_dir, tag, views, shade='color', keep=None, origin=(0, 0, 0), wid
     os.makedirs(out_dir, exist_ok=True)
     files = []
     with _viewport(), _hidden(keep):
-        for v, loc, dist in views:
+        base_lens = view.view3d_context()['area'].spaces.active.lens
+        for entry in views:
+            v, loc, dist = entry[:3]
             f = os.path.join(out_dir, '%s_%s.png' % (tag, v))
             _shoot(v if fit is None else view.rotation(fit['yaw'], fit['pitch']), shade, Vector(origin) + Vector(loc),
-                   dist, f, width)
+                   dist, f, width, lens=entry[3] if len(entry) > 3 else base_lens)
             files.append(f)
     return files
 
@@ -80,7 +83,7 @@ def _viewport():
                  outline=sh.show_object_outline, floor=(ov.show_floor, ov.show_ortho_grid, ov.show_cursor),
                  wire=ov.show_wireframes, axis=(ov.show_axis_x, ov.show_axis_y), threshold=ov.wireframe_threshold,
                  origins=ov.show_object_origins,
-                 lookdev=(sh.use_scene_world, sh.use_scene_lights, sh.studiolight_intensity))
+                 lookdev=(sh.use_scene_world, sh.use_scene_lights, sh.studiolight_intensity), lens=sp.lens)
     scn = bpy.context.scene
     vt = (scn.view_settings.view_transform, scn.view_settings.look)
     try:
@@ -95,6 +98,7 @@ def _viewport():
         ov.show_axis_x, ov.show_axis_y = saved['axis']; ov.wireframe_threshold = saved['threshold']
         ov.show_object_origins = saved['origins']
         sh.use_scene_world, sh.use_scene_lights, sh.studiolight_intensity = saved['lookdev']
+        sp.lens = saved['lens']
 
 
 @contextlib.contextmanager
@@ -114,12 +118,12 @@ def _hidden(keep):
             o.hide_set(False)
 
 
-def _shoot(rot, shade, loc, dist, path, width, measure=None):
+def _shoot(rot, shade, loc, dist, path, width, measure=None, lens=None):
     """One capture to `path` of the view `rot` (a VIEWS name or a rotation, as view.set_view takes it),
     inside _viewport, under the Standard view transform in every shade (view.standard_view: AgX greys the
     whites of each). measure: a function called with the view set, before the capture; returns its value
-    (None without one)."""
-    view.set_view(rot, shade, loc, dist)
+    (None without one). lens: as view.set_view takes it."""
+    view.set_view(rot, shade, loc, dist, lens=lens)
     with view.standard_view():
         got = measure() if measure is not None else None
         view.capture(path, width)
@@ -148,11 +152,23 @@ def framing(obj_name, views=('front', 'side', 'q34', 'back')):
             'distance': FIT_PER_M * max(ext.z, width, MIN_HEIGHT) * MARGIN}
 
 
-def body_views(obj_name, views=('front', 'side', 'q34', 'back')):
+def body_views(obj_name, views=('front', 'side', 'q34', 'back'), eye=None):
     """capture's views of a model framed on its body object (framing over the same views): [(view,
-    centre, distance)] for the lpk.stages.view.VIEWS names in `views`."""
-    f = framing(obj_name, views)
-    return [(v, tuple(f['centre']), f['distance']) for v in views]
+    centre, distance)] for the lpk.stages.view.VIEWS names in `views`. The view 'eye' is framed from
+    `eye` instead, {'at': (x, y, z) the eye in metres, 'lens': focal length in mm}: the viewport stands at the
+    eye looking forward (-Y), (view, pivot, EYE_PIVOT, lens). Raises ValueError for 'eye' without eye."""
+    flat = [v for v in views if v != 'eye']
+    f = framing(obj_name, flat) if flat else None
+    out = []
+    for v in views:
+        if v != 'eye':
+            out.append((v, tuple(f['centre']), f['distance']))
+            continue
+        if not eye or 'at' not in eye or 'lens' not in eye:
+            raise ValueError("the view 'eye' needs the model's EYE: {'at': (x, y, z), 'lens': mm}")
+        at = Vector(eye['at'])
+        out.append((v, tuple(at - Vector((0.0, EYE_PIVOT, 0.0))), EYE_PIVOT, float(eye['lens'])))
+    return out
 
 
 def _turn(yaw, pitch):
@@ -419,7 +435,7 @@ def join_metrics(obj_name, rig_name, pose, pairs, rings=2):
     return out
 
 
-def pose_captures(body, rig, out, poses, *, views=('front', 'q34', 'side'), width=1000):
+def pose_captures(body, rig, out, poses, *, views=('front', 'q34', 'side'), width=1000, eye=None):
     """The pose captures of a rigged body on one sheet: each pose set on the rig (lpk.stages.pose.set_pose),
     the body alone captured in each of `views` (body_views: framed on the rest shape, so a posed part can
     leave the frame) in the 'color' shade, the rig holding the pose it was found in again
@@ -430,7 +446,8 @@ def pose_captures(body, rig, out, poses, *, views=('front', 'q34', 'side'), widt
     body: the name of the body object, which names nothing else; rig: the name of its armature object; out:
     the folder of the captures, named <pose>_<view>.png, and of the sheet, poses.png; poses: {name: {bone:
     pose entry}} (lpk.stages.pose.channels), in column order; views: lpk.stages.view.VIEWS
-    names; width: the captures' width in pixels.
+    names; width: the captures' width in pixels; eye: the model's EYE, which the view 'eye' needs
+    (body_views).
 
     A bone a pose names that the rig lacks turns nothing, so the pose shows less than it names: those names
     are returned per pose, and a pose none of whose bones the rig has is left out, since its column would
@@ -451,7 +468,7 @@ def pose_captures(body, rig, out, poses, *, views=('front', 'q34', 'side'), widt
     if arm is None or arm.type != 'ARMATURE':
         raise RuntimeError('no rig %r in the scene' % rig)
     out_dir = os.path.abspath(out)
-    frames = body_views(body, views)
+    frames = body_views(body, views, eye)
     bones = {pb.name for pb in arm.pose.bones}
     shots, files, ignored, skipped = [], [], {}, []
     with pose_stage.held_pose(rig):
@@ -469,7 +486,7 @@ def pose_captures(body, rig, out, poses, *, views=('front', 'q34', 'side'), widt
     if shots:
         n = len(frames)
         order = [k * n + v for v in range(n) for k in range(len(shots))]
-        labels = ['%s %s' % (tag, v) for tag in shots for v, _, _ in frames]
+        labels = ['%s %s' % (tag, f[0]) for tag in shots for f in frames]
         sheet = save_image(imaging.sheet([load_image(files[i]) for i in order], len(shots),
                                               labels=[labels[i] for i in order], crop=True),
                                 os.path.join(out_dir, 'poses.png'))

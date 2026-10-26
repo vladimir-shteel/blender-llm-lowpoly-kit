@@ -32,7 +32,13 @@ roles, parents and rolls, its sides (`L` +X, `R` -X), its options, its part bind
   rigid on its hand bone. The biped's `Neck`, `Shoulder` and `Toes` bones are optional too: a light rig
   (a low budget, a target that animates no neck, clavicle or toes) leaves them out of `bones(P)`, each
   side's pair together, and the bones they parent hang from the nearest bone the rig has (the head and the
-  upper arms from the chest), unconnected. The poses leave out what the rig lacks (`ignored`). The biped has no twist bones; whether a target needs them is checked against
+  upper arms from the chest), unconnected. The poses leave out what the rig lacks (`ignored`).
+- **Full hands.** `hands: 'full'` gives every digit three phalanges, `Thumb1`..`Thumb3`, `Index1`..,
+  `Middle1`.., `Ring1`.., `Little1`.. per side, each digit a part of its own in the binding (`thumb.{s}`,
+  `index.{s}`, ...): the hands of first-person arms and of a humanoid avatar's finger clips.
+- **Standard rest.** `lpk.skeletons.rest('biped', 'standard', options)` gives the joints of an adult 1.75 m
+  in an A-pose for every bone a rig of those options has: `bones(P)` for a body that must share one
+  skeleton with others ([first-person arms](kinds/first_person.md)). The biped has no twist bones; whether a target needs them is checked against
   its clips and its importer.
 - **Names.** A template bone keeps the template's name; export profiles rename bones by role
   (`lpk.skeletons.role_of`) on a copy, during the export only.

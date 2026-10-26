@@ -923,7 +923,8 @@ def capture(path, tag='build', shade='color', views=('front', 'side', 'q34', 'ba
     if part is not None:
         return part_capture(M, part, tag, shade, views)
     shown = list(objects or [n['body']])
-    return review.capture(out(M, 'captures'), tag, review.body_views(shown[0], views), shade=shade, keep=shown)
+    return review.capture(out(M, 'captures'), tag, review.body_views(shown[0], views, getattr(M, 'EYE', None)),
+                          shade=shade, keep=shown)
 
 
 def part_capture(M, part, tag, shade, views):
@@ -944,16 +945,17 @@ def part_capture(M, part, tag, shade, views):
             bpy.data.meshes.remove(me)
 
 
-def poses(path, names_=None):
+def poses(path, names_=None, views=('front', 'q34', 'side')):
     """The rigged body in the review poses (review_poses) on one sheet, out/captures/poses/poses.png
-    (lpk.stages.review.pose_captures); names_: the poses to show, default all. Returns pose_captures'
-    report."""
+    (lpk.stages.review.pose_captures); names_: the poses to show, default all; views: the sheet's rows,
+    'eye' among them for a model with EYE. Returns pose_captures' report."""
     from lpk.stages import review
     M = load(path)
     n = names(M)
     every = review_poses(M)
     chosen = {k: every[k] for k in (names_ or every)}
-    return review.pose_captures(n['body'], n['rig'], out(M, 'captures', 'poses'), chosen)
+    return review.pose_captures(n['body'], n['rig'], out(M, 'captures', 'poses'), chosen, views=views,
+                                eye=getattr(M, 'EYE', None))
 
 
 def review_poses(M):
@@ -1012,7 +1014,7 @@ def clip(path, clip_path, bone_map=None, frames=None, count=CLIP_FRAMES, ground=
     base = os.path.splitext(os.path.basename(source))[0]
     stem = ''.join(c if c.isalnum() or c in '-_' else '_' for c in base)
     rep = review.pose_captures(n['body'], n['rig'], out(M, 'captures', 'clips', stem),
-                               {'f%04d' % f: poses[f] for f in shown}, views=views)
+                               {'f%04d' % f: poses[f] for f in shown}, views=views, eye=getattr(M, 'EYE', None))
     return dict(rep, frames=shown, mapped=sampled['mapped'], unmapped=sampled['unmapped'], anchor=sampled['anchor'],
                 turn=sampled['turn'], ground_shift=shift)
 

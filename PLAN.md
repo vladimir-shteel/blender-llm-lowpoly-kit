@@ -4,18 +4,9 @@ The kit's structure is in [ARCHITECTURE.md](ARCHITECTURE.md). Open work:
 
 ## Further kinds of model
 
-The skill branches by kind of model (`skills/lowpoly/references/kinds/`: `biped`, `prop`, `rigid`, `quadruped`). Each further
-kind lands as one card there with what it needs in `lpk` and its own worked example; the kind stays a
-notion of the skill, never read by `lpk`. Each stage below is one pull request, in this order:
-
-1. **Shared hard-surface forms**: a chamfered prism and box, a hinge pin, a hub, a plate along a segment,
-   a plate standing off a face, a slot, a mechanical hand, merged into `lpk/forms/hard.py` on the
-   human's request ([Where forms live](ARCHITECTURE.md#where-forms-live)).
-2. **First-person arms**: a skeleton of fixed standard proportions (the `biped` template with `full`
-   hands below; the arms carry the character in mesh volume, not bone lengths), arm and digit forms at
-   first-person detail with the weights written while building (a weights backend), review framing from
-   the first-person camera, a worked example. The `biped` template gains a `full` hands choice: three
-   phalanges on each of five digits.
+The skill branches by kind of model (`skills/lowpoly/references/kinds/`: `biped`, `prop`, `rigid`,
+`quadruped`, `first_person`). Each further kind lands as one card there with what it needs in `lpk` and its
+own worked example; the kind stays a notion of the skill, never read by `lpk`. None is planned now.
 
 ## Deferred
 
@@ -27,3 +18,5 @@ notion of the skill, never read by `lpk`. Each stage below is one pull request, 
 - **Environment** (modular rooms with door sockets, collision boxes, a palette texture shared by a set of
   rooms): needs its own design before it enters the kit.
 - **A set of props in one module**: one model module holds one prop today.
+- **The eye view following the head**: the view `'eye'` stands at `EYE` on the rest pose; a clip that turns
+  the head (a look, a bob) is seen from where the head rested.

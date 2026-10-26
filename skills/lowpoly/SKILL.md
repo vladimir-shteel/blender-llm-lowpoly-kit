@@ -26,6 +26,7 @@ attributes.
 | An object without a rig: a barrel, a crate, a lamp, a weapon held whole | [prop](references/kinds/prop.md) |
 | An object of rigid pieces that move: a turret, a drone, a weapon with a slide, a chest with a lid | [rigid](references/kinds/rigid.md) |
 | An animal on four legs, its trunk level: a dog, a cat, a wolf | [quadruped](references/kinds/quadruped.md) |
+| The arms a first-person camera shows, on a shared standard skeleton | [first-person arms](references/kinds/first_person.md) |
 
 | When | Card |
 |---|---|

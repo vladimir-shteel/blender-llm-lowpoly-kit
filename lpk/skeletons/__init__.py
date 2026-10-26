@@ -26,7 +26,9 @@ in it. Its sections:
                        options_for()): {'chain': a chain prefix, 'default': n} takes a count n >= 0, the
                        chain's first n bones; {'choices': {choice: [bones]}, 'default': a choice} takes one of
                        its choices, whose bones ('{s}' expanded over the sides) it requires
-    about              {section: text}: what parts, roll, poses and the options hold, and why
+    rests              optional: {rest: {bone: [head, tail]}}, named rest poses of the template in metres (Z up, the
+                       front -Y, '.L' +X), one joint pair per bone it covers (rest())
+    about              {section: text}: what parts, roll, poses, the options and the rests hold, and why
 
 Code reads a template's roles, sides and sections, never its bone names. Export profiles rename bones by
 role. Pure Python, no bpy."""
@@ -42,8 +44,10 @@ _CACHE = {}
 SECTIONS = ('name', 'description', 'bones', 'chains', 'sides', 'parts', 'roll', 'poses', 'about')
 # The optional section of the template's options and the optional bones each requires.
 OPTIONS_SECTION = 'options'
+# The optional section of the template's named rest poses.
+RESTS_SECTION = 'rests'
 # The sections the about texts document: every one of them a template holds.
-DOCUMENTED = ('parts', 'roll', 'poses', 'options')
+DOCUMENTED = ('parts', 'roll', 'poses', 'options', 'rests')
 
 def names():
     """The template names shipped in lpk/skeletons, sorted."""
@@ -128,6 +132,24 @@ def poses(template='biped'):
     rotations from the rest pose."""
     return {p: {b: tuple(float(v) for v in e) for b, e in r.items()}
             for p, r in _template(template)['poses'].items()}
+
+
+def rest(template, name, options=None):
+    """The joints of the template's rest pose `name` (its 'rests' section) for the bones a rig of the
+    template has under `options` (bones_for), {bone: (head, tail)} with points (x, y, z) in metres, in
+    creation order: a model's bones(P) for a body that takes the template's standard proportions. Raises
+    ValueError for a rest the template lacks and for a bone of the rig the rest does not cover."""
+    t = _template(template)
+    rests = t.get(RESTS_SECTION, {})
+    if name not in rests:
+        raise ValueError('skeleton template %r has no rest %r; its rests: %s'
+                         % (template, name, ', '.join(rests) or 'none'))
+    joints = rests[name]
+    bones = [b['name'] for b in bones_for(template, options)]
+    missing = [b for b in bones if b not in joints]
+    if missing:
+        raise ValueError('rest %r of %r covers no joint of %s' % (name, template, ', '.join(missing)))
+    return {b: (tuple(float(c) for c in joints[b][0]), tuple(float(c) for c in joints[b][1])) for b in bones}
 
 
 def option_values(template, options=None):
@@ -297,7 +319,7 @@ def validate(data, name=None):
     roles and bones; options over chains and optional bones; an about text per documented section."""
     if not isinstance(data, dict):
         return ['the template is %s, not a JSON object' % type(data).__name__]
-    optional = (OPTIONS_SECTION,)
+    optional = (OPTIONS_SECTION, RESTS_SECTION)
     missing = [k for k in SECTIONS if k not in data]
     unknown = [k for k in data if k not in SECTIONS + optional]
     out = ['%s: the section is missing; add it (see lpk.skeletons)' % k for k in missing]
@@ -316,6 +338,7 @@ def validate(data, name=None):
     if out:
         return out
     out += _part_problems(data) + _roll_problems(data) + _pose_problems(data) + _option_problems(data)
+    out += _rest_problems(data)
     return out + _about_problems(data)
 
 
@@ -486,6 +509,28 @@ def _option_problems(t):
                 if claimed.setdefault(b, name) != name:
                     out.append('%s: bone %r is required by option %r too; one option requires each bone'
                                % (where, b, claimed[b]))
+    return out
+
+
+def _rest_problems(t):
+    if RESTS_SECTION not in t:
+        return []
+    rests = t[RESTS_SECTION]
+    if not (isinstance(rests, dict) and rests):
+        return ['rests: {rest: {bone: [head, tail]}}']
+    bones = {b['name'] for b in t['bones']}
+    out = []
+    for name, joints in rests.items():
+        if not (_text(name) and isinstance(joints, dict) and joints):
+            out.append('rests: %r must name a rest with {bone: [head, tail]}' % (name,))
+            continue
+        for bone, pair in joints.items():
+            if bone not in bones:
+                out.append('rests[%r]: %r is no bone of the template' % (name, bone))
+            elif not (isinstance(pair, list) and len(pair) == 2 and all(_vector(p) for p in pair)
+                      and pair[0] != pair[1]):
+                out.append('rests[%r]: %r -> %r must be [head, tail], two different points (x, y, z)'
+                           % (name, bone, pair))
     return out
 
 

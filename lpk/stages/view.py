@@ -14,8 +14,10 @@ from lpk.stages import imaging
 # yaw -c and pitch 90 - a do, perspective aside: 'side' shows the model's left side (+X) with its front
 # toward image left, yaw -90; 'q34' its right front, yaw 35.
 VIEWS = {'front': (90, 0, 0), 'back': (90, 0, 180), 'side': (90, 0, 90), 'q34': (80, 0, -35), 'q34_r': (80, 0, 35),
-         'q34_back': (75, 0, 150), 'top': (0, 0, 0)}
+         'q34_back': (75, 0, 150), 'top': (0, 0, 0), 'eye': (90, 0, 180)}
 ORTHO = {'front', 'back', 'side', 'top'}
+# 'eye' looks forward (-Y) from the model's own eye in perspective, as a first-person camera does: its framing
+# comes from the model's EYE (lpk.stages.review.body_views), not from the body's bounds.
 # The look-dev light's intensity set_view gives a lit 'material' view: Blender's own default, so a lit
 # capture does not depend on the intensity an earlier view left behind.
 LOOKDEV_INTENSITY = 1.0
@@ -63,7 +65,7 @@ def rotation(yaw, pitch):
     return (90.0 - pitch, 0.0, -yaw)
 
 
-def set_view(view='q34', shade='color', loc=(0, 0.3, 0.92), dist=2.6, wire=False):
+def set_view(view='q34', shade='color', loc=(0, 0.3, 0.92), dist=2.6, wire=False, lens=None):
     """view: a VIEWS name, shown orthographic when ORTHO holds it, or a rotation (a, b, c), Euler XYZ
     degrees as in VIEWS, always shown orthographic (rotation() gives a fit's).
     shade: 'color' = vertex colours with studio light (the blocks and the build's palette colours),
@@ -78,7 +80,8 @@ def set_view(view='q34', shade='color', loc=(0, 0.3, 0.92), dist=2.6, wire=False
     the whites (lpk.stages.review's captures set Standard for themselves, standard_view).
     The floor, the grid of the orthographic views, the 3D cursor and the object origins are hidden, so a
     capture shows the model alone on its background, as lpk.stages.imaging.ink_mask and figure_box read
-    a picture. The background is the viewport's own."""
+    a picture. The background is the viewport's own. lens: the viewport's focal length in millimetres for a
+    perspective view, None to keep the viewport's own."""
     area = view3d_context()['area']
     sp = area.spaces.active
     r3 = sp.region_3d
@@ -90,6 +93,8 @@ def set_view(view='q34', shade='color', loc=(0, 0.3, 0.92), dist=2.6, wire=False
     r3.view_perspective = 'ORTHO' if ortho else 'PERSP'
     r3.view_location = Vector(loc)
     r3.view_distance = dist
+    if lens is not None:
+        sp.lens = lens
     sh = sp.shading
     sh.type = 'SOLID'
     sh.light = 'FLAT' if shade in ('tex', 'material') else 'STUDIO'

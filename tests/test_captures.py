@@ -91,7 +91,7 @@ def _scene(objects=()):
                                show_axis_x=True, show_axis_y=True, show_wireframes=True, wireframe_threshold=0.5)
     r3 = types.SimpleNamespace(view_rotation=_Vector((1, 0, 0, 0)), view_perspective='PERSP',
                                view_location=_Vector((0, 0, 1)), view_distance=5.0)
-    sp = types.SimpleNamespace(shading=sh, overlay=ov, region_3d=r3)
+    sp = types.SimpleNamespace(shading=sh, overlay=ov, region_3d=r3, lens=50.0)
     area = types.SimpleNamespace(type='VIEW_3D', spaces=types.SimpleNamespace(active=sp),
                                  regions=[types.SimpleNamespace(type='WINDOW')])
     scene = types.SimpleNamespace(
@@ -302,7 +302,7 @@ def test_pose_captures_set_each_pose_and_leave_out_the_poses_the_rig_cannot_turn
         if tag == 'shrug' and failing:
             raise RuntimeError('capture failed')
         return [os.path.join(out, '%s_%s.png' % (tag, v)) for v, _, _ in views]
-    review.capture, review.body_views = capture, lambda name, views: frames
+    review.capture, review.body_views = capture, lambda name, views, eye=None: frames
     review.load_image = lambda path: np.ones((4, 3, 4), np.float32)
     review.save_image = lambda arr, path: path
     bpy.data = types.SimpleNamespace(objects=objects)

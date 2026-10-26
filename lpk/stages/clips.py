@@ -51,7 +51,7 @@ def load_clip(path):
     layer.active_layer_collection = layer.layer_collection.children[COLLECTION]
     try:
         if ext == '.fbx':
-            bpy.ops.import_scene.fbx(filepath=path)
+            bpy.ops.import_scene.fbx(filepath=path, automatic_bone_orientation=True)
         else:
             bpy.ops.import_scene.gltf(filepath=path)
     finally:

@@ -7,6 +7,7 @@ expands '{s}' in model data.
 
 python tests/test_skeletons.py"""
 import ast
+import math
 from pathlib import Path
 import sys
 
@@ -167,6 +168,28 @@ def test_the_quadruped_rolls_its_body_up_and_its_legs_forward():
     binding = skeletons.part_binding('quadruped', bones=bones)
     assert binding['front_paw.L'] == ['Forearm.L', 'FrontFoot.L', 'FrontToes.L'] and binding['head'] == ['Head', 'Jaw']
     assert set(skeletons.poses('quadruped')) >= {'front_step', 'hind_step', 'head_turn', 'tail_up'}
+
+
+def test_full_hands_and_the_standard_rest():
+    full = [b['name'] for b in skeletons.bones_for('biped', {'hands': 'full'})]
+    assert len(full) == 51 and 'Little3.R' in full and 'Index.L' not in full
+    bones = {b['name']: b for b in skeletons.bones_for('biped', {'hands': 'full'})}
+    assert (bones['Index2.L']['parent'], bones['Index2.L']['connect']) == ('Index1.L', True)
+    assert skeletons.part_binding('biped', bones=full)['thumb.L'] == ['Hand.L', 'Thumb1.L', 'Thumb2.L', 'Thumb3.L']
+    rest = skeletons.rest('biped', 'standard', {'hands': 'full'})
+    assert list(rest) == full and all(rest[b][0] != rest[b][1] for b in rest)
+    assert math.isclose(rest['Head'][1][2], 1.75) and rest['Hand.L'][0][0] > 0 > rest['Hand.R'][0][0]
+    assert rest['Hand.R'][0] == (-rest['Hand.L'][0][0],) + rest['Hand.L'][0][1:], 'the sides mirror'
+    for options, needle in (({'tail': 2}, 'covers no joint'), ({'hands': 'mitten'}, 'covers no joint')):
+        try:
+            skeletons.rest('biped', 'standard', options)
+        except ValueError as e:
+            assert needle in str(e), e
+        else:
+            raise AssertionError('%r accepted' % (options,))
+    for edit in (lambda d: d['rests']['standard'].update(Wing=[[0, 0, 0], [0, 0, 1]]),
+                 lambda d: d['rests']['standard'].update(Hips=[[0, 0, 1], [0, 0, 1]])):
+        assert any(p.startswith('rests') for p in _broken(edit))
 
 
 def test_options_for_reads_the_options_back_from_a_rigs_bones():

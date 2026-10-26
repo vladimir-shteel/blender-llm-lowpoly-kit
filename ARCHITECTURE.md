@@ -252,6 +252,7 @@ such a stage or review call runs, naming the attribute.
 | `WEIGHTS` | `rig` (optional) | the weights backend |
 | `PREVIEW` | `preview` (optional) | the look |
 | `POSES` | `poses`, `joins` (optional) | `{name: {bone: pose entry}}`, review poses beyond the template's (`lpk.stages.pose.channels`: Euler degrees, or a rotation and an offset) |
+| `EYE` | `capture`, `poses`, `clip` for the view `'eye'` (optional) | `{'at': (x, y, z), 'lens': mm}`: the first-person camera, at the eye on the rest pose looking forward |
 | `TEST_POSE` | `pose_test`; `joins` for the pose `'test'`, its default; `poses` for the pose `'test'` (optional) | the test pose, `{bone: pose entry}` |
 | `EXPORTS` | `export`; `rig` for the influence limit (optional) | profile names or JSON paths |
 | `EXPORT_DIR` | `export` (optional) | default `out/` |
