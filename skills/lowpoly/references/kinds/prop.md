@@ -2,7 +2,7 @@
 
 An object without a rig: a barrel, a crate, a lamp, a weapon held whole. Its module has no `SKELETON`, so
 there is no rig, no pose and no join to review, and the export writes its body alone. A prop with moving
-parts (a lid, a door) needs a rig and is not this kind. The worked example is `examples/barrel/barrel.py`:
+parts (a lid, a door) needs a rig and is a [rigid mechanism](rigid.md). The worked example is `examples/barrel/barrel.py`:
 read it before writing a model of this kind.
 
 1. **Brief.** Read the brief and the references. Decide with the human: the triangle total, the atlas

@@ -1,7 +1,7 @@
 """The pose kernel: per bone an Euler rotation (degrees, bone-local XYZ) and optionally an offset (metres,
 bone-local), None restores the rest pose (set_pose); and the scoped pose of a call that poses the rig only
-while it runs (held_pose), as the export does in the rest pose. The pose is display state: a tool that poses the rig for its own work puts
-the pose it found back."""
+while it runs (held_pose), as the export does in the rest pose. The pose is display state: a tool that
+poses the rig for its own work puts the pose it found back."""
 from contextlib import contextmanager
 
 import bpy, math

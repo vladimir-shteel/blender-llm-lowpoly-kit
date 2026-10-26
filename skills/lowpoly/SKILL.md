@@ -24,6 +24,7 @@ attributes.
 |---|---|
 | A character on two legs, rigged | [biped](references/kinds/biped.md) |
 | An object without a rig: a barrel, a crate, a lamp, a weapon held whole | [prop](references/kinds/prop.md) |
+| An object of rigid pieces that move: a turret, a drone, a weapon with a slide, a chest with a lid | [rigid](references/kinds/rigid.md) |
 
 | When | Card |
 |---|---|
