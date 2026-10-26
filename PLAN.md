@@ -2,6 +2,35 @@
 
 The kit's structure is in [ARCHITECTURE.md](ARCHITECTURE.md). Open work:
 
+## Further kinds of model
+
+The skill branches by kind of model (`skills/lowpoly/references/kinds/`: `biped`, `prop`). Each further
+kind lands as one card there with what it needs in `lpk` and its own worked example; the kind stays a
+notion of the skill, never read by `lpk`. Each stage below is one pull request, in this order:
+
+1. **Shared hard-surface forms**: a chamfered prism and box, a hinge pin, a hub, a plate along a segment,
+   a plate standing off a face, a slot, a mechanical hand, merged into `lpk/forms/hard.py` on the
+   human's request ([Where forms live](ARCHITECTURE.md#where-forms-live)).
+2. **Light bipeds and full hands**: the `biped` template's neck, shoulders and toes become options, so a
+   rig can hold the fifteen bones a humanoid avatar requires plus the chest; a `full` hands choice with
+   three phalanges on each of five digits; the review poses read from the template's `poses` instead of
+   `stages.review.POSES`, which names biped bones (ARCHITECTURE.md, "Transition"). A worked example at a
+   light triangle budget.
+3. **Rigid mechanism** (a turret, a drone, a walking machine, a chest with a lid): a skeleton template
+   `lpk/skeletons/rigid.json` with a root only, the model's bones in `EXTRA_BONES`, every part pinned to
+   one bone through `FIXED`; the export stays one mesh and one armature. A worked example.
+4. **Quadruped**: a template `lpk/skeletons/quadruped.json` with its review poses, forms for four legs,
+   paws and a level trunk, a worked example.
+5. **Atlas variants**: a model attribute naming palette and colour-source overrides, each baked into its
+   own atlas on the same UVs and exported beside the first.
+6. **Clip review**: a review call that bakes a clip from another skeleton onto the model's rig by a bone
+   map (rotation deltas for the trunk and legs, directions for the arms, scaled hips, optional
+   procedural tail sway and foot planting) and captures chosen frames.
+7. **First-person arms**: a skeleton of fixed standard proportions (the `biped` template with `full`
+   hands; the arms carry the character in mesh volume, not bone lengths), arm and digit forms at
+   first-person detail with the weights written while building (a weights backend), review framing from
+   the first-person camera, a worked example.
+
 ## Deferred
 
 - The hand unwrap: on the mannequin example, right after `freeze_texture` and before any edit,
@@ -9,23 +38,6 @@ The kit's structure is in [ARCHITECTURE.md](ARCHITECTURE.md). Open work:
   island. The procedural unwrap squashes them, not the check. Fix the hand's
   seams or unwrap so a fresh frozen texture reports no hand faces; an intentional UV change, stated with
   a before/after in its commit.
-
-### Ideas: further kinds of model
-
-The skill branches by kind of model (`skills/lowpoly/references/kinds/`: `biped`, `prop`). Each further
-kind lands as one card there with what it needs in `lpk` and its own worked example; the kind stays a
-notion of the skill, never read by `lpk`.
-
-- **Animated prop** (a chest with a lid, a door, a weapon with moving parts): a skeleton template
-  `lpk/skeletons/prop.json` (a root and a chain the model sizes), export profiles for it (a profile's
-  `bone_map` is checked against its skeleton), rigid binding through `FIXED`, and the review poses read
-  from the template's `poses` instead of `stages.review.POSES`, which names biped bones (ARCHITECTURE.md,
-  "Transition").
-- **Quadruped**: a template `lpk/skeletons/quadruped.json`, forms for four legs and paws, a worked
-  example.
-- **First-person hands**: a template for the arms and the camera, forms of the forearm and the hand at
-  first-person detail, and review framing from the camera's point of view.
-- **Shared hard-surface forms**: a chamfered box, a hub, a hinge, a plate stack, merged from the local
-  forms of several props into `lpk/forms/` on the human's request
-  ([Where forms live](ARCHITECTURE.md#where-forms-live)).
+- **Environment** (modular rooms with door sockets, collision boxes, a palette texture shared by a set of
+  rooms): needs its own design before it enters the kit.
 - **A set of props in one module**: one model module holds one prop today.
