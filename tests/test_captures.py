@@ -260,6 +260,16 @@ def test_set_pose_returns_the_names_the_rig_lacks():
         assert np.allclose(left.rotation_euler, (0, 0, np.pi / 2)) and left.location == (0, 0, 0)
         assert right.rotation_euler == [0, 0, 0] and right.rotation_mode == 'XYZ', 'a bone it does not name rests'
         assert pose.set_pose('Figure_Rig', None) == [] and left.rotation_euler == [0, 0, 0]
+        pose.set_pose('Figure_Rig', {'UpperArm.R': {'loc': (0, 0.02, 0)}, 'UpperArm.L': {'rot': (10, 0, 0)}})
+        assert right.location == (0.0, 0.02, 0.0) and right.rotation_euler == [0, 0, 0], 'an offset alone'
+        assert np.allclose(left.rotation_euler, (np.radians(10), 0, 0)) and left.location == (0.0, 0.0, 0.0)
+        for bad in ({'move': (0, 0, 1)}, {'loc': (0, 1)}, 'up'):
+            try:
+                pose.channels(bad)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError('%r accepted' % (bad,))
     finally:
         del bpy.data
 

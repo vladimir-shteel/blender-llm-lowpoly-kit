@@ -41,7 +41,7 @@ lists every key. Take the one the target's importer expects.
   arguments must agree.
 - **Bone names.** The model keeps its own names; a profile renames bones by role on a temporary copy
   during the export only (`lpk.profiles.bone_renames`). Two roles mapped to one name are refused. A bone
-  of the model's own (`EXTRA_BONES`) has no role and keeps its name; a deform-only profile leaves out a
+  of the model's own (`extra_bones(P)`) has no role and keeps its name; a deform-only profile leaves out a
   bone that deforms nothing unless a deform bone hangs from it, so a target that needs a prop socket
   needs a profile that writes it.
 - **The influence limit** of the rig is the smallest `influence_limit` of the `EXPORTS` profiles

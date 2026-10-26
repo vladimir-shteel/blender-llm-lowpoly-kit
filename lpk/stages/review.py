@@ -384,8 +384,8 @@ def _area(co, poly):
 def join_metrics(obj_name, rig_name, pose, pairs, rings=2):
     """How a pose deforms each join zone of a rigged mesh, against the rest pose.
 
-    obj_name: the skinned mesh object; rig_name: its armature; pose: a rotation dict {bone: (x, y, z)
-    degrees}; pairs: [{'parent', 'child', 'caps'}] join pairs (parent and child part
+    obj_name: the skinned mesh object; rig_name: its armature; pose: {bone: pose entry}
+    (lpk.stages.pose.channels); pairs: [{'parent', 'child', 'caps'}] join pairs (parent and child part
     names, caps as lpk.stages.rig.smooth_zones takes them); rings: the edge rings round each loop the zone
     takes (lpk.stages.rig.join_zones). The rig holds the pose it was found in again afterwards
     (lpk.stages.pose.held_pose).
@@ -429,7 +429,7 @@ def pose_captures(body, rig, out, poses, *, views=('front', 'q34', 'side'), widt
 
     body: the name of the body object, which names nothing else; rig: the name of its armature object; out:
     the folder of the captures, named <pose>_<view>.png, and of the sheet, poses.png; poses: {name: {bone:
-    (x, y, z) degrees}} as lpk.skeletons.poses gives them, in column order; views: lpk.stages.view.VIEWS
+    pose entry}} (lpk.stages.pose.channels), in column order; views: lpk.stages.view.VIEWS
     names; width: the captures' width in pixels.
 
     A bone a pose names that the rig lacks turns nothing, so the pose shows less than it names: those names

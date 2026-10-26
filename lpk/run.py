@@ -780,7 +780,7 @@ def _profile(M, name):
 
 def rig(M, P, backend=None):
     """The rig '<NAME>_Rig' of the template SKELETON at the joints bones(P) (lpk.stages.rig.build_rig,
-    EXTRA_BONES for the model's own) and the body's weights (lpk.stages.rig.skin): the template's part
+    extra_bones(P) for the model's own) and the body's weights (lpk.stages.rig.skin): the template's part
     binding (lpk.skeletons.part_binding) updated by ALLOWED, FIXED rigid parts, JOINS smoothed, '{s}'
     expanded per side in each; the backend `backend`, else WEIGHTS, else 'auto'; the influence limit of
     influences(M). Returns {'rig': build_rig's report, 'skin': skin's report}."""
@@ -789,7 +789,8 @@ def rig(M, P, backend=None):
     require(M, 'rig', 'body')
     n = names(M)
     template = need(M, 'SKELETON')
-    rep = rig_mod.build_rig(n['body'], n['rig'], template, need(M, 'bones')(P), getattr(M, 'EXTRA_BONES', None))
+    extra = M.extra_bones(P) if hasattr(M, 'extra_bones') else None
+    rep = rig_mod.build_rig(n['body'], n['rig'], template, need(M, 'bones')(P), extra)
     bones = [b.name for b in bpy.data.objects[n['rig']].data.bones]
     allowed = dict(skeletons.part_binding(template, bones))
     allowed.update(skeletons.sided(getattr(M, 'ALLOWED', {}), template))
@@ -811,7 +812,7 @@ def preview(M, P):
 
 
 def pose_test(M, P):
-    """The rig in TEST_POSE ({bone: (x, y, z) degrees}, lpk.stages.pose.set_pose). Returns the names the
+    """The rig in TEST_POSE ({bone: pose entry}, lpk.stages.pose.set_pose). Returns the names the
     rig lacks."""
     from lpk.stages import pose
     require(M, 'pose_test', 'rig')
@@ -881,22 +882,36 @@ def part_capture(M, part, tag, shade, views):
 
 
 def poses(path, names_=None):
-    """The rigged body in the review poses (the SKELETON template's, lpk.skeletons.poses; the model's
-    TEST_POSE as 'test') on one sheet, out/captures/poses/poses.png (lpk.stages.review.pose_captures);
-    names_: the poses to show, default all. Returns pose_captures' report."""
-    from lpk import skeletons
+    """The rigged body in the review poses (review_poses) on one sheet, out/captures/poses/poses.png
+    (lpk.stages.review.pose_captures); names_: the poses to show, default all. Returns pose_captures'
+    report."""
     from lpk.stages import review
     M = load(path)
     n = names(M)
-    every = skeletons.poses(need(M, 'SKELETON'))
-    if hasattr(M, 'TEST_POSE'):
-        every['test'] = M.TEST_POSE
+    every = review_poses(M)
     chosen = {k: every[k] for k in (names_ or every)}
     return review.pose_captures(n['body'], n['rig'], out(M, 'captures', 'poses'), chosen)
 
 
+def review_poses(M):
+    """The review poses of a model, {name: {bone: pose entry}}: the SKELETON template's
+    (lpk.skeletons.poses), then the model's POSES, then its TEST_POSE as 'test'. Raises ValueError for a
+    POSES name the template or 'test' already takes."""
+    from lpk import skeletons
+    every = skeletons.poses(need(M, 'SKELETON'))
+    own = dict(getattr(M, 'POSES', {}))
+    clash = [k for k in own if k in every or k == 'test']
+    if clash:
+        raise ValueError('POSES names %s, which the template %r or TEST_POSE already takes: rename them'
+                         % (', '.join(map(repr, clash)), M.SKELETON))
+    every.update(own)
+    if hasattr(M, 'TEST_POSE'):
+        every['test'] = M.TEST_POSE
+    return every
+
+
 def joins(path, pose='test'):
-    """How `pose` (a review pose of the SKELETON template, 'test' for TEST_POSE, or {bone: degrees})
+    """How `pose` (a review pose's name, review_poses, or {bone: pose entry})
     deforms each of the model's JOINS (lpk.stages.review.join_metrics). Two joins whose zones share vertices (the
     leg holes of a crotch seam) both read the deformation there: a leg the pose leaves still shows the
     stretch of the other at the seam; its loop_cm stays its own. Returns join_metrics' report."""
@@ -908,10 +923,9 @@ def joins(path, pose='test'):
     if pose == 'test':
         pose = need(M, 'TEST_POSE')
     elif isinstance(pose, str):
-        every = skeletons.poses(template)
+        every = review_poses(M)
         if pose not in every:
-            raise ValueError("pose %r: give a review pose of %r (%s), 'test' or {bone: degrees}"
-                             % (pose, template, ', '.join(every)))
+            raise ValueError("pose %r: give a review pose (%s) or {bone: pose entry}" % (pose, ', '.join(every)))
         pose = every[pose]
     pairs = [{'parent': p, 'child': c, 'caps': caps}
              for p, c, caps in skeletons.sided(list(need(M, 'JOINS')), template)]

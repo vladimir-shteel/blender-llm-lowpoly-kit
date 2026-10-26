@@ -125,6 +125,18 @@ def test_a_missing_model_attribute_is_named():
         assert 'Probe defines no TEST_POSE' in _raises(AttributeError, run.need, M, 'TEST_POSE')
 
 
+def test_review_poses_add_the_models_own_and_the_test_pose():
+    with stand_ins():
+        run = importlib.import_module('lpk.run')
+        M = types.SimpleNamespace(NAME='Probe', __name__='probe', SKELETON='rigid',
+                                  POSES={'recoil': {'Slide': {'loc': (0, 0.03, 0)}}}, TEST_POSE={'Root': (0, 0, 20)})
+        assert run.review_poses(M) == {'recoil': {'Slide': {'loc': (0, 0.03, 0)}}, 'test': {'Root': (0, 0, 20)}}
+        M = types.SimpleNamespace(NAME='Probe', __name__='probe', SKELETON='biped', POSES={'stride': {}})
+        assert "'stride'" in _raises(ValueError, run.review_poses, M), 'a template pose is not taken twice'
+        biped = run.review_poses(types.SimpleNamespace(NAME='Probe', __name__='probe', SKELETON='biped'))
+        assert list(biped)[0] == 'side75' and 'test' not in biped
+
+
 def _model():
     run = importlib.import_module('lpk.run')
     M = run.load(MODEL)

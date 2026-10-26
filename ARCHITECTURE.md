@@ -244,13 +244,14 @@ such a stage or review call runs, naming the attribute.
 |---|---|---|
 | `SKELETON` | `rig`, `poses`, `joins`; `adopt` for the part names of the template's binding, `export` (optional) | the skeleton template name. With it `export` writes the body with the rig `<NAME>_Rig`, whose influence limit is the smallest of the profiles'; without it the body alone, the profiles' skeleton keys acting on no bone |
 | `bones(P)` | `rig` | `{bone: (head, tail)}` in metres, keyed by the template's bone names with each side's bones written out |
-| `EXTRA_BONES` | `rig` (optional) | bones beyond the template's |
+| `extra_bones(P)` | `rig` (optional) | `{bone: {'head', 'tail', 'parent', 'roll'?, 'deform'?}}` in metres, the bones beyond the template's |
 | `ALLOWED` | `rig`, `adopt` with `SKELETON` for the part names (optional) | bones per part over the template's binding |
 | `FIXED` | `rig`, `adopt` with `SKELETON` for the part names (optional) | the parts bound at fixed weights |
 | `JOINS` | `joins`; `rig`, `adopt` with `SKELETON` for the part names (optional) | `[(parent, child, caps)]` |
 | `WEIGHTS` | `rig` (optional) | the weights backend |
 | `PREVIEW` | `preview` (optional) | the look |
-| `TEST_POSE` | `pose_test`; `joins` for the pose `'test'`, its default; `poses` for the pose `'test'` (optional) | the test pose |
+| `POSES` | `poses`, `joins` (optional) | `{name: {bone: pose entry}}`, review poses beyond the template's (`lpk.stages.pose.channels`: Euler degrees, or a rotation and an offset) |
+| `TEST_POSE` | `pose_test`; `joins` for the pose `'test'`, its default; `poses` for the pose `'test'` (optional) | the test pose, `{bone: pose entry}` |
 | `EXPORTS` | `export`; `rig` for the influence limit (optional) | profile names or JSON paths |
 | `EXPORT_DIR` | `export` (optional) | default `out/` |
 

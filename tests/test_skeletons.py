@@ -45,7 +45,7 @@ def _broken(edit):
 
 
 def test_every_shipped_template_validates():
-    assert skeletons.names() == ['biped']
+    assert skeletons.names() == ['biped', 'rigid']
     for name in skeletons.names():
         data = skeletons.load(name)
         assert skeletons.validate(data, name) == [], name
@@ -146,6 +146,15 @@ def test_a_light_rig_hangs_children_from_the_nearest_bone_it_has():
     binding = skeletons.part_binding('biped', bones=list(light))
     assert binding['trunk'] == ['Hips', 'Spine', 'Chest', 'UpperArm.L', 'UpperArm.R', 'UpperLeg.L', 'UpperLeg.R']
     assert binding['foot.L'] == ['LowerLeg.L', 'Foot.L']
+
+
+def test_the_rigid_template_is_a_root_the_model_builds_on():
+    assert [b['name'] for b in skeletons.bones_for('rigid')] == ['Root']
+    assert skeletons.part_binding('rigid') == {} and skeletons.poses('rigid') == {}
+    assert skeletons.options_for('rigid', ['Root', 'Turret', 'Barrel']) == {}, 'model bones are no template bones'
+    assert skeletons.role_of('Turret', 'rigid') is None and skeletons.roll('Turret', 'rigid') == (0.0, -1.0, 0.0)
+    assert skeletons.sided({'leg.{s}': {'Leg.{s}': 1.0}}, 'rigid') == {'leg.L': {'Leg.L': 1.0},
+                                                                       'leg.R': {'Leg.R': 1.0}}
 
 
 def test_options_for_reads_the_options_back_from_a_rigs_bones():
