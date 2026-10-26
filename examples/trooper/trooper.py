@@ -2,10 +2,10 @@
 a belt and a chest plate, shoulder pads, a round helmet with a visor, block gloves and boots. It has no
 references: every size is a named value of the brief, and each review compares with the human's idea.
 
-Brief: about 600 triangles in one 256 atlas of flat colours, a body seen in groups at a distance; the
-biped skeleton at its fifteen required bones and the chest (no neck, clavicles, toes, fingers or tail),
-the limbs as separate shells; binary glTF and FBX, and an FBX for a humanoid avatar, from the same body;
-about 100 px tall on screen at the farthest play distance.
+Brief: about 600 triangles in one 256 atlas of flat colours and a desert variant of it, a body seen in
+groups at a distance; the biped skeleton at its fifteen required bones and the chest (no neck, clavicles,
+toes, fingers or tail), the limbs as separate shells; binary glTF and FBX, and an FBX for a humanoid
+avatar, from the same body; about 100 px tall on screen at the farthest play distance.
 
 Run it from an MCP call after the kit's bootstrap (lpk/__init__.py):
 
@@ -229,6 +229,9 @@ def build_mesh(P):
 
 ATLAS = (256, {'Body': 1.0})
 PREVIEW = 'neutral'
+# The same trooper in desert colours: another atlas on the same UVs, for a squad of another side.
+VARIANTS = {'desert': {'suit': (0.66, 0.56, 0.40), 'helmet': (0.58, 0.49, 0.35), 'armour': (0.42, 0.35, 0.25),
+                       'visor': (0.20, 0.55, 0.75)}}
 
 
 def sheet_of(colour, part):

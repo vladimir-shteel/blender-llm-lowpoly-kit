@@ -44,6 +44,9 @@ lists every key. Take the one the target's importer expects.
   of the model's own (`extra_bones(P)`) has no role and keeps its name; a deform-only profile leaves out a
   bone that deforms nothing unless a deform bone hangs from it, so a target that needs a prop socket
   needs a profile that writes it.
+- **Colour variants** (`VARIANTS`, [atlas](atlas.md#colour-variants)) go beside the files as
+  `<NAME>_Atlas_<name>.png` whatever the profile's textures, `report['export'][profile]['variants']`
+  listing them; a glTF that embeds its atlas leaves the variants as files.
 - **The influence limit** of the rig is the smallest `influence_limit` of the `EXPORTS` profiles
   ([weights](weights.md#the-influence-limit)); a profile added with a lower limit needs `rig` again.
 

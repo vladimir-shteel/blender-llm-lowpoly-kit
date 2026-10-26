@@ -1273,8 +1273,7 @@ def _bake_sources(obj_name, sheet_of, atlas, specs, face_part, face_pred, strips
     scene = bpy.context.scene
     size = atlas[0]
     imgs = {}
-    for key in ('Albedo', 'Atlas'):
-        nm = obj_name + '_' + key
+    for key, nm in (('Albedo', obj_name + '_Albedo'), ('Atlas', final_name)):
         if bpy.data.images.get(nm):
             bpy.data.images.remove(bpy.data.images[nm])
         imgs[key] = bpy.data.images.new(nm, size, size, alpha=False)
@@ -1693,12 +1692,12 @@ def unwrap(obj_name, sheet_of, atlas, face_part=None, face_pred=None, boost=None
 
 
 def bake(obj_name, sheet_of, atlas, sources=(), colours=None, face_part=None, face_pred=None, strips=None, own=None,
-         grit=None, material='base', margin=0.006, save_dir=None):
+         grit=None, material='base', margin=0.006, save_dir=None, image=None):
     """The colour atlas baked on the current UVs of the body `obj_name`: the recolour of `Col` on the body
     and every source from `colours` (recolour; none when colours is None), then the bake (_bake_sources)
-    with the colour sources in bake order, the grit, and the final material `material` named
-    '<obj_name>_Atlas' on the body's slot 0, the atlas image '<obj_name>_Atlas' saved as
-    <save_dir>/<obj_name>_Atlas.png unless save_dir is None. A collection holding a source that is excluded
+    with the colour sources in bake order, the grit, and the final material `material` named `image` on
+    the body's slot 0, the atlas image `image` saved as <save_dir>/<image>.png unless save_dir is None;
+    image defaults to '<obj_name>_Atlas'. A collection holding a source that is excluded
     from the view layer or hidden (the sources' own, lpk.core.builder.hidden_collection) is included for the
     call (include_collections) and put back after it; each source's materials and visibility are put
     back as found, the body's slot links are held on its mesh materials while it bakes
@@ -1725,7 +1724,7 @@ def bake(obj_name, sheet_of, atlas, sources=(), colours=None, face_part=None, fa
     recoloured = {} if colours is None else recolour([obj_name] + [s['object'] for s in specs], colours)
     if save_dir is not None:
         os.makedirs(str(save_dir), exist_ok=True)
-    name = obj_name + '_Atlas'
+    name = image or obj_name + '_Atlas'
     kept = {m: bpy.data.materials.get(m) is not None for m in own_materials(own)}
     with _baking(obj_name, specs, _working(obj_name, specs)):
         report = _bake_sources(obj_name, _own_sheet(sheet_of, own), atlas, specs, face_part, face_pred,

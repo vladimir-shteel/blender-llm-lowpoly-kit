@@ -137,6 +137,19 @@ def test_review_poses_add_the_models_own_and_the_test_pose():
         assert list(biped)[0] == 'side75' and 'test' not in biped
 
 
+def test_variant_palettes_replace_the_colours_they_name():
+    with stand_ins():
+        run = importlib.import_module('lpk.run')
+        M = types.SimpleNamespace(NAME='Probe', __name__='probe', PALETTE={'suit': (0.1, 0.2, 0.3), 'trim': (1, 1, 1)},
+                                  VARIANTS={'desert': {'suit': (0.6, 0.5, 0.4)}})
+        assert run.variant_palettes(M) == {'desert': {'suit': (0.6, 0.5, 0.4), 'trim': (1, 1, 1)}}
+        assert run.variant_palettes(types.SimpleNamespace(NAME='Probe', __name__='probe', PALETTE={})) == {}
+        for bad, needle in (({'de sert': {}}, 'letters'), ({'night': {'boot': (0, 0, 0)}}, "'boot'"),
+                            ({'night': {'suit': (2, 0, 0)}}, 'each 0 to 1')):
+            M.VARIANTS = bad
+            assert needle in _raises(ValueError, run.variant_palettes, M), bad
+
+
 def _model():
     run = importlib.import_module('lpk.run')
     M = run.load(MODEL)
@@ -269,7 +282,7 @@ def test_the_bake_stage_passes_the_models_grit():
                                   sheet_of=lambda colour, part: 'A')
         seen = []
         saved = texture.bake, texture.stamp_image
-        texture.bake = lambda *a, **k: seen.append(k['grit'])
+        texture.bake = lambda *a, **k: seen.append(k['grit']) or {}
         texture.stamp_image = lambda name: None
         try:
             run.bake(M, {})

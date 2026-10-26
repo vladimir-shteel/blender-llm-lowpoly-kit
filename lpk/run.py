@@ -645,12 +645,22 @@ def bake(M, P, discard_edits=False):
     atlas in the scene is checked against its stamp: one painted by hand since the kit wrote it raises
     (freeze_texture stores the paint), unless discard_edits.
 
-    Raises ValueError for a GRIT that is not such a colour and an 'over' that is not True or False. Returns
-    bake's or bake_over's result, the latter with 'uv_check': uv_check's report on the body's UVs."""
+    VARIANTS (variant_palettes): before the atlas, each variant baked the same way from its palette into
+    the image '<NAME>_Atlas_<variant>', saved as out/<NAME>_Atlas_<variant>.png on the same UVs; its working
+    material is removed, so the body keeps the atlas's.
+
+    Raises ValueError for a GRIT that is not such a colour, an 'over' that is not True or False, VARIANTS
+    variant_palettes refuses and VARIANTS under a frozen texture. Returns bake's or bake_over's result, the
+    former with 'variants': {variant: its PNG's path}, the latter with 'uv_check': uv_check's report on the
+    body's UVs."""
     from lpk.stages import texture
     require(M, 'bake', 'uv')
     n = names(M)
     grit = _grit(M)
+    variants = variant_palettes(M)
+    if variants and texture_frozen(M):
+        raise ValueError('bake: VARIANTS recolour the palette, which a frozen texture (TEXTURE_FROZEN = True) does '
+                         'not bake from: drop VARIANTS, or unfreeze the texture')
     specs = getattr(M, 'SOURCES', {})
     bad = [k for k, spec in specs.items() if not isinstance(spec.get('over', False), bool)]
     if bad:
@@ -670,11 +680,46 @@ def bake(M, P, discard_edits=False):
                                 material=getattr(M, 'MATERIAL', 'base'), save_dir=out(M))
         rep['uv_check'] = uv_check(M)
     else:
+        done = {}
+        for variant, colours in variants.items():
+            image = '%s_%s' % (n['atlas'], variant)
+            vrep = texture.bake(n['body'], need(M, 'sheet_of'), need(M, 'ATLAS'), sources=sources, colours=colours,
+                                grit=grit, material=getattr(M, 'MATERIAL', 'base'), save_dir=out(M), image=image,
+                                **_atlas_args(M, P))
+            done[variant] = vrep['files'][0]
+            if bpy.data.materials.get(image) is not None:
+                bpy.data.materials.remove(bpy.data.materials[image])
         rep = texture.bake(n['body'], need(M, 'sheet_of'), need(M, 'ATLAS'), sources=sources,
                            colours=need(M, 'PALETTE'), grit=grit, material=getattr(M, 'MATERIAL', 'base'),
                            save_dir=out(M), **_atlas_args(M, P))
+        rep['variants'] = done
     texture.stamp_image(n['atlas'])
     return rep
+
+
+def variant_palettes(M):
+    """The palettes of the model's VARIANTS, {variant: PALETTE with that variant's colours replaced}, in
+    VARIANTS order ({} without VARIANTS). VARIANTS: {name: {palette name: sRGB (r, g, b)}}, each variant
+    recolouring some of PALETTE's names, the rest kept. Raises ValueError for a variant name that is not
+    a non-empty word of letters, digits and underscores (it names an image and a file), a variant naming a
+    colour PALETTE lacks, and a colour that is not three channels from 0 to 1."""
+    palette = dict(getattr(M, 'PALETTE', {}))
+    out_, problems = {}, []
+    for variant, colours in dict(getattr(M, 'VARIANTS', {})).items():
+        if not (isinstance(variant, str) and variant and all(c.isalnum() or c == '_' for c in variant)):
+            problems.append('VARIANTS[%r]: name a variant with letters, digits and underscores' % (variant,))
+            continue
+        unknown = [c for c in colours if c not in palette]
+        if unknown:
+            problems.append('VARIANTS[%r]: %s not in PALETTE' % (variant, ', '.join(map(repr, unknown))))
+        bad = [c for c, v in colours.items()
+               if not (len(tuple(v)) == 3 and all(isinstance(x, (int, float)) and 0.0 <= x <= 1.0 for x in v))]
+        if bad:
+            problems.append('VARIANTS[%r]: %s must be (r, g, b), each 0 to 1' % (variant, ', '.join(map(repr, bad))))
+        out_[variant] = dict(palette, **{c: tuple(v) for c, v in colours.items()})
+    if problems:
+        raise ValueError('\n'.join(problems))
+    return out_
 
 
 def _grit(M):
@@ -829,19 +874,34 @@ def pose_rest(M, P):
 def export(M, P):
     """One file per EXPORTS profile (lpk.stages.export.export_output) in EXPORT_DIR (relative to the
     model's folder, default out/), named '<NAME>_<profile>', each re-imported and compared with the model.
-    A model with SKELETON goes out with its rig '<NAME>_Rig', one without as its body alone. Returns
-    {profile: export_output's report}."""
+    A model with SKELETON goes out with its rig '<NAME>_Rig', one without as its body alone. The atlas of
+    each of VARIANTS, baked as out/<NAME>_Atlas_<variant>.png, goes beside the files as a PNG of that name
+    whatever the profile's textures: no material in the file uses it, the engine swaps it in. Raises
+    ValueError for a variant whose atlas the bake has not written. Returns {profile: export_output's report
+    plus 'variants': the variant PNGs' paths beside the file}."""
+    import shutil
     from lpk.stages import export as export_mod
     rigged = hasattr(M, 'SKELETON')
     require(M, 'export', 'body', *(('rig',) if rigged else ()))
     n = names(M)
     target = folder(M, M.EXPORT_DIR) if getattr(M, 'EXPORT_DIR', None) else out(M)
     os.makedirs(target, exist_ok=True)
+    variants = []
+    for variant in variant_palettes(M):
+        png = '%s_%s.png' % (n['atlas'], variant)
+        source = os.path.join(out(M), png)
+        if not os.path.isfile(source):
+            raise ValueError('export: no atlas %s for the variant %r: run bake' % (source, variant))
+        dest = os.path.join(target, png)
+        if os.path.abspath(dest) != os.path.abspath(source):
+            shutil.copyfile(source, dest)
+        variants.append(dest)
     report = {}
     for profile in need(M, 'EXPORTS'):
         stem = os.path.splitext(os.path.basename(profile))[0]
         report[profile] = export_mod.export_output(n['body'], n['rig'] if rigged else None, target,
                                                    n['body'] + '_' + stem, _profile(M, profile))
+        report[profile]['variants'] = list(variants)
     return report
 
 

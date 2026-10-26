@@ -212,6 +212,21 @@ nearest-texel sampling). The atlas is saved as `out/<NAME>_Atlas.png`.
   albedo, shared by a source and the body under it. Large areas of one colour under grit read blotchy:
   have the human look at them on the preview in Blender before keeping it.
 
+## Colour variants
+
+`VARIANTS = {name: {palette name: sRGB}}` gives the same model in other colours: a squad of another side,
+a recoloured elite, a palette swapped for a region. Each variant replaces the colours it names and keeps
+the rest of `PALETTE`; `bake` bakes it, body and colour sources alike, into `out/<NAME>_Atlas_<name>.png`
+on the same UVs before the atlas itself, so the body keeps the atlas's material
+(`report['bake']['variants']`). The export writes each variant's PNG beside the files; no material in them
+uses it, and the engine swaps it in.
+
+- A variant recolours palette names only: a difference of shape (another emblem, a stripe in another
+  place) is a colour source of its own under a palette name the base colours like its surface and the
+  variant colours apart, or another model.
+- Under a frozen texture there is no palette to recolour: the bake refuses `VARIANTS` there.
+- Review each variant's atlas with the human beside the first, as a pair of captures or the two PNGs.
+
 ## The preview
 
 `preview` saves the atlas as `out/<NAME>_Atlas_preview.png` and shows it on the body in the `PREVIEW` look,

@@ -237,6 +237,7 @@ such a stage or review call runs, naming the attribute.
 | `FACE_AREA`, `FACE_TEXELS` | `pack` (optional) | the face island's atlas area, or its texels per metre |
 | `SOURCES` | `build`, `bake`, `repair_uvs` (optional) | the colour sources, below |
 | `MATERIAL`, `GRIT` | `bake`, `repair_uvs` for `GRIT` (optional) | `GRIT` is the print grit colour, None for flat colours |
+| `VARIANTS` | `bake`, `export` (optional) | `{name: {palette name: sRGB}}`: each bakes `<NAME>_Atlas_<name>` from PALETTE with its colours replaced, on the same UVs; refused under a frozen texture |
 
 **Rig, pose and export**
 
@@ -280,7 +281,7 @@ A budget (triangles, atlas size) is prose in the module's docstring or the brief
 | Frozen texture | `freeze_texture`, `adopt`, `repair_uvs`; the UV layer also by `freeze` and the zone operations under a frozen texture; removed by `unfreeze_texture` | the UV layer `UVMap` on the mesh `<NAME>_Frozen` and the image `<NAME>_AtlasFrozen`, packed into the open `.blend` with a fake user | the UVs and atlas of the frozen texture, hand edits included; kept when the `.blend` is saved |
 | Build stamp | `build`, `freeze`, `capture_edits`, `freeze_texture`, `bake`, `repair_uvs`, the zone operations (`unwrap` and `pack` drop its UV digest) | properties of the body object and of the image `<NAME>_Atlas` | the topology key, position digest and UV digest of what the kit last wrote on the body, the texel digest of the atlas it last wrote; read only to refuse overwriting hand edits |
 | Scene objects | the stages | the open `.blend` | named `<NAME>` or `<NAME>_*` |
-| Captures, sheets, overlays, baked atlas, atlas preview | the tools that make them | `out/` beside the model module | outputs |
+| Captures, sheets, overlays, baked atlas and its variants, atlas preview | the tools that make them | `out/` beside the model module | outputs |
 | Pack cache | `stages.texture` | `out/<NAME>.pack.json` | a speed-up keyed by the unwrap and the pack settings; deleting it changes only the time a pack takes |
 | Exports | `stages.export` | `EXPORT_DIR` or `out/` | `<NAME>_<profile>` |
 
