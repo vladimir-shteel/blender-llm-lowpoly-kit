@@ -907,6 +907,9 @@ def export(M, P):
 
 # -- review calls -----------------------------------------------------------------------------------------
 
+# The frames clip() shows of a clip by default, spread over its action.
+CLIP_FRAMES = 6
+
 def capture(path, tag='build', shade='color', views=('front', 'side', 'q34', 'back'), objects=None, part=None):
     """Captures of the model framed on its body (lpk.stages.review.capture over body_views) as
     out/captures/<tag>_<view>.png. shade: lpk.stages.view.set_view's ('color', 'tex', 'material', ...);
@@ -968,6 +971,50 @@ def review_poses(M):
     if hasattr(M, 'TEST_POSE'):
         every['test'] = M.TEST_POSE
     return every
+
+
+def clip(path, clip_path, bone_map=None, frames=None, count=CLIP_FRAMES, ground=None, hips_scale=None, sway=None,
+         views=('front', 'q34', 'side')):
+    """Frames of a clip of another skeleton on the model's rig, on one sheet (lpk.stages.clips over
+    lpk.stages.review.pose_captures): out/captures/clips/<clip file stem>/poses.png, a frame per column.
+    Nothing is keyed on the rig and the clip leaves the scene again.
+
+    clip_path: an .fbx, .glb or .gltf file, absolute or relative to the model's folder. bone_map: {rig bone:
+    (clip bone, 'delta' or 'dir')} (lpk.stages.clips); None lists the clip instead of sampling it. frames:
+    the clip's frames to show, by default `count` spread evenly over its action from the first frame to
+    the last. ground: parts of the body to plant on the floor in every frame (lpk.stages.clips.plant), None
+    to keep the clip's own heights. hips_scale: the root's travel factor (clips.sample's default without
+    it). sway: keyword arguments of lpk.stages.clips.tail_sway, turning the bones the map leaves out on
+    that wave, None for none. views: the sheet's rows.
+
+    Returns, without bone_map, {'bones': the clip's bone names, 'frames': its (first, last) frame}; with it,
+    pose_captures' report plus 'frames' (the frames shown), 'mapped', 'unmapped', 'anchor' and 'turn'
+    (clips.sample's) and 'ground_shift' (plant's range, None without ground). Raises ValueError for a
+    missing rig and with the bone map's problems (clips.map_problems)."""
+    from lpk.stages import clips, review
+    M = load(path)
+    n = names(M)
+    require(M, 'clip', 'body', 'rig')
+    source = clip_path if os.path.isabs(clip_path) else folder(M, clip_path)
+    loaded = clips.load_clip(source)
+    try:
+        if bone_map is None:
+            return {'bones': loaded['bones'], 'frames': loaded['frames']}
+        first, last = loaded['frames']
+        shown = list(frames) if frames else sorted({round(first + (last - first) * i / max(count - 1, 1))
+                                                    for i in range(count)})
+        sampled = clips.sample(loaded['armature'], n['rig'], shown, bone_map, hips_scale,
+                               extra=clips.tail_sway(**sway) if sway is not None else None)
+    finally:
+        clips.remove_clip(loaded)
+    poses = sampled['poses']
+    shift = clips.plant(n['body'], n['rig'], poses, sampled['root'], list(ground)) if ground else None
+    base = os.path.splitext(os.path.basename(source))[0]
+    stem = ''.join(c if c.isalnum() or c in '-_' else '_' for c in base)
+    rep = review.pose_captures(n['body'], n['rig'], out(M, 'captures', 'clips', stem),
+                               {'f%04d' % f: poses[f] for f in shown}, views=views)
+    return dict(rep, frames=shown, mapped=sampled['mapped'], unmapped=sampled['unmapped'], anchor=sampled['anchor'],
+                turn=sampled['turn'], ground_shift=shift)
 
 
 def joins(path, pose='test'):

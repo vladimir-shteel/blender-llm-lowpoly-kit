@@ -90,6 +90,8 @@ build is followed by `unwrap`, the packs, `bake` and, for a rigged model, `rig` 
   ([operations on a part](frozen.md#operations-on-a-part)); `run.check_uvs` and `run.repair_uvs` find and
   repair UVs an edit broke ([mesh edits under a frozen texture](frozen.md#mesh-edits-under-a-frozen-texture)).
 - `run.poses(MODEL)`: the rigged body in the review poses and `TEST_POSE` on one sheet.
+- `run.clip(MODEL, clip, bone_map)`: frames of the target's own animation clip on the rig, on one sheet
+  ([weights](weights.md#a-clip-on-the-rig)).
 - `run.joins(MODEL, pose='test')`: how a pose stretches each of `JOINS`
   ([reading the joins](weights.md#reading-the-poses-and-the-joins)).
 - The overlay of the build on a reference view: `lpk.stages.review.calib_fit` or `view_fit`, then

@@ -45,7 +45,8 @@ build), rigged on the `quadruped` skeleton template (`SKELETON = 'quadruped'`). 
    the tip, the tail's bones evenly along it. The trunk's binding takes the roots of the legs it hides;
    ears and gear take the head or the bone they ride through `ALLOWED` or `FIXED`. Run `rig`, then
    `run.poses(MODEL)`. **Review:** the poses: each leg bends at its joints without tearing its shell, the
-   paws stay on their legs, the head and the tail turn.
+   paws stay on their legs, the head and the tail turn. The target's clips, when at hand, go on the rig
+   the same way ([a clip on the rig](../weights.md#a-clip-on-the-rig)).
 9. **Export, only when the human asks** ([export](../export.md)): the generic profiles write the bones by
    the template's names. Every `reimport` must have an empty `diffs`. **Review:** the human checks the
    import in the target engine.

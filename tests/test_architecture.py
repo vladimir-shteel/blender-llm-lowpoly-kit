@@ -66,7 +66,8 @@ LAYERS = {
     1: ('lpk.core.builder', 'lpk.core.shapes', 'lpk.core.edits', 'lpk.stages.checks', 'lpk.stages.view'),
     2: ('lpk.forms.*',),
     3: ('lpk.stages.texture', 'lpk.stages.rig', 'lpk.stages.pose', 'lpk.stages.preview', 'lpk.stages.export',
-        'lpk.stages.review', 'lpk.stages.reference', 'lpk.stages.blocks', 'lpk.stages.zones'),
+        'lpk.stages.review', 'lpk.stages.reference', 'lpk.stages.blocks', 'lpk.stages.zones',
+        'lpk.stages.clips'),
     4: ('lpk', 'lpk.run', 'lpk.setup_check', 'lpk.host.*'),
 }
 # The planned modules ARCHITECTURE.md names, with their layers: a module created under one of these names

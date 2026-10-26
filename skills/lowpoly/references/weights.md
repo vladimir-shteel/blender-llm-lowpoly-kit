@@ -172,3 +172,25 @@ After `rig`:
   crouch, an arm swung back for a garment).
 - A deformation tradeoff (a cap or none, another backend) is compared one change at a time, each run and
   shown in turn; the human says which stays.
+
+## A clip on the rig
+
+The review poses test the joins; the target's own clips test whether the rig moves as its animations ask
+(a walk, an attack, a reload). `run.clip(MODEL, clip)` imports a clip file (`.fbx`, `.glb`, `.gltf`) and
+lists its bones and frames, then removes it. Write the bone map from that list: `{rig bone: (clip bone,
+mode)}`, `'delta'` for the trunk, the head and the legs (their rests differ little from the clip's),
+`'dir'` for the arms (a T-pose clip on an A-pose rig), every bone the clip has a counterpart for; the rig's
+root must be mapped. Then `run.clip(MODEL, clip, bone_map, ground=['foot.L', 'foot.R'])` samples frames
+spread over the clip onto the rig and captures them on one sheet,
+`out/captures/clips/<clip>/poses.png`: nothing is keyed on the rig, and the clip leaves the scene again.
+
+- **Read the report first.** `turn` is the angle the clip was turned to stand in the rig's frame: near
+  zero for a clip in the same axes, near a right angle for a file with other axes; a turn that leaves the
+  figure lying or facing away means the map pairs bones wrongly. `anchor` is a clip root above the mapped
+  ones, held at its rest so a unit scale or axis turn keyed on it drops out (and its root motion with it).
+  `unmapped` lists the rig bones that keep their rest.
+- **ground** names parts to plant on the floor in every frame; `ground_shift` says how far they had to
+  move. A large shift is a leg length or a hip height the clip does not share with the rig.
+- **sway** (`lpk.stages.clips.tail_sway`'s arguments) swings a tail the clip lacks.
+- The sheet is a sampled approximation of the engine's own retargeting, not a copy of it: judge with the
+  human whether the gestures read and nothing tears, then check the clip in the engine.

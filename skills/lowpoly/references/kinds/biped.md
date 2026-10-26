@@ -50,7 +50,8 @@ read the one nearer the brief before writing a model of this kind.
    sources. After a mesh edit under the frozen texture, **review** the UV check's parts and repair on the
    human's word ([mesh edits under a frozen texture](../frozen.md#mesh-edits-under-a-frozen-texture)).
 10. **Rig.** `rig`, then `run.poses(MODEL)` and `run.joins(MODEL)` ([weights](../weights.md)). **Review:** the
-   poses: no tearing at the joins, limbs that bend where the joints are.
+   poses: no tearing at the joins, limbs that bend where the joints are. When the target's clips are at
+   hand, show one or two of them on the rig too ([a clip on the rig](../weights.md#a-clip-on-the-rig)).
 11. **Export, only when the human asks.** The character is finished with the rig's review; the export
     may come much later, for several models at once. When asked, settle the targets with the human,
     write `EXPORTS`, run `export` ([export](../export.md)); every `reimport` must have an empty `diffs`.

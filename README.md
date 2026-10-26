@@ -124,6 +124,7 @@ shape that is off. When you see a mismatch, or doubt one, ask for the measuremen
 | A limb looks glued on or sunk in | the limb separation and armhole reports |
 | The body shows through hair or clothing | the shell clearance |
 | A joint tears or folds when posed | the pose sheet and the join metrics |
+| The engine's own animations may not fit the rig | the clip sheet: a clip of yours on the rig, frame by frame |
 | Thin painted lines break up, the face looks blurry | the texel readings, then a texel boost for the part |
 | Detail reads poorly at play distance | the read-size captures |
 | The file differs in the engine | the export's re-import comparison |

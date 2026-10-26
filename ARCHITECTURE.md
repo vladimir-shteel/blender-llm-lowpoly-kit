@@ -56,7 +56,7 @@ does not follow the rules yet, or has not run where it must; do not copy its pat
 | L0 Pure tools and data | calibration and views reader (`core.views`), section kernel (`core.sections`), skeleton templates (`skeletons`), export profiles (`profiles`), image tools on arrays (`stages.imaging`), mask metrics (`stages.numerical`), intake on arrays and views.json dicts: crop, grids, calibrations, colour samples, comparing a copy with its original (`intake`) | stdlib, numpy, L0 | host and Blender |
 | L1 Kernels | `core.builder`, `core.shapes`, `core.edits`, `stages.checks`, `stages.view` | L0, L1 | Blender |
 | L2 Forms | `forms.*` | L0–L2 | Blender |
-| L3 Stage tools | `stages.texture`, `stages.rig`, `stages.pose`, `stages.preview`, `stages.export`, `stages.review`, `stages.reference`, `stages.blocks`, `stages.zones` | L0–L3 | Blender |
+| L3 Stage tools | `stages.texture`, `stages.rig`, `stages.pose`, `stages.preview`, `stages.export`, `stages.review`, `stages.reference`, `stages.blocks`, `stages.zones`, `stages.clips` | L0–L3 | Blender |
 | L4 Runner and entry points | the `lpk` package bootstrap, the runner (`run`), the Blender setup check (`setup_check`) | any layer | Blender |
 | L4 Host commands | `lpk.host`: the commands and their PNG reader (`host.png`) | L0, `lpk.host` | host |
 
@@ -104,7 +104,7 @@ stages. `run.STAGES` is the only list of stage names and fixes their order:
 - The runner keeps nothing between calls. A stage that needs another
   stage's output reads it from the scene by object name and raises with the missing name when it is
   absent.
-- Review calls are functions of the runner beside `model` (`capture`, `poses`, `joins`, `zones`, `select`,
+- Review calls are functions of the runner beside `model` (`capture`, `poses`, `clip`, `joins`, `zones`, `select`,
   `assign`, `paint`, the zone operations `transform`, `replace`, `decimate`, `subdivide`, `smooth`, and
   the UV calls `check_uvs` and `repair_uvs`): they take a model path and arguments, read the model module
   again, and return the paths and numbers they made. `run.dumps` gives a report as JSON text for the
@@ -361,7 +361,8 @@ to do a job this document assigns. Then:
   hash order.
 - **Scene safety.** The kit creates and replaces only objects named `<NAME>` or `<NAME>_*` of the model
   it runs, in its collection `<NAME>` and the child collection `<NAME>_Sources`, and temporary data the
-  same call removes (the export's re-import collection `lpk_reimport`, working images and proxies).
+  same call removes (the export's re-import collection `lpk_reimport`, the clip review's collection
+  `lpk_clip`, working images and proxies).
 - **Edit safety.** No stage overwrites a hand edit it has not stored ([Build modes](#build-modes), the
   build stamp). In parametric mode `build_mesh` replays stored vertex moves through `core.edits.apply`
   right after making each part, and a stored edit whose topology key no longer matches its part stops the
