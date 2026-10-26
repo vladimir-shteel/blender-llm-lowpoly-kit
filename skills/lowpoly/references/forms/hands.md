@@ -26,7 +26,7 @@ exaggeration twice.
 | Long curved talons | `hands.talon_hand` |
 | A mitten with a split index finger | `hands.fist_mitten` (`claws=` for claws, `finger_col=` for a fingerless glove) |
 | No fingers at the read size, or more than the budget carries | a `Builder.box`, a low-sided loft closing the arm, or a local form |
-| A mechanical or robot hand | a local form (below) |
+| A mechanical or robot hand | `hard.mech_hand` (below) |
 
 A heavy hand built from spread sticks costs as much and reads less like the drawing. Compare each docstring's
 triangle count with the budget first. Of the library's hands only the mitten has finger bones: `bones(P)`
@@ -87,10 +87,11 @@ form's docstring says where its wrist section starts and how wide and thick it i
 
 ## A mechanical hand
 
-No library form yet: a local form with a plate palm and a light back, digits of a rectangular section
-pinched at the middle joint, a light first segment against a dark knuckle and tip so the segments separate in
-a flat bake. Measure the palm's and the digits' widths off the drawing: a thin palm with thin digits reads as
-a stick of tiny blocks. Its rigid pieces are pinned to one bone each in `FIXED` ([gear.md](gear.md#rigid-pieces)).
+`hard.mech_hand`: a chamfered plate palm with its back in `back_col`, digits of a rectangular section
+pinched at the middle joint. Give the first segment (`finger_col`) a light colour against a dark knuckle and
+tip (`knuckle_col`) so the segments separate in a flat bake. Measure the palm's and the digits' widths off
+the drawing: a thin palm with thin digits reads as a stick of tiny blocks. A hand it cannot make (digits
+that bend on finger bones) is a local form. Its rigid pieces are pinned to one bone each in `FIXED` ([gear.md](gear.md#rigid-pieces)).
 
 ## Judge hands where they read
 

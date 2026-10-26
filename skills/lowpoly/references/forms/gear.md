@@ -30,7 +30,7 @@ of the model ([README.md](README.md#where-a-new-form-goes)).
 | A band, rim or hoop standing off a turned body | step rings in the body's own loft, the band's faces coloured by the loft's colour function (`examples/barrel/barrel.py`, `_staves`) |
 | A bent handle, a rail or a pipe with corners | `Builder.loft` through the path's points, every ring carrying its own `axis` (its ring option; at a corner the mean of the two segments' directions), so each corner is a mitred joint: without it a ring turns to the path through its neighbours' centres, which a sharp bend does not carry through |
 | A fitting on a body (a bung, a knob, a bolt head) | a short `Builder.loft` from a point cast onto the body, its open base sunk into it, its outer end flat (`_bung` in the barrel example) |
-| A rounded-box, plate or chamfered section | `Builder.loft` with flat caps (`cap0='flat'`, `cap1='flat'`), its ring options shaping the section |
+| A rounded-box or superellipse section along a path | `Builder.loft` with flat caps (`cap0='flat'`, `cap1='flat'`), its ring options shaping the section |
 | Spikes and studs | `Builder.pyramid(part, base, apex, col)`, the base buried |
 | A star badge, a buckle, a lens in a frame | `shapes.star_prism` |
 | A belt with a box buckle | `torso.belt` |
@@ -115,7 +115,8 @@ The grey is a palette value the human picks and judges in Blender.
 ## Mechanical bulk
 
 Rigid shells at the measured width, chamfered dark cores per segment, a dark knuckle block at each joint, each
-member overlapping the next, hubs on the flexion axis turned toward the front; organic radii or widths under
+member overlapping the next, hubs on the flexion axis turned toward the front (`hard.segment_plate` for
+the shells, `hard.chamfer_box` for the cores, `hard.hub`); organic radii or widths under
 the drawn ones read as a stick with floating plates ([joins.md](joins.md#a-limb-unlike-its-pair)).
 
 ## Rigid pieces
